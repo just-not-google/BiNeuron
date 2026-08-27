@@ -1,9 +1,0 @@
-To get a more accurate answer from the AI, you need to use these points, which are listed below in your prompt:
-1) If you know English, it is recommended to write in it, since most of the AI on the list is recognized only in this language.
-2) Specify which programming languages to use for the task, then specialized AI will be enabled.
-3) All formats that AI can accept for processing:
-   1. Programming formats: .py, .java, .c, .h, .cpp, .hpp, .cs, .js, .ts, .go, .rs, .swift, .kt, .php, .rb, .dart, .r, .jl, .lua, .sh, .sql, .scala
-   2. Other formats: .txt, .log, .md, .markdown, .rst, .tex, .ltx, .bib, .csv, .tsv, .json, .jsonl, .xml, .xsd, .xsl, .xslt, .yaml, .yml, .toml, .ini, .cfg, .conf, .properties, .env, .editorconfig, .gitignore, .dockerfile, .makefile, .cmake, .cmakelists.txt, .sh, .bash, .zsh, .ksh, .csh, .fish, .ps1, .psm1, .psd1, .bat, .cmd, .py, .pyw, .pyi, .pyx, .java, .c, .h, .cpp, .cc, .cxx, .c++, .hpp, .hh, .hxx, .ipp, .cs, .js, .mjs, .cjs, .ts, .tsx, .go, .rs, .swift, .kt, .kts, .php, .php3, .php4, .php5, .phtml, .rb, .rbw, .rake, .gemspec, .dart, .r, .R, .Rmd, .jl, .lua, .sql, .scala, .sc, .pl, .pm, .t, .hs, .lhs, .erl, .hrl, .ex, .exs, .clj, .cljs, .cljc, .groovy, .gvy, .vb, .vbs, .html, .htm, .xhtml, .css, .scss, .sass, .less, .rss, .atom
-   3. New formats: .pdf, .word, .odf, .pptx, .jpg, .jpeg, .png, .bmp, .gif, .webp, .tiff, .tif
-4) Describe the task in more detail, for the accuracy of the definition of the code.
-5) If you know what technologies you will use to create your assignment, then specify their full and exact names.

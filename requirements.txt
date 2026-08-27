@@ -20,7 +20,6 @@ deepseek-ocr~=0.3.0
 easyocr~=1.7.2
 pptx2txt2~=1.1.0
 customtkinter~=6.0.0
-CTkSpinbox~=1.4.1
 torch~=2.6.0
 transformers~=5.15.1
 pillow~=12.3.0
