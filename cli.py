@@ -258,6 +258,16 @@ def main(request: str,
     Processes the user request with the given options, initializes the
     AlexRadar instance, and prints the generated response.
     """
+    banner = """
+       █████╗ ██╗     ███████╗██╗  ██╗██████╗  █████╗ ██████╗  █████╗ ██████╗ 
+      ██╔══██╗██║     ██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔══██╗
+      ███████║██║     █████╗   ╚███╔╝ ██████╔╝███████║██║  ██║███████║██████╔╝
+      ██╔══██║██║     ██╔══╝   ██╔██╗ ██╔══██╗██╔══██║██║  ██║██╔══██║██╔══██╗
+      ██║  ██║███████╗███████╗██╔╝ ██╗██║  ██║██║  ██║██████╔╝██║  ██║██║  ██║
+      ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+        """
+    click.echo(banner)
+
     additional_files_list = list(additional_files) if additional_files else None
     proxies_list = list(your_proxies_dict) if your_proxies_dict else None
     url_list = list(url_lst) if url_lst else None

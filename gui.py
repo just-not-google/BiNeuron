@@ -151,6 +151,7 @@ class AlexRadarGUI:
         self.virtual_tree_data = {}
         self.chats_file = "chats.json"
         self.storage_path_file = "storage_path.json"
+        self.settings_file = "settings.json"
 
         self.storage_path = self.load_storage_path()
 
@@ -173,6 +174,8 @@ class AlexRadarGUI:
 
         self.tree_style_configured = False
         self.setup_tree_style()
+
+        self.load_settings()
 
     def setup_logging(self):
         class TextHandler(logging.Handler):
@@ -206,6 +209,337 @@ class AlexRadarGUI:
                 json.dump(self.storage_path, f, ensure_ascii=False, indent=2)
         except:
             pass
+
+    def get_all_settings(self):
+        return {
+            "theme": self.theme_option_menu.get(),
+            "language": self.language_option_menu.get(),
+            "country": self.country_entry.get(),
+            "protocol": self.protocol_option_menu.get(),
+            "max_timeout": self.max_timeout_entry.get(),
+            "is_working": str(self.is_working_checkbox.get()),
+            "auto_proxies": str(self.auto_proxies_checkbox.get()),
+            "your_proxies_dict": self.your_proxies_dict_textbox.get("1.0", "end-1c"),
+            "min_timeout_for_checking_availability": self.min_timeout_for_checking_availability_entry.get(),
+            "max_timeout_for_checking_availability": self.max_timeout_for_checking_availability_entry.get(),
+            "retries": self.retries_entry.get(),
+            "github_proxies": str(self.github_proxies_checkbox.get()),
+            "url_lst": self.url_lst_textbox.get("1.0", "end-1c"),
+            "proxy_retries": self.proxy_retries_entry.get(),
+            "main_retries": self.main_retries_entry.get(),
+            "preferences_in_ai": self.preferences_in_ai_option_menu.get(),
+            "models_dir": self.models_dir_entry.get(),
+            "with_ai_orchestrator": str(self.with_ai_orchestrator_checkbox.get()),
+            "n_ctx": self.n_ctx_entry.get(),
+            "n_gpu_layers": self.n_gpu_layers_entry.get(),
+            "max_tokens": self.max_tokens_entry.get(),
+            "your_token_for_hf": self.your_token_for_hf_entry.get(),
+            "subdomain": self.subdomain_entry.get(),
+            "repo_id": self.repo_id_entry.get(),
+            "filename": self.filename_entry.get(),
+            "prefer_mirror": str(self.prefer_mirror_checkbox.get()),
+            "main_prompt_mode": self.main_prompt_mode_option_menu.get(),
+            "main_prompt": self.main_prompt_textbox.get("1.0", "end-1c"),
+            "temperature": self.temperature_entry.get(),
+            "determinant_mode": self.determinant_mode_option_menu.get(),
+            "accurate_translation": str(self.accurate_translation_checkbox.get()),
+            "your_key_for_deepl": self.your_key_for_deepl_entry.get(),
+            "request_language": self.request_language_entry.get(),
+            "lang_lst": self.lang_lst_textbox.get("1.0", "end-1c"),
+            "use_gpu_for_ocr": str(self.use_gpu_for_ocr_checkbox.get()),
+            "with_ocr": str(self.with_ocr_checkbox.get()),
+            "cloud_version": str(self.cloud_version_checkbox.get()),
+            "with_deepseek": str(self.with_deepseek_checkbox.get()),
+            "model_size": self.model_size_option_menu.get(),
+            "crop_mode": str(self.crop_mode_checkbox.get()),
+            "base_url": self.base_url_entry.get(),
+            "api_key_for_deepseek_ocr": self.api_key_for_deepseek_ocr_entry.get(),
+            "timeout_for_deepseek_ocr": self.timeout_for_deepseek_ocr_entry.get(),
+            "max_rate_limit_retries": self.max_rate_limit_retries_entry.get(),
+            "filter_for_swearing": str(self.filter_for_swearing_checkbox.get()),
+            "verbose": str(self.verbose_checkbox.get()),
+            "echo": str(self.echo_checkbox.get()),
+            "type_computer": self.type_computer_option_menu.get(),
+            "proprietary_algorithms": str(self.proprietary_algorithms_checkbox.get()),
+            "writing_response_to_file": str(self.writing_response_to_file_checkbox.get()),
+            "virtual_storage": str(self.mode_switch.get()),
+            "storage_path": self.storage_path,
+        }
+
+    def set_all_settings(self, settings):
+        if "theme" in settings:
+            self.theme_option_menu.set(settings["theme"])
+            ctk.set_appearance_mode(settings["theme"])
+            self.update_tree_style()
+        if "language" in settings:
+            self.language_option_menu.set(settings["language"])
+        if "country" in settings:
+            self.country_entry.delete(0, "end")
+            self.country_entry.insert(0, settings["country"])
+        if "protocol" in settings:
+            self.protocol_option_menu.set(settings["protocol"])
+        if "max_timeout" in settings:
+            self.max_timeout_entry.delete(0, "end")
+            self.max_timeout_entry.insert(0, settings["max_timeout"])
+        if "is_working" in settings:
+            if settings["is_working"] == "1":
+                self.is_working_checkbox.select()
+            else:
+                self.is_working_checkbox.deselect()
+        if "auto_proxies" in settings:
+            if settings["auto_proxies"] == "1":
+                self.auto_proxies_checkbox.select()
+            else:
+                self.auto_proxies_checkbox.deselect()
+        if "your_proxies_dict" in settings:
+            self.your_proxies_dict_textbox.delete("1.0", "end")
+            self.your_proxies_dict_textbox.insert("1.0", settings["your_proxies_dict"])
+        if "min_timeout_for_checking_availability" in settings:
+            self.min_timeout_for_checking_availability_entry.delete(0, "end")
+            self.min_timeout_for_checking_availability_entry.insert(0, settings["min_timeout_for_checking_availability"])
+        if "max_timeout_for_checking_availability" in settings:
+            self.max_timeout_for_checking_availability_entry.delete(0, "end")
+            self.max_timeout_for_checking_availability_entry.insert(0, settings["max_timeout_for_checking_availability"])
+        if "retries" in settings:
+            self.retries_entry.delete(0, "end")
+            self.retries_entry.insert(0, settings["retries"])
+        if "github_proxies" in settings:
+            if settings["github_proxies"] == "1":
+                self.github_proxies_checkbox.select()
+            else:
+                self.github_proxies_checkbox.deselect()
+        if "url_lst" in settings:
+            self.url_lst_textbox.delete("1.0", "end")
+            self.url_lst_textbox.insert("1.0", settings["url_lst"])
+        if "proxy_retries" in settings:
+            self.proxy_retries_entry.delete(0, "end")
+            self.proxy_retries_entry.insert(0, settings["proxy_retries"])
+        if "main_retries" in settings:
+            self.main_retries_entry.delete(0, "end")
+            self.main_retries_entry.insert(0, settings["main_retries"])
+        if "preferences_in_ai" in settings:
+            self.preferences_in_ai_option_menu.set(settings["preferences_in_ai"])
+        if "models_dir" in settings:
+            self.models_dir_entry.delete(0, "end")
+            self.models_dir_entry.insert(0, settings["models_dir"])
+        if "with_ai_orchestrator" in settings:
+            if settings["with_ai_orchestrator"] == "1":
+                self.with_ai_orchestrator_checkbox.select()
+            else:
+                self.with_ai_orchestrator_checkbox.deselect()
+        if "n_ctx" in settings:
+            self.n_ctx_entry.delete(0, "end")
+            self.n_ctx_entry.insert(0, settings["n_ctx"])
+        if "n_gpu_layers" in settings:
+            self.n_gpu_layers_entry.delete(0, "end")
+            self.n_gpu_layers_entry.insert(0, settings["n_gpu_layers"])
+        if "max_tokens" in settings:
+            self.max_tokens_entry.delete(0, "end")
+            self.max_tokens_entry.insert(0, settings["max_tokens"])
+        if "your_token_for_hf" in settings:
+            self.your_token_for_hf_entry.delete(0, "end")
+            self.your_token_for_hf_entry.insert(0, settings["your_token_for_hf"])
+        if "subdomain" in settings:
+            self.subdomain_entry.delete(0, "end")
+            self.subdomain_entry.insert(0, settings["subdomain"])
+        if "repo_id" in settings:
+            self.repo_id_entry.delete(0, "end")
+            self.repo_id_entry.insert(0, settings["repo_id"])
+        if "filename" in settings:
+            self.filename_entry.delete(0, "end")
+            self.filename_entry.insert(0, settings["filename"])
+        if "prefer_mirror" in settings:
+            if settings["prefer_mirror"] == "1":
+                self.prefer_mirror_checkbox.select()
+            else:
+                self.prefer_mirror_checkbox.deselect()
+        if "main_prompt_mode" in settings:
+            self.main_prompt_mode_option_menu.set(settings["main_prompt_mode"])
+        if "main_prompt" in settings:
+            self.main_prompt_textbox.delete("1.0", "end")
+            self.main_prompt_textbox.insert("1.0", settings["main_prompt"])
+        if "temperature" in settings:
+            self.temperature_entry.delete(0, "end")
+            self.temperature_entry.insert(0, settings["temperature"])
+        if "determinant_mode" in settings:
+            self.determinant_mode_option_menu.set(settings["determinant_mode"])
+        if "accurate_translation" in settings:
+            if settings["accurate_translation"] == "1":
+                self.accurate_translation_checkbox.select()
+            else:
+                self.accurate_translation_checkbox.deselect()
+        if "your_key_for_deepl" in settings:
+            self.your_key_for_deepl_entry.delete(0, "end")
+            self.your_key_for_deepl_entry.insert(0, settings["your_key_for_deepl"])
+        if "request_language" in settings:
+            self.request_language_entry.delete(0, "end")
+            self.request_language_entry.insert(0, settings["request_language"])
+        if "lang_lst" in settings:
+            self.lang_lst_textbox.delete("1.0", "end")
+            self.lang_lst_textbox.insert("1.0", settings["lang_lst"])
+        if "use_gpu_for_ocr" in settings:
+            if settings["use_gpu_for_ocr"] == "1":
+                self.use_gpu_for_ocr_checkbox.select()
+            else:
+                self.use_gpu_for_ocr_checkbox.deselect()
+        if "with_ocr" in settings:
+            if settings["with_ocr"] == "1":
+                self.with_ocr_checkbox.select()
+            else:
+                self.with_ocr_checkbox.deselect()
+        if "cloud_version" in settings:
+            if settings["cloud_version"] == "1":
+                self.cloud_version_checkbox.select()
+            else:
+                self.cloud_version_checkbox.deselect()
+        if "with_deepseek" in settings:
+            if settings["with_deepseek"] == "1":
+                self.with_deepseek_checkbox.select()
+            else:
+                self.with_deepseek_checkbox.deselect()
+        if "model_size" in settings:
+            self.model_size_option_menu.set(settings["model_size"])
+        if "crop_mode" in settings:
+            if settings["crop_mode"] == "1":
+                self.crop_mode_checkbox.select()
+            else:
+                self.crop_mode_checkbox.deselect()
+        if "base_url" in settings:
+            self.base_url_entry.delete(0, "end")
+            self.base_url_entry.insert(0, settings["base_url"])
+        if "api_key_for_deepseek_ocr" in settings:
+            self.api_key_for_deepseek_ocr_entry.delete(0, "end")
+            self.api_key_for_deepseek_ocr_entry.insert(0, settings["api_key_for_deepseek_ocr"])
+        if "timeout_for_deepseek_ocr" in settings:
+            self.timeout_for_deepseek_ocr_entry.delete(0, "end")
+            self.timeout_for_deepseek_ocr_entry.insert(0, settings["timeout_for_deepseek_ocr"])
+        if "max_rate_limit_retries" in settings:
+            self.max_rate_limit_retries_entry.delete(0, "end")
+            self.max_rate_limit_retries_entry.insert(0, settings["max_rate_limit_retries"])
+        if "filter_for_swearing" in settings:
+            if settings["filter_for_swearing"] == "1":
+                self.filter_for_swearing_checkbox.select()
+            else:
+                self.filter_for_swearing_checkbox.deselect()
+        if "verbose" in settings:
+            if settings["verbose"] == "1":
+                self.verbose_checkbox.select()
+            else:
+                self.verbose_checkbox.deselect()
+        if "echo" in settings:
+            if settings["echo"] == "1":
+                self.echo_checkbox.select()
+            else:
+                self.echo_checkbox.deselect()
+        if "type_computer" in settings:
+            self.type_computer_option_menu.set(settings["type_computer"])
+        if "proprietary_algorithms" in settings:
+            if settings["proprietary_algorithms"] == "1":
+                self.proprietary_algorithms_checkbox.select()
+            else:
+                self.proprietary_algorithms_checkbox.deselect()
+        if "writing_response_to_file" in settings:
+            if settings["writing_response_to_file"] == "1":
+                self.writing_response_to_file_checkbox.select()
+            else:
+                self.writing_response_to_file_checkbox.deselect()
+        if "virtual_storage" in settings:
+            if settings["virtual_storage"] == "1":
+                self.mode_switch.select()
+            else:
+                self.mode_switch.deselect()
+            self.switch_mode()
+        if "storage_path" in settings:
+            self.storage_path = settings["storage_path"]
+            self.storage_path_entry.delete(0, "end")
+            self.storage_path_entry.insert(0, self.storage_path)
+            self.save_storage_path()
+            if self.mode_switch.get() == 1:
+                self.build_tree()
+
+        self.update_attached_text()
+
+    def set_default_settings(self):
+        default = {
+            "theme": "dark",
+            "language": list(NATURAL_LANGUAGES.keys())[0],
+            "country": "",
+            "protocol": HTTP_PROTOCOL,
+            "max_timeout": "30",
+            "is_working": "0",
+            "auto_proxies": "0",
+            "your_proxies_dict": "",
+            "min_timeout_for_checking_availability": "5",
+            "max_timeout_for_checking_availability": "15",
+            "retries": "3",
+            "github_proxies": "0",
+            "url_lst": "",
+            "proxy_retries": "3",
+            "main_retries": "3",
+            "preferences_in_ai": PREFERENCES_IN_AI_LIST[0],
+            "models_dir": "./models",
+            "with_ai_orchestrator": "1",
+            "n_ctx": "0",
+            "n_gpu_layers": "0",
+            "max_tokens": "4096",
+            "your_token_for_hf": "",
+            "subdomain": "",
+            "repo_id": "",
+            "filename": "",
+            "prefer_mirror": "1",
+            "main_prompt_mode": list(ALL_MAIN_PROMPTS.keys())[0],
+            "main_prompt": "",
+            "temperature": "0.1",
+            "determinant_mode": DETERMINANT_MODE_LIST[0],
+            "accurate_translation": "0",
+            "your_key_for_deepl": "",
+            "request_language": "en",
+            "lang_lst": "",
+            "use_gpu_for_ocr": "0",
+            "with_ocr": "0",
+            "cloud_version": "0",
+            "with_deepseek": "1",
+            "model_size": "tiny",
+            "crop_mode": "0",
+            "base_url": "https://api.siliconflow.cn/v1/chat/completions",
+            "api_key_for_deepseek_ocr": "",
+            "timeout_for_deepseek_ocr": "30",
+            "max_rate_limit_retries": "3",
+            "filter_for_swearing": "0",
+            "verbose": "0",
+            "echo": "0",
+            "type_computer": "auto",
+            "proprietary_algorithms": "0",
+            "writing_response_to_file": "0",
+            "virtual_storage": "0",
+            "storage_path": "",
+        }
+        self.set_all_settings(default)
+
+    def load_settings(self):
+        if os.path.exists(self.settings_file):
+            try:
+                with open(self.settings_file, "r", encoding="utf-8") as f:
+                    settings = json.load(f)
+                self.set_all_settings(settings)
+            except Exception as e:
+                logging.error(f"Failed to load settings: {e}")
+                self.set_default_settings()
+        else:
+            self.set_default_settings()
+
+    def save_settings(self):
+        settings = self.get_all_settings()
+        try:
+            with open(self.settings_file, "w", encoding="utf-8") as f:
+                json.dump(settings, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logging.error(f"Failed to save settings: {e}")
+
+    def reset_settings(self):
+        self.set_default_settings()
+        self.save_settings()
+        messagebox.showinfo("Settings", "Settings have been reset to default.")
 
     def load_chats_from_file(self):
         if os.path.exists(self.chats_file):
@@ -242,6 +576,7 @@ class AlexRadarGUI:
     def on_closing(self):
         self.save_chats_to_file()
         self.save_storage_path()
+        self.save_settings()
         self.root.destroy()
 
     def show_welcome_placeholder(self):
@@ -315,10 +650,31 @@ class AlexRadarGUI:
         settings_frame.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
         settings_frame.grid_columnconfigure(0, weight=1)
 
-        ctk.CTkLabel(settings_frame, text="Settings", font=TITLE_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(10, 15))
+        ctk.CTkLabel(settings_frame, text="Settings", font=TITLE_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(10, 5))
+
+        reset_frame = ctk.CTkFrame(settings_frame, fg_color="transparent")
+        reset_frame.grid(row=1, column=0, sticky="ew", padx=5, pady=(0, 10))
+        reset_frame.grid_columnconfigure(0, weight=1)
+        reset_frame.grid_columnconfigure(1, weight=1)
+        reset_frame.grid_columnconfigure(2, weight=1)
+
+        reset_btn = ctk.CTkButton(reset_frame, text="Reset", corner_radius=8,
+                                  fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
+                                  text_color=("black", "white"), command=self.reset_settings)
+        reset_btn.grid(row=0, column=0, sticky="ew", padx=2)
+
+        export_all_btn = ctk.CTkButton(reset_frame, text="Export All", corner_radius=8,
+                                       fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
+                                       text_color=("black", "white"), command=self.export_all_chats)
+        export_all_btn.grid(row=0, column=1, sticky="ew", padx=2)
+
+        delete_all_btn = ctk.CTkButton(reset_frame, text="Delete All", corner_radius=8,
+                                       fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
+                                       text_color=("black", "white"), command=self.delete_all_chats)
+        delete_all_btn.grid(row=0, column=2, sticky="ew", padx=2)
 
         interface_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        interface_frame.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+        interface_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
         interface_frame.grid_columnconfigure(0, weight=1)
         ctk.CTkLabel(interface_frame, text="Interface", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
         interface_subframe = ctk.CTkFrame(interface_frame, fg_color="transparent", corner_radius=0)
@@ -349,7 +705,7 @@ class AlexRadarGUI:
         row += 1
 
         network_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        network_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
+        network_frame.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
         network_frame.grid_columnconfigure(0, weight=1)
         ctk.CTkLabel(network_frame, text="Network", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
         network_subframe = ctk.CTkFrame(network_frame, fg_color="transparent", corner_radius=0)
@@ -452,7 +808,7 @@ class AlexRadarGUI:
         row += 1
 
         model_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        model_frame.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
+        model_frame.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
         model_frame.grid_columnconfigure(0, weight=1)
         ctk.CTkLabel(model_frame, text="Model", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
         model_subframe = ctk.CTkFrame(model_frame, fg_color="transparent", corner_radius=0)
@@ -564,7 +920,7 @@ class AlexRadarGUI:
         row += 1
 
         translator_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        translator_frame.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
+        translator_frame.grid(row=5, column=0, sticky="ew", padx=5, pady=5)
         translator_frame.grid_columnconfigure(0, weight=1)
         ctk.CTkLabel(translator_frame, text="Translator", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
         translator_subframe = ctk.CTkFrame(translator_frame, fg_color="transparent", corner_radius=0)
@@ -604,7 +960,7 @@ class AlexRadarGUI:
         row += 1
 
         ocr_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        ocr_frame.grid(row=5, column=0, sticky="ew", padx=5, pady=5)
+        ocr_frame.grid(row=6, column=0, sticky="ew", padx=5, pady=5)
         ocr_frame.grid_columnconfigure(0, weight=1)
         ctk.CTkLabel(ocr_frame, text="OCR", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
         ocr_subframe = ctk.CTkFrame(ocr_frame, fg_color="transparent", corner_radius=0)
@@ -694,7 +1050,7 @@ class AlexRadarGUI:
         row += 1
 
         other_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        other_frame.grid(row=6, column=0, sticky="ew", padx=5, pady=5)
+        other_frame.grid(row=7, column=0, sticky="ew", padx=5, pady=5)
         other_frame.grid_columnconfigure(0, weight=1)
         ctk.CTkLabel(other_frame, text="Other", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
         other_subframe = ctk.CTkFrame(other_frame, fg_color="transparent", corner_radius=0)
@@ -859,7 +1215,7 @@ class AlexRadarGUI:
         download_chats_button = ctk.CTkButton(self.history_controls, text="Download", width=60, height=30, corner_radius=8,
                                               fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
                                               text_color=("black", "white"), command=self.download_chat)
-        download_chats_button.grid(row=0, column=3, padx=(2,0), sticky="w")
+        download_chats_button.grid(row=0, column=3, padx=2, sticky="w")
 
         self.storage_controls = ctk.CTkFrame(self.history_subframe, fg_color="transparent")
         self.storage_controls.grid(row=0, column=0, sticky="ew")
@@ -922,6 +1278,53 @@ class AlexRadarGUI:
 
         self.tree = None
 
+    def export_all_chats(self):
+        if not self.chats:
+            messagebox.showinfo("Info", "No chats to export.")
+            return
+        folder = filedialog.askdirectory(title="Select folder to export all chats")
+        if not folder:
+            return
+        count = 0
+        for chat_id, chat_data in self.chats.items():
+            messages = chat_data.get("messages", [])
+            if not messages:
+                continue
+            first_user = next((m["content"] for m in messages if m.get("role") == "user"), "empty")
+            safe_title = "".join(c for c in first_user[:30] if c.isalnum() or c in (' ', '_')).strip()
+            if not safe_title:
+                safe_title = "chat"
+            timestamp = chat_data.get("created_at", "unknown").replace(":", "-").replace(" ", "_")
+            filename = f"{timestamp}_{safe_title}.txt"
+            filepath = os.path.join(folder, filename)
+            with open(filepath, "w", encoding="utf-8") as f:
+                for msg in messages:
+                    f.write(f"{msg['role'].capitalize()}: {msg['content']}\n")
+            count += 1
+        messagebox.showinfo("Export", f"Exported {count} chat(s) to {folder}")
+
+    def delete_all_chats(self):
+        if not self.chats:
+            return
+        if not messagebox.askyesno("Delete All", "Are you sure you want to delete ALL chats?"):
+            return
+        self.chats.clear()
+        self.add_new_chat()
+        self.save_chats_to_file()
+        self.update_history_list()
+        self.resume_button.grid_remove()
+
+    def clear_current_chat(self):
+        if self.current_chat_id is None or self.current_chat_id not in self.chats:
+            messagebox.showwarning("Warning", "No chat selected.")
+            return
+        if not messagebox.askyesno("Clear Chat", "Are you sure you want to clear all messages in this chat?"):
+            return
+        self.chats[self.current_chat_id]["messages"] = []
+        self.save_chats_to_file()
+        self.load_chat(self.current_chat_id)
+        self.resume_button.grid_remove()
+
     def switch_mode(self):
         if self.mode_switch.get() == 1:
             self.history_controls.grid_remove()
@@ -958,6 +1361,8 @@ class AlexRadarGUI:
 
         self.tree = ttk.Treeview(self.history_field_frame, selectmode="browse")
         self.tree.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.history_field_frame.grid_rowconfigure(0, weight=1)
+        self.history_field_frame.grid_columnconfigure(0, weight=1)
 
         self.virtual_tree_data = {}
         root_node = self.tree.insert("", "end", text=os.path.basename(self.storage_path), open=True)
