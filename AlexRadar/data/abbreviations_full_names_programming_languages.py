@@ -1,0 +1,20 @@
+LANG_SHORTCUT_TO_FULL = {
+    "cpp": "cpp",
+    "cs": "csharp",
+    "dart": "dart",
+    "go": "go",
+    "java": "java",
+    "js": "javascript",
+    "kt": "kotlin",
+    "py": "python",
+    "r": "r",
+    "rb": "ruby",
+    "rs": "rust",
+    "swift": "swift",
+    "ts": "typescript",
+    "matlab": "matlab",
+    "lua": "lua",
+    "julia": "julia",
+    "html": "html",
+    "sql": "sql"
+}

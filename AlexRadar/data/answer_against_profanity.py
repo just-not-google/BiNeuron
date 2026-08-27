@@ -1,0 +1,1 @@
+ANSWER_AGAINST_PROFANITY = "Sorry, aggression or profanity was found in this request, if you do not want this check, then turn off the 'filter_for_swearing' parameter in the settings"
