@@ -14,7 +14,6 @@ from BiNeuron.data.constants_for_functions import (HTTP_PROTOCOL, HTTPS_PROTOCOL
 from BiNeuron.data.variants_industrial_scenarios import ALL_MAIN_PROMPTS
 from BiNeuron.data.natural_languages import NATURAL_LANGUAGES
 
-# --- OpenCode-like color scheme ---
 BG_MAIN = "#1e1e1e"
 BG_FRAME = "#252526"
 BG_ENTRY = "#3c3c3c"
@@ -38,7 +37,6 @@ FONT_SMALL = ("Segoe UI", 9)
 
 
 class NumericEntry(ttk.Entry):
-    """Entry that only accepts numeric values."""
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         vcmd = (self.register(self._validate), "%P")
@@ -67,18 +65,19 @@ class NumericEntry(ttk.Entry):
 
 
 class SpinEntry(ttk.Frame):
-    """A frame containing an entry and up/down buttons."""
     def __init__(self, master, step=1, default=0, **kwargs):
         super().__init__(master)
         self.step = step
         self.entry = NumericEntry(self, **kwargs)
-        self.entry.pack(side="left", fill="x", expand=True, padx=(0, 2))
+        self.entry.grid(row=0, column=0, sticky="ew", padx=(0, 2))
         self.entry.insert(0, str(default))
 
         self.btn_up = ttk.Button(self, text="▲", width=2, command=self.increment)
-        self.btn_up.pack(side="left", padx=1)
+        self.btn_up.grid(row=0, column=1, padx=1, sticky="e")
         self.btn_down = ttk.Button(self, text="▼", width=2, command=self.decrement)
-        self.btn_down.pack(side="left", padx=1)
+        self.btn_down.grid(row=0, column=2, padx=1, sticky="e")
+
+        self.grid_columnconfigure(0, weight=1)  # поле ввода расширяется
 
     def increment(self):
         try:
@@ -122,7 +121,6 @@ class SpinEntry(ttk.Frame):
 
 
 class ScrollableFrame(ttk.Frame):
-    """A scrollable frame for settings and history."""
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.canvas = tk.Canvas(self, bg=BG_FRAME, highlightthickness=0, borderwidth=0)
@@ -136,9 +134,13 @@ class ScrollableFrame(ttk.Frame):
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
 
-        # Bind mousewheel scrolling
         self.canvas.bind("<Enter>", self._bind_mousewheel)
         self.canvas.bind("<Leave>", self._unbind_mousewheel)
+
+        self.canvas.bind("<Configure>", self._on_canvas_configure)
+
+    def _on_canvas_configure(self, event):
+        self.canvas.itemconfig(self.canvas.find_withtag("all")[0], width=event.width)
 
     def _bind_mousewheel(self, event):
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
@@ -153,15 +155,14 @@ class ScrollableFrame(ttk.Frame):
         return self.scrollable_frame
 
 
-class AlexRadarGUI:
+class BiNeuronGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("AlexRadar")
+        self.root.title("BiNeuron")
         self.root.geometry("1500x900")
         self.root.minsize(1200, 700)
         self.root.configure(bg=BG_MAIN)
 
-        # Configure ttk styles
         self.style = ttk.Style()
         self.style.theme_use("clam")
         self._setup_styles()
@@ -179,10 +180,10 @@ class AlexRadarGUI:
 
         self.storage_path = self.load_storage_path()
 
-        # Main layout: 3 columns – settings panel narrower
-        self.root.grid_columnconfigure(0, weight=1, uniform="main")   # settings
-        self.root.grid_columnconfigure(1, weight=4, uniform="main")   # chat
-        self.root.grid_columnconfigure(2, weight=1, uniform="main")   # history
+        # Увеличены минимальные ширины панелей
+        self.root.grid_columnconfigure(0, weight=1, uniform="main", minsize=320)
+        self.root.grid_columnconfigure(1, weight=4, uniform="main")
+        self.root.grid_columnconfigure(2, weight=1, uniform="main", minsize=200)
         self.root.grid_rowconfigure(0, weight=1)
 
         self.create_settings_panel()
@@ -200,7 +201,6 @@ class AlexRadarGUI:
         self.load_settings()
 
     def _setup_styles(self):
-        """Configure ttk styles for OpenCode-like appearance."""
         self.style.configure(".", background=BG_MAIN, foreground=FG_TEXT, font=FONT_MAIN)
         self.style.configure("TFrame", background=BG_MAIN)
         self.style.configure("TLabel", background=BG_MAIN, foreground=FG_TEXT, font=FONT_MAIN)
@@ -241,7 +241,6 @@ class AlexRadarGUI:
                              bordercolor=BG_MAIN, arrowcolor=FG_TEXT)
 
     def setup_logging(self):
-        """Redirect logging to chat area (messages_frame) with white text."""
         class ChatHandler(logging.Handler):
             def __init__(self, gui):
                 super().__init__()
@@ -251,7 +250,6 @@ class AlexRadarGUI:
                 msg = self.format(record)
                 self.gui.root.after(0, self.gui.display_log_message, msg)
 
-        # Remove existing handlers and add our own to root logger
         root_logger = logging.getLogger()
         for handler in root_logger.handlers[:]:
             root_logger.removeHandler(handler)
@@ -260,25 +258,36 @@ class AlexRadarGUI:
         root_logger.addHandler(handler)
         root_logger.setLevel(logging.INFO)
 
-        # Also keep our named logger for compatibility
-        logger = logging.getLogger("AlexRadar")
+        logger = logging.getLogger("BiNeuron")
         logger.setLevel(logging.INFO)
         for handler in logger.handlers[:]:
             logger.removeHandler(handler)
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
 
-    def display_log_message(self, text):
-        """Insert a log entry into the chat with white text color and [LOG] prefix."""
+    def display_log_message(self, text, save=True):
         if self.welcome_label is not None:
             self.hide_welcome_placeholder()
         frame = tk.Frame(self.messages_frame, bg=BG_FRAME, bd=0)
         frame.pack(fill="x", padx=10, pady=2)
+
         label = tk.Label(frame, text=f"[LOG] {text}", fg=FG_TEXT, bg=BG_FRAME,
                          font=FONT_SMALL, wraplength=600, justify="left", anchor="w")
-        label.pack(padx=10, pady=2, fill="x")
+        label.pack(side="left", padx=10, pady=2, fill="x", expand=True)
+
         self.messages_frame.update_idletasks()
-        self.messages_canvas.yview_moveto(1.0)  # auto-scroll to bottom
+        self.messages_canvas.yview_moveto(1.0)
+
+        if save:
+            self._save_log_to_chat(text)
+
+    def _save_log_to_chat(self, text):
+        if hasattr(self, 'current_chat_id') and self.current_chat_id is not None and self.current_chat_id in self.chats:
+            timestamp = datetime.now().strftime("%H:%M")
+            log_entry = {"role": "system", "content": text, "timestamp": timestamp}
+            self.chats[self.current_chat_id]["messages"].append(log_entry)
+            self.save_chats_to_file()
+            self.update_history_list()
 
     def load_storage_path(self):
         if os.path.exists(self.storage_path_file):
@@ -348,6 +357,7 @@ class AlexRadarGUI:
             "type_computer": self.type_computer_combobox.get(),
             "proprietary_algorithms": "1" if self.proprietary_algorithms_var.get() else "0",
             "writing_response_to_file": "1" if self.writing_response_var.get() else "0",
+            "editing_files": "1" if self.editing_files_var.get() else "0",
             "virtual_storage": "1" if self.virtual_storage_var.get() else "0",
             "storage_path": self.storage_path,
         }
@@ -459,6 +469,8 @@ class AlexRadarGUI:
             self.proprietary_algorithms_var.set(settings["proprietary_algorithms"] == "1")
         if "writing_response_to_file" in settings:
             self.writing_response_var.set(settings["writing_response_to_file"] == "1")
+        if "editing_files" in settings:
+            self.editing_files_var.set(settings["editing_files"] == "1")
         if "virtual_storage" in settings:
             self.virtual_storage_var.set(settings["virtual_storage"] == "1")
         if "storage_path" in settings:
@@ -524,6 +536,7 @@ class AlexRadarGUI:
             "type_computer": "auto",
             "proprietary_algorithms": "0",
             "writing_response_to_file": "0",
+            "editing_files": "0",
             "virtual_storage": "0",
             "storage_path": "",
         }
@@ -592,62 +605,59 @@ class AlexRadarGUI:
         self.save_settings()
         self.root.destroy()
 
-    # --- UI creation methods ---
-
     def create_settings_panel(self):
-        # Left panel with scrollable settings
         settings_outer = tk.Frame(self.root, bg=BG_MAIN)
         settings_outer.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
         settings_outer.grid_rowconfigure(1, weight=1)
         settings_outer.grid_columnconfigure(0, weight=1)
 
-        # Title "Settings" outside scrollable area
         title_label = ttk.Label(settings_outer, text="Settings", font=FONT_TITLE)
         title_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
 
         settings_scroll = ScrollableFrame(settings_outer)
         settings_scroll.grid(row=1, column=0, sticky="nsew")
         settings_frame = settings_scroll.get_frame()
+        settings_frame.grid_columnconfigure(0, weight=1)
 
-        # Reset/Export/Delete buttons - compact, left-aligned
         btn_frame = ttk.Frame(settings_frame)
-        btn_frame.grid(row=0, column=0, sticky="w", padx=5, pady=(0, 10))
-        ttk.Button(btn_frame, text="Reset", width=10, command=self.reset_settings).pack(side="left", padx=2)
-        ttk.Button(btn_frame, text="Export All", width=10, command=self.export_all_chats).pack(side="left", padx=2)
-        ttk.Button(btn_frame, text="Delete All", width=10, command=self.delete_all_chats).pack(side="left", padx=2)
+        btn_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=(0, 10))
+        btn_frame.grid_columnconfigure(0, weight=1)
+        btn_frame.grid_columnconfigure(1, weight=1)
+        btn_frame.grid_columnconfigure(2, weight=1)
+        ttk.Button(btn_frame, text="Reset", width=10, command=self.reset_settings).grid(row=0, column=0, sticky="ew", padx=2)
+        ttk.Button(btn_frame, text="Export All", width=10, command=self.export_all_chats).grid(row=0, column=1, sticky="ew", padx=2)
+        ttk.Button(btn_frame, text="Delete All", width=10, command=self.delete_all_chats).grid(row=0, column=2, sticky="ew", padx=2)
 
-        # Interface section
         interface_frame = ttk.LabelFrame(settings_frame, text="Interface", padding=5)
         interface_frame.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-        interface_frame.grid_columnconfigure(0, weight=0)
+        interface_frame.grid_columnconfigure(0, weight=0, minsize=160)
         interface_frame.grid_columnconfigure(1, weight=1)
 
         row = 0
         ttk.Label(interface_frame, text="Language").grid(row=row, column=0, sticky="w", pady=2)
-        self.language_combobox = ttk.Combobox(interface_frame, values=list(NATURAL_LANGUAGES.keys()), state="readonly", width=23)
-        self.language_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.language_combobox = ttk.Combobox(interface_frame, values=list(NATURAL_LANGUAGES.keys()), state="readonly")
+        self.language_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
-        # Network section
         network_frame = ttk.LabelFrame(settings_frame, text="Network", padding=5)
         network_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
-        network_frame.grid_columnconfigure(0, weight=0)
+        network_frame.grid_columnconfigure(0, weight=0, minsize=160)
         network_frame.grid_columnconfigure(1, weight=1)
 
         row = 0
         ttk.Label(network_frame, text="Country").grid(row=row, column=0, sticky="w", pady=2)
-        self.country_entry = ttk.Entry(network_frame, width=25)
-        self.country_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.country_entry = ttk.Entry(network_frame)
+        self.country_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(network_frame, text="Protocol").grid(row=row, column=0, sticky="w", pady=2)
-        self.protocol_combobox = ttk.Combobox(network_frame, values=[HTTP_PROTOCOL, HTTPS_PROTOCOL], state="readonly", width=23)
-        self.protocol_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.protocol_combobox = ttk.Combobox(network_frame, values=[HTTP_PROTOCOL, HTTPS_PROTOCOL], state="readonly")
+        self.protocol_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(network_frame, text="Max Timeout").grid(row=row, column=0, sticky="w", pady=2)
-        self.max_timeout_entry = SpinEntry(network_frame, step=1, default=30, width=25)
-        self.max_timeout_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.max_timeout_entry = SpinEntry(network_frame, step=1, default=30)
+        self.max_timeout_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(network_frame, text="Is Working").grid(row=row, column=0, sticky="w", pady=2)
@@ -661,25 +671,25 @@ class AlexRadarGUI:
         row += 1
 
         ttk.Label(network_frame, text="Your Proxies").grid(row=row, column=0, sticky="nw", pady=2)
-        self.your_proxies_dict_text = tk.Text(network_frame, height=3, width=25, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
+        self.your_proxies_dict_text = tk.Text(network_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
                                               relief="flat", borderwidth=1, highlightthickness=1,
-                                              highlightbackground=BORDER, highlightcolor=BORDER)
-        self.your_proxies_dict_text.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+                                              highlightbackground=BORDER, highlightcolor=BORDER, wrap="word")
+        self.your_proxies_dict_text.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(network_frame, text="Min Timeout For Check").grid(row=row, column=0, sticky="w", pady=2)
-        self.min_timeout_entry = SpinEntry(network_frame, step=1, default=5, width=25)
-        self.min_timeout_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.min_timeout_entry = SpinEntry(network_frame, step=1, default=5)
+        self.min_timeout_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(network_frame, text="Max Timeout For Check").grid(row=row, column=0, sticky="w", pady=2)
-        self.max_timeout_entry = SpinEntry(network_frame, step=1, default=15, width=25)
-        self.max_timeout_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.max_timeout_entry = SpinEntry(network_frame, step=1, default=15)
+        self.max_timeout_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(network_frame, text="Retries").grid(row=row, column=0, sticky="w", pady=2)
-        self.retries_entry = SpinEntry(network_frame, step=1, default=3, width=25)
-        self.retries_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.retries_entry = SpinEntry(network_frame, step=1, default=3)
+        self.retries_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(network_frame, text="GitHub Proxies").grid(row=row, column=0, sticky="w", pady=2)
@@ -688,38 +698,37 @@ class AlexRadarGUI:
         row += 1
 
         ttk.Label(network_frame, text="URL List").grid(row=row, column=0, sticky="nw", pady=2)
-        self.url_lst_text = tk.Text(network_frame, height=3, width=25, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
+        self.url_lst_text = tk.Text(network_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
                                     relief="flat", borderwidth=1, highlightthickness=1,
-                                    highlightbackground=BORDER, highlightcolor=BORDER)
-        self.url_lst_text.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+                                    highlightbackground=BORDER, highlightcolor=BORDER, wrap="word")
+        self.url_lst_text.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(network_frame, text="Proxy Retries").grid(row=row, column=0, sticky="w", pady=2)
-        self.proxy_retries_entry = SpinEntry(network_frame, step=1, default=3, width=25)
-        self.proxy_retries_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.proxy_retries_entry = SpinEntry(network_frame, step=1, default=3)
+        self.proxy_retries_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(network_frame, text="Main Retries").grid(row=row, column=0, sticky="w", pady=2)
-        self.main_retries_entry = SpinEntry(network_frame, step=1, default=3, width=25)
-        self.main_retries_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.main_retries_entry = SpinEntry(network_frame, step=1, default=3)
+        self.main_retries_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
-        # Model section
         model_frame = ttk.LabelFrame(settings_frame, text="Model", padding=5)
         model_frame.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
-        model_frame.grid_columnconfigure(0, weight=0)
+        model_frame.grid_columnconfigure(0, weight=0, minsize=160)
         model_frame.grid_columnconfigure(1, weight=1)
 
         row = 0
         ttk.Label(model_frame, text="Preferences In AI").grid(row=row, column=0, sticky="w", pady=2)
-        self.preferences_combobox = ttk.Combobox(model_frame, values=PREFERENCES_IN_AI_LIST, state="readonly", width=23)
-        self.preferences_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.preferences_combobox = ttk.Combobox(model_frame, values=PREFERENCES_IN_AI_LIST, state="readonly")
+        self.preferences_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="Models Dir").grid(row=row, column=0, sticky="w", pady=2)
-        self.models_dir_entry = ttk.Entry(model_frame, width=25)
+        self.models_dir_entry = ttk.Entry(model_frame)
         self.models_dir_entry.insert(0, "./models")
-        self.models_dir_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.models_dir_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="With AI Orchestrator").grid(row=row, column=0, sticky="w", pady=2)
@@ -728,38 +737,38 @@ class AlexRadarGUI:
         row += 1
 
         ttk.Label(model_frame, text="N CTX").grid(row=row, column=0, sticky="w", pady=2)
-        self.n_ctx_entry = SpinEntry(model_frame, step=1, default=0, width=25)
-        self.n_ctx_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.n_ctx_entry = SpinEntry(model_frame, step=1, default=0)
+        self.n_ctx_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="N GPU Layers").grid(row=row, column=0, sticky="w", pady=2)
-        self.n_gpu_layers_entry = SpinEntry(model_frame, step=1, default=0, width=25)
-        self.n_gpu_layers_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.n_gpu_layers_entry = SpinEntry(model_frame, step=1, default=0)
+        self.n_gpu_layers_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="Max Tokens").grid(row=row, column=0, sticky="w", pady=2)
-        self.max_tokens_entry = SpinEntry(model_frame, step=1, default=4096, width=25)
-        self.max_tokens_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.max_tokens_entry = SpinEntry(model_frame, step=1, default=4096)
+        self.max_tokens_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="Token Hugging Face").grid(row=row, column=0, sticky="w", pady=2)
-        self.token_hf_entry = ttk.Entry(model_frame, width=25)
-        self.token_hf_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.token_hf_entry = ttk.Entry(model_frame)
+        self.token_hf_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="Subdomain").grid(row=row, column=0, sticky="w", pady=2)
-        self.subdomain_entry = ttk.Entry(model_frame, width=25)
-        self.subdomain_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.subdomain_entry = ttk.Entry(model_frame)
+        self.subdomain_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="Repo ID").grid(row=row, column=0, sticky="w", pady=2)
-        self.repo_id_entry = ttk.Entry(model_frame, width=25)
-        self.repo_id_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.repo_id_entry = ttk.Entry(model_frame)
+        self.repo_id_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="Filename").grid(row=row, column=0, sticky="w", pady=2)
-        self.filename_entry = ttk.Entry(model_frame, width=25)
-        self.filename_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.filename_entry = ttk.Entry(model_frame)
+        self.filename_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="Prefer Mirror").grid(row=row, column=0, sticky="w", pady=2)
@@ -768,32 +777,31 @@ class AlexRadarGUI:
         row += 1
 
         ttk.Label(model_frame, text="Main Prompt Mode").grid(row=row, column=0, sticky="w", pady=2)
-        self.main_prompt_mode_combobox = ttk.Combobox(model_frame, values=list(ALL_MAIN_PROMPTS.keys()), state="readonly", width=23)
-        self.main_prompt_mode_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.main_prompt_mode_combobox = ttk.Combobox(model_frame, values=list(ALL_MAIN_PROMPTS.keys()), state="readonly")
+        self.main_prompt_mode_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="Main Prompt").grid(row=row, column=0, sticky="nw", pady=2)
-        self.main_prompt_text = tk.Text(model_frame, height=3, width=25, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
+        self.main_prompt_text = tk.Text(model_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
                                         relief="flat", borderwidth=1, highlightthickness=1,
-                                        highlightbackground=BORDER, highlightcolor=BORDER)
-        self.main_prompt_text.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+                                        highlightbackground=BORDER, highlightcolor=BORDER, wrap="word")
+        self.main_prompt_text.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(model_frame, text="Temperature").grid(row=row, column=0, sticky="w", pady=2)
-        self.temperature_entry = SpinEntry(model_frame, step=0.1, default=0.1, width=25)
-        self.temperature_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.temperature_entry = SpinEntry(model_frame, step=0.1, default=0.1)
+        self.temperature_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
-        # Translator section
         translator_frame = ttk.LabelFrame(settings_frame, text="Translator", padding=5)
         translator_frame.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
-        translator_frame.grid_columnconfigure(0, weight=0)
+        translator_frame.grid_columnconfigure(0, weight=0, minsize=160)
         translator_frame.grid_columnconfigure(1, weight=1)
 
         row = 0
         ttk.Label(translator_frame, text="Determinant Mode").grid(row=row, column=0, sticky="w", pady=2)
-        self.determinant_mode_combobox = ttk.Combobox(translator_frame, values=DETERMINANT_MODE_LIST, state="readonly", width=23)
-        self.determinant_mode_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.determinant_mode_combobox = ttk.Combobox(translator_frame, values=DETERMINANT_MODE_LIST, state="readonly")
+        self.determinant_mode_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(translator_frame, text="Accurate Translation").grid(row=row, column=0, sticky="w", pady=2)
@@ -802,28 +810,27 @@ class AlexRadarGUI:
         row += 1
 
         ttk.Label(translator_frame, text="API KEY DeepL").grid(row=row, column=0, sticky="w", pady=2)
-        self.deepl_key_entry = ttk.Entry(translator_frame, width=25)
-        self.deepl_key_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.deepl_key_entry = ttk.Entry(translator_frame)
+        self.deepl_key_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(translator_frame, text="Request Language").grid(row=row, column=0, sticky="w", pady=2)
-        self.request_language_entry = ttk.Entry(translator_frame, width=25)
+        self.request_language_entry = ttk.Entry(translator_frame)
         self.request_language_entry.insert(0, "en")
-        self.request_language_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.request_language_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
-        # OCR section
         ocr_frame = ttk.LabelFrame(settings_frame, text="OCR", padding=5)
         ocr_frame.grid(row=5, column=0, sticky="ew", padx=5, pady=5)
-        ocr_frame.grid_columnconfigure(0, weight=0)
+        ocr_frame.grid_columnconfigure(0, weight=0, minsize=160)
         ocr_frame.grid_columnconfigure(1, weight=1)
 
         row = 0
         ttk.Label(ocr_frame, text="Languages List").grid(row=row, column=0, sticky="nw", pady=2)
-        self.lang_lst_text = tk.Text(ocr_frame, height=3, width=25, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
+        self.lang_lst_text = tk.Text(ocr_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
                                      relief="flat", borderwidth=1, highlightthickness=1,
-                                     highlightbackground=BORDER, highlightcolor=BORDER)
-        self.lang_lst_text.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+                                     highlightbackground=BORDER, highlightcolor=BORDER, wrap="word")
+        self.lang_lst_text.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(ocr_frame, text="Use GPU").grid(row=row, column=0, sticky="w", pady=2)
@@ -847,8 +854,8 @@ class AlexRadarGUI:
         row += 1
 
         ttk.Label(ocr_frame, text="Model Size").grid(row=row, column=0, sticky="w", pady=2)
-        self.model_size_combobox = ttk.Combobox(ocr_frame, values=["tiny", "small", "base", "large", "gundam"], state="readonly", width=23)
-        self.model_size_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.model_size_combobox = ttk.Combobox(ocr_frame, values=["tiny", "small", "base", "large", "gundam"], state="readonly")
+        self.model_size_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(ocr_frame, text="Crop Mode").grid(row=row, column=0, sticky="w", pady=2)
@@ -857,30 +864,29 @@ class AlexRadarGUI:
         row += 1
 
         ttk.Label(ocr_frame, text="Base URL").grid(row=row, column=0, sticky="w", pady=2)
-        self.base_url_entry = ttk.Entry(ocr_frame, width=25)
+        self.base_url_entry = ttk.Entry(ocr_frame)
         self.base_url_entry.insert(0, "https://api.siliconflow.cn/v1/chat/completions")
-        self.base_url_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.base_url_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(ocr_frame, text="API Key DeepSeek OCR").grid(row=row, column=0, sticky="w", pady=2)
-        self.deepseek_api_entry = ttk.Entry(ocr_frame, width=25)
-        self.deepseek_api_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.deepseek_api_entry = ttk.Entry(ocr_frame)
+        self.deepseek_api_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(ocr_frame, text="Timeout DeepSeek OCR").grid(row=row, column=0, sticky="w", pady=2)
-        self.deepseek_timeout_entry = SpinEntry(ocr_frame, step=1, default=30, width=25)
-        self.deepseek_timeout_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.deepseek_timeout_entry = SpinEntry(ocr_frame, step=1, default=30)
+        self.deepseek_timeout_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(ocr_frame, text="Max Rate Limit Retries").grid(row=row, column=0, sticky="w", pady=2)
-        self.max_rate_limit_retries_entry = SpinEntry(ocr_frame, step=1, default=3, width=25)
-        self.max_rate_limit_retries_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.max_rate_limit_retries_entry = SpinEntry(ocr_frame, step=1, default=3)
+        self.max_rate_limit_retries_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
-        # Other section
         other_frame = ttk.LabelFrame(settings_frame, text="Other", padding=5)
         other_frame.grid(row=6, column=0, sticky="ew", padx=5, pady=5)
-        other_frame.grid_columnconfigure(0, weight=0)
+        other_frame.grid_columnconfigure(0, weight=0, minsize=160)
         other_frame.grid_columnconfigure(1, weight=1)
 
         row = 0
@@ -900,8 +906,8 @@ class AlexRadarGUI:
         row += 1
 
         ttk.Label(other_frame, text="Type Computer").grid(row=row, column=0, sticky="w", pady=2)
-        self.type_computer_combobox = ttk.Combobox(other_frame, values=["auto"] + TYPES_POWER, state="readonly", width=23)
-        self.type_computer_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        self.type_computer_combobox = ttk.Combobox(other_frame, values=["auto"] + TYPES_POWER, state="readonly")
+        self.type_computer_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
 
         ttk.Label(other_frame, text="Proprietary Algorithms").grid(row=row, column=0, sticky="w", pady=2)
@@ -914,8 +920,12 @@ class AlexRadarGUI:
         ttk.Checkbutton(other_frame, variable=self.writing_response_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
         row += 1
 
+        ttk.Label(other_frame, text="Editing Files").grid(row=row, column=0, sticky="w", pady=2)
+        self.editing_files_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(other_frame, variable=self.editing_files_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
     def create_chat_panel(self):
-        # Center panel with chat
         chat_frame = tk.Frame(self.root, bg=BG_MAIN)
         chat_frame.grid(row=0, column=1, sticky="nsew", padx=8, pady=8)
         chat_frame.grid_rowconfigure(1, weight=1)
@@ -923,12 +933,10 @@ class AlexRadarGUI:
 
         ttk.Label(chat_frame, text="Chat With AI", font=FONT_TITLE).grid(row=0, column=0, pady=(10, 5))
 
-        # Resume button (hidden initially)
         self.resume_button = ttk.Button(chat_frame, text="Resume pending request", command=self.resume_request)
         self.resume_button.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 5))
         self.resume_button.grid_remove()
 
-        # Messages area (scrollable)
         messages_container = tk.Frame(chat_frame, bg=BG_FRAME)
         messages_container.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
         messages_container.grid_rowconfigure(0, weight=1)
@@ -943,20 +951,19 @@ class AlexRadarGUI:
         self.messages_canvas.pack(side="left", fill="both", expand=True)
         self.messages_scrollbar.pack(side="right", fill="y")
 
-        # Bind mousewheel
         self.messages_canvas.bind("<Enter>", self._bind_mousewheel_messages)
         self.messages_canvas.bind("<Leave>", self._unbind_mousewheel_messages)
 
-        # Attached files
+        self.messages_canvas.bind("<Configure>", self._on_messages_canvas_configure)
+
         attached_frame = ttk.LabelFrame(chat_frame, text="Attached files", padding=5)
         attached_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=5)
         attached_frame.grid_columnconfigure(0, weight=1)
         self.attached_textbox = tk.Text(attached_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
                                         relief="flat", borderwidth=1, highlightthickness=1,
-                                        highlightbackground=BORDER, highlightcolor=BORDER, state="disabled")
+                                        highlightbackground=BORDER, highlightcolor=BORDER, state="disabled", wrap="word")
         self.attached_textbox.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 
-        # Input area
         input_frame = ttk.Frame(chat_frame)
         input_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=5)
         input_frame.grid_columnconfigure(0, weight=1)
@@ -965,6 +972,16 @@ class AlexRadarGUI:
         self.request_entry.bind("<Return>", lambda event: self.send_message())
         ttk.Button(input_frame, text="Upload", command=self.upload_files).grid(row=0, column=1, padx=2)
         ttk.Button(input_frame, text="Send", command=self.send_message).grid(row=0, column=2, padx=2)
+
+        button_frame = ttk.Frame(chat_frame)
+        button_frame.grid(row=5, column=0, sticky="ew", padx=10, pady=(0,5))
+        button_frame.grid_columnconfigure(0, weight=1)
+        button_frame.grid_columnconfigure(1, weight=1)
+        ttk.Button(button_frame, text="Copy Chat", command=self.copy_chat).grid(row=0, column=0, sticky="ew", padx=2)
+        ttk.Button(button_frame, text="Download Chat", command=self.download_chat).grid(row=0, column=1, sticky="ew", padx=2)
+
+    def _on_messages_canvas_configure(self, event):
+        self.messages_canvas.itemconfig(self.messages_canvas.find_withtag("all")[0], width=event.width)
 
     def _bind_mousewheel_messages(self, event):
         self.messages_canvas.bind_all("<MouseWheel>", self._on_mousewheel_messages)
@@ -976,10 +993,8 @@ class AlexRadarGUI:
         self.messages_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def create_history_panel(self):
-        # Right panel with history and virtual storage
         history_outer = tk.Frame(self.root, bg=BG_MAIN)
         history_outer.grid(row=0, column=2, sticky="nsew", padx=8, pady=8)
-        # Give row 2 (content) all extra space
         history_outer.grid_rowconfigure(2, weight=1)
         history_outer.grid_columnconfigure(0, weight=1)
 
@@ -994,28 +1009,33 @@ class AlexRadarGUI:
         ttk.Checkbutton(title_frame, text="Virtual Storage", variable=self.virtual_storage_var,
                         command=self.switch_mode).grid(row=0, column=1, sticky="e", padx=10)
 
-        # Controls for history
         self.history_controls = ttk.Frame(history_outer)
         self.history_controls.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
         self.history_controls.grid_columnconfigure(0, weight=1)
-        self.find_story_entry = ttk.Entry(self.history_controls)
-        self.find_story_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
-        self.find_story_entry.bind("<KeyRelease>", lambda e: self.filter_history())
-        ttk.Button(self.history_controls, text="Add", width=6, command=self.add_new_chat).grid(row=0, column=1, padx=2)
-        ttk.Button(self.history_controls, text="Delete", width=6, command=self.delete_current_chat).grid(row=0, column=2, padx=2)
-        ttk.Button(self.history_controls, text="Download", width=6, command=self.download_chat).grid(row=0, column=3, padx=2)
+        self.history_controls.grid_columnconfigure(1, weight=1)
+        self.history_controls.grid_columnconfigure(2, weight=1)
 
-        # Controls for storage
+        self.find_story_entry = ttk.Entry(self.history_controls)
+        self.find_story_entry.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0, 5))
+        self.find_story_entry.bind("<KeyRelease>", lambda e: self.filter_history())
+
+        ttk.Button(self.history_controls, text="Add", width=6, command=self.add_new_chat).grid(row=1, column=0, sticky="ew", padx=2)
+        ttk.Button(self.history_controls, text="Delete", width=6, command=self.delete_current_chat).grid(row=1, column=1, sticky="ew", padx=2)
+        ttk.Button(self.history_controls, text="Download", width=6, command=self.download_chat).grid(row=1, column=2, sticky="ew", padx=2)
+
         self.storage_controls = ttk.Frame(history_outer)
         self.storage_controls.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
         self.storage_controls.grid_columnconfigure(0, weight=1)
+        self.storage_controls.grid_columnconfigure(1, weight=1)
+
         self.storage_path_entry = ttk.Entry(self.storage_controls)
-        self.storage_path_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
-        ttk.Button(self.storage_controls, text="Browse", width=6, command=self.browse_storage).grid(row=0, column=1, padx=2)
-        ttk.Button(self.storage_controls, text="Refresh", width=6, command=self.refresh_storage).grid(row=0, column=2, padx=2)
+        self.storage_path_entry.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 5))
+
+        ttk.Button(self.storage_controls, text="Browse", width=6, command=self.browse_storage).grid(row=1, column=0, sticky="ew", padx=2)
+        ttk.Button(self.storage_controls, text="Refresh", width=6, command=self.refresh_storage).grid(row=1, column=1, sticky="ew", padx=2)
+
         self.storage_controls.grid_remove()
 
-        # Container for history list (ScrollableFrame) and tree view (Frame with Treeview)
         self.history_normal_frame = ScrollableFrame(history_outer)
         self.history_normal_frame.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
         self.history_tree_frame = tk.Frame(history_outer, bg=BG_FRAME)
@@ -1026,14 +1046,12 @@ class AlexRadarGUI:
         self.chats = {}
         self.update_history_list()
 
-        self.tree = None  # for virtual storage Treeview
-
-    # --- Helper methods for UI ---
+        self.tree = None
 
     def show_welcome_placeholder(self):
         self.hide_welcome_placeholder()
         if not self.messages_frame.winfo_children():
-            self.welcome_label = tk.Label(self.messages_frame, text="Welcome to AlexRadar! How can I help?\n"
+            self.welcome_label = tk.Label(self.messages_frame, text="Welcome to BiNeuron! How can I help?\n"
                                                                    "(The GUI was created using the CLI version of the app)",
                                          font=("Segoe UI", 12), fg=FG_DARK, bg=BG_FRAME,
                                          justify="center")
@@ -1088,13 +1106,11 @@ class AlexRadarGUI:
         threading.Thread(target=worker, daemon=True).start()
 
     def _build_tree_ui(self):
-        # Clear previous tree frame
         for widget in self.history_tree_frame.winfo_children():
             widget.destroy()
         if not self.storage_path or not os.path.isdir(self.storage_path):
             ttk.Label(self.history_tree_frame, text="No storage path selected").pack(pady=10)
             return
-        # Create Treeview with own scrollbar
         tree_container = tk.Frame(self.history_tree_frame, bg=BG_FRAME)
         tree_container.pack(fill="both", expand=True)
         scrollbar = ttk.Scrollbar(tree_container, orient="vertical")
@@ -1152,7 +1168,6 @@ class AlexRadarGUI:
         self.build_tree()
 
     def update_history_list(self):
-        # Clear and repopulate history buttons in normal frame
         for widget in self.history_normal_frame.get_frame().winfo_children():
             widget.destroy()
         for chat_id, chat_data in self.chats.items():
@@ -1161,14 +1176,12 @@ class AlexRadarGUI:
             title = first_user_msg[:30] + ("..." if len(first_user_msg) > 30 else "") if first_user_msg else "Empty chat"
             created_at = chat_data.get("created_at", "Unknown date")
             btn_text = f"{created_at} - {title}"
-            # Use tk.Button with anchor='w' for left alignment and dark style
             btn = tk.Button(self.history_normal_frame.get_frame(), text=btn_text,
                             command=lambda cid=chat_id: self.load_chat(cid),
                             anchor='w', justify='left', bg=BG_FRAME, fg=FG_TEXT,
                             relief='flat', activebackground=ACCENT_HOVER, activeforeground='white',
                             font=FONT_MAIN, padx=5, pady=2)
             btn.pack(fill="x", padx=5, pady=2)
-        # Force update scrollregion and move to top
         self.history_normal_frame.canvas.configure(scrollregion=self.history_normal_frame.canvas.bbox("all"))
         self.history_normal_frame.canvas.yview_moveto(0.0)
 
@@ -1188,7 +1201,6 @@ class AlexRadarGUI:
                                 relief='flat', activebackground=ACCENT_HOVER, activeforeground='white',
                                 font=FONT_MAIN, padx=5, pady=2)
                 btn.pack(fill="x", padx=5, pady=2)
-        # Force update scrollregion and move to top
         self.history_normal_frame.canvas.configure(scrollregion=self.history_normal_frame.canvas.bbox("all"))
         self.history_normal_frame.canvas.yview_moveto(0.0)
 
@@ -1226,10 +1238,10 @@ class AlexRadarGUI:
                 role = msg.get("role")
                 if role in ("user", "assistant"):
                     self.display_message(role, msg["content"], msg.get("timestamp", ""))
-                elif role == "system":  # log messages from previous session?
-                    self.display_log_message(msg["content"])
+                elif role == "system":
+                    # Do not save again; only display
+                    self.display_log_message(msg["content"], save=False)
         self.check_pending_message()
-        # Scroll to bottom after loading chat
         self.messages_canvas.yview_moveto(1.0)
 
     def display_message(self, role, content, timestamp=None):
@@ -1239,7 +1251,6 @@ class AlexRadarGUI:
             timestamp = datetime.now().strftime("%H:%M")
         self.hide_welcome_placeholder()
 
-        # Choose bubble color
         if role == "user":
             bg = "#3a3a3a"
         else:
@@ -1247,7 +1258,10 @@ class AlexRadarGUI:
         bubble = tk.Frame(self.messages_frame, bg=bg, bd=0)
         bubble.pack(fill="x", padx=10, pady=5, anchor="e" if role == "user" else "w")
 
-        label = tk.Label(bubble, text=content, wraplength=600, justify="left",
+        canvas_width = self.messages_canvas.winfo_width()
+        wrap_length = max(200, canvas_width - 50)
+
+        label = tk.Label(bubble, text=content, wraplength=wrap_length, justify="left",
                          fg=FG_TEXT, bg=bg, font=FONT_MAIN)
         label.pack(padx=10, pady=(10, 5), anchor="w")
 
@@ -1257,16 +1271,31 @@ class AlexRadarGUI:
         time_label = tk.Label(bottom, text=timestamp, font=FONT_SMALL, fg=FG_DARK, bg=bg)
         time_label.pack(side="left")
 
-        copy_btn = ttk.Button(bottom, text="Copy", width=6, command=lambda: self.copy_to_clipboard(content))
-        copy_btn.pack(side="right", padx=(5, 0))
-
-        # Scroll to bottom after adding message
         self.messages_canvas.yview_moveto(1.0)
 
     def copy_to_clipboard(self, text):
         self.root.clipboard_clear()
         self.root.clipboard_append(text)
         self.root.update()
+
+    def copy_chat(self):
+        if self.current_chat_id is None or self.current_chat_id not in self.chats:
+            return
+        messages = self.chats[self.current_chat_id].get("messages", [])
+        if not messages:
+            return
+        lines = []
+        for msg in messages:
+            role = msg.get("role")
+            content = msg.get("content", "")
+            if role == "system":
+                prefix = "LOG"
+            else:
+                prefix = role.capitalize()
+            lines.append(f"{prefix}: {content}")
+        text = "\n".join(lines)
+        self.copy_to_clipboard(text)
+        messagebox.showinfo("Info", "Chat copied to clipboard.")
 
     def send_message(self):
         if self.is_busy:
@@ -1339,6 +1368,7 @@ class AlexRadarGUI:
             "type_computer": self.type_computer_combobox.get() if self.type_computer_combobox.get() != "auto" else None,
             "auto_proxies": self.auto_proxies_var.get(),
             "writing_response_to_file": self.writing_response_var.get(),
+            "editing_files": self.editing_files_var.get(),
             "your_proxies_dict": parse_textbox_list(self.your_proxies_dict_text) or None,
             "determinant_mode": self.determinant_mode_combobox.get(),
             "accurate_translation": self.accurate_translation_var.get(),
@@ -1510,5 +1540,5 @@ class AlexRadarGUI:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = AlexRadarGUI(root)
+    app = BiNeuronGUI(root)
     root.mainloop()
