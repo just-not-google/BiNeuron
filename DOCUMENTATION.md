@@ -84,8 +84,6 @@
 
 </details>
 
----
-
 <details>
 <summary>🇷🇺 Русский</summary>
 
