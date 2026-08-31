@@ -2,10 +2,10 @@ from free_proxy_server import ProxyClient, ProxyFilter
 from typing import List, Optional, Dict
 import httpx
 import random
-from AlexRadar.data.constants_for_functions import (HTTP_PROTOCOL, HTTPS_PROTOCOL, MAX_TIMEOUT,
+from BiNeuron.data.constants_for_functions import (HTTP_PROTOCOL, HTTPS_PROTOCOL, MAX_TIMEOUT,
                                                     NUMBER_ATTEMPTS, MAIN_PROXY_ATTEMPTS)
-from AlexRadar.additional_functions.proxy_from_raw_github import check_github_proxy
-from AlexRadar.data.links_to_raw_github_proxies import PROXY_LINK_LST
+from BiNeuron.additional_functions.proxy_from_raw_github import check_github_proxy
+from BiNeuron.data.links_to_raw_github_proxies import PROXY_LINK_LST
 import logging
 
 

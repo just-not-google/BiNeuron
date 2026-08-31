@@ -1,34 +1,38 @@
 from typing import Optional, List, Dict, Literal
 from datetime import datetime
 from huggingface_hub import model_info
+import os
 import logging
-from AlexRadar.additional_functions.proxy_for_circumventing_restrictions import working_with_proxy
-from AlexRadar.additional_functions.text_translation import TranslatorText
-from AlexRadar.data.preferences_in_ai import PreferenceInAI
-from AlexRadar.data.models_for_programming_languages import MODELS_DICT
-from AlexRadar.additional_functions.defining_programming_language import DefiningProgrammingLanguage
-from AlexRadar.data.models_and_file_names import MODELS_AND_FILE_NAMES
-from AlexRadar.additional_functions.checking_and_downloading_ai_model import ModelDownloader
-from AlexRadar.additional_functions.launching_ai_model_and_requesting import launching_ai_model_and_requesting
-from AlexRadar.data.variants_industrial_scenarios import ALL_MAIN_PROMPTS
-from AlexRadar.additional_functions.determining_computer_power import determining_type_computer
-from AlexRadar.data.constants_for_functions import (TYPE_DEFAULT, HTTP_PROTOCOL, TYPES_POWER,
-                                                    PROJECT_NAME, MAX_TIMEOUT, MAX_TOKENS,
-                                                    MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
-                                                    MAIN_LANGUAGE, NUMBER_ATTEMPTS, MAIN_PROXY_ATTEMPTS,
-                                                    GOOGLE_TRANSLATE_URL, DEEPL_TRANSLATE_URL, TYPE_FORMATS,
-                                                    TINY_TYPE, LITE_TYPE)
-from AlexRadar.additional_functions.definition_swearing import definition_swearing
-from AlexRadar.data.answer_against_profanity import ANSWER_AGAINST_PROFANITY
-from AlexRadar.data.links_to_raw_github_proxies import PROXY_LINK_LST
-from AlexRadar.additional_functions.checking_site_access import checking_site_access
-from AlexRadar.additional_functions.logic_virtual_storage import logic_virtual_storage
-from AlexRadar import main_logger
+from BiNeuron.additional_functions.proxy_for_circumventing_restrictions import working_with_proxy
+from BiNeuron.additional_functions.text_translation import TranslatorText
+from BiNeuron.data.preferences_in_ai import PreferenceInAI
+from BiNeuron.data.models_for_programming_languages import MODELS_DICT
+from BiNeuron.additional_functions.defining_programming_language import DefiningProgrammingLanguage
+from BiNeuron.data.models_and_file_names import MODELS_AND_FILE_NAMES
+from BiNeuron.additional_functions.checking_and_downloading_ai_model import ModelDownloader
+from BiNeuron.additional_functions.launching_ai_model_and_requesting import launching_ai_model_and_requesting
+from BiNeuron.data.variants_industrial_scenarios import ALL_MAIN_PROMPTS
+from BiNeuron.additional_functions.determining_computer_power import determining_type_computer
+from BiNeuron.data.constants_for_functions import (TYPE_DEFAULT, HTTP_PROTOCOL, TYPES_POWER,
+                                                   PROJECT_NAME, MAX_TIMEOUT, MAX_TOKENS,
+                                                   MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
+                                                   MAIN_LANGUAGE, NUMBER_ATTEMPTS, MAIN_PROXY_ATTEMPTS,
+                                                   GOOGLE_TRANSLATE_URL, DEEPL_TRANSLATE_URL, TYPE_FORMATS,
+                                                   TINY_TYPE, LITE_TYPE, MAIN_REPO_ID, MAIN_FILENAME,
+                                                   NOT_UNREAD_FILES)
+from BiNeuron.additional_functions.definition_swearing import definition_swearing
+from BiNeuron.data.answer_against_profanity import ANSWER_AGAINST_PROFANITY
+from BiNeuron.data.links_to_raw_github_proxies import PROXY_LINK_LST
+from BiNeuron.additional_functions.checking_site_access import checking_site_access
+from BiNeuron.additional_functions.logic_virtual_storage import logic_virtual_storage
+from BiNeuron.data.prompt_for_json_formatter import PROMPT_FOR_JSON_FORMATTER
+from BiNeuron.additional_functions.logic_editing_files import logic_editing_files
+from BiNeuron import main_logger
 
 
 logger = logging.getLogger(__name__)
 
-class AlexRadar:
+class BiNeuron:
     def __init__(self,
                  request: str,
                  preferences_in_ai: PreferenceInAI = PreferenceInAI.DEEPSEEK,
@@ -83,9 +87,10 @@ class AlexRadar:
                  api_key_for_deepseek_ocr: Optional[str] = None,
                  timeout_for_deepseek_ocr: Optional[int] = None,
                  max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS,
-                 prefer_mirror: bool = True) -> None:
+                 prefer_mirror: bool = True,
+                 editing_files: bool = False) -> None:
         """
-        Initialize an AlexRadar instance with all necessary configuration.
+        Initialize an BiNeuron instance with all necessary configuration.
         :param request: User's input text (question or code description).
         :param preferences_in_ai: Preferred AI model family (DeepSeek, Qwen, etc.).
         :param filter_for_swearing: If True, blocks responses containing profanity.
@@ -138,8 +143,9 @@ class AlexRadar:
         :param timeout_for_deepseek_ocr: Timeout (seconds) for DeepSeek API requests.
         :param max_rate_limit_retries: Number of retry attempts on rate limit errors.
         :param prefer_mirror: If True, forces using the mirror endpoint (hf-mirror.com).
+        :param editing_files: If True, the files are automatically created and modified.
         """
-        logger.info("Initializing AlexRadar")
+        logger.info("Initializing BiNeuron")
         self.request = request
         self.preferences_in_ai = preferences_in_ai
         self.filter_for_swearing = filter_for_swearing
@@ -192,11 +198,13 @@ class AlexRadar:
         self.timeout_for_deepseek_ocr = timeout_for_deepseek_ocr
         self.max_rate_limit_retries = max_rate_limit_retries
         self.prefer_mirror = prefer_mirror
+        self.editing_files = editing_files
         self.translated_text = None
         self.programmer_langs = None
         self.proxies_lst = None
         self.history = []
         self.unread_files = None
+        self.files_context = None
 
     def __settings_for_proxy(self) -> None:
         """
@@ -274,6 +282,7 @@ class AlexRadar:
             with_ocr=self.with_ocr,
             **self.__settings_for_translator()
         )
+        logger.info("Additional files were overwritten to the files contained in the virtual storage.")
         self.additional_files = answer[TYPE_FORMATS[0]]
         self.unread_files = answer[TYPE_FORMATS[1]]
 
@@ -292,6 +301,7 @@ class AlexRadar:
         if self.virtual_storage:
             self._virtual_storage_operation()
 
+        logger.info("The beginning of the definition of the necessary programming languages in the user's request.")
         defining_obj = DefiningProgrammingLanguage(
             translated_text=self.translated_text,
             unread_files=self.unread_files,
@@ -313,6 +323,7 @@ class AlexRadar:
             prefer_mirror=self.prefer_mirror
         )
         self.programmer_langs = defining_obj.defining_programming_language_for_str()
+        self.files_context = defining_obj.translated_text
         logger.info(f"The programming language is defined: {self.programmer_langs}")
 
     def _defining_ai_model(self) -> str or Dict:
@@ -391,6 +402,7 @@ class AlexRadar:
 
         filename = MODELS_AND_FILE_NAMES[self.repo_id]
         full_filename = filename[self.type_computer]
+
         logger.info(f"A model variant file for your type of PC has been selected in the repository.")
         return full_filename
 
@@ -400,6 +412,7 @@ class AlexRadar:
         :return: A dictionary containing keys such as 'repo_id', 'filename', 'cache_dir',
         'token', proxy settings, timeout values and retry configurations.
         """
+        logger.info("Challenge __settings_for_model_downloader")
         return {
             "repo_id": self.repo_id,
             "filename": self.filename,
@@ -450,6 +463,7 @@ class AlexRadar:
         `_main_defining_type_ai_model`, then downloaded using `__template_for_download_models`.
         """
         logger.info("Challenge __automatic_model_selection")
+        logger.info("The beginning of defining the repository of the model and the file inside this repository for later download.")
         self.repo_id = self._defining_type_ai_model()
         self.filename = self._main_defining_type_ai_model()
         logger.info(f"Model starts downloading from repository (Automatic mode).")
@@ -485,9 +499,11 @@ class AlexRadar:
         """
         logger.info("Challenge _creating_main_prompt")
         if not self.main_prompt_mode in ALL_MAIN_PROMPTS.keys():
+            logger.info("The default main technical prompt has been selected.")
             self.main_prompt_mode = TYPE_DEFAULT
 
         if self.main_prompt is None:
+            logger.info("The preset mode for prompta is selected.")
             self.main_prompt = ALL_MAIN_PROMPTS[self.main_prompt_mode]
 
     def _creating_chat_record(self, ai_answer: str) -> None:
@@ -526,18 +542,44 @@ class AlexRadar:
         messages = [{"role": "system", "content": self.main_prompt}]
         messages.extend(self.history)
         messages.append({"role": "user", "content": self.translated_text})
+        logger.info("A list of all requests for AI has been generated.")
         return messages
+
+    def __settings_for_launching_ai_model(self) -> Dict:
+        """
+        A dictionary of necessary parameters for configuring the Model Launcher.
+        :return: Dictionary of the values 'models_dir', 'n_ctx', 'n_gpu_layers'
+        and similar values needed for the model.
+        """
+        logger.info("Challenge __settings_for_launching_ai_model")
+        return {
+            "models_dir": self.models_dir,
+            "n_ctx": self.n_ctx,
+            "n_gpu_layers": self.n_gpu_layers,
+            "verbose": self.verbose,
+            "echo": self.echo,
+            "max_tokens": self.max_tokens,
+            "temperature": self.temperature,
+            "prefer_mirror": self.prefer_mirror
+        }
 
     def _send_message(self, user_text: Optional[str] = None) -> str:
         """
         Send a message to the AI model and return the response.
         If `user_text` is provided, it updates the request and re-translates it.
         If profanity filtering is enabled, it checks the translated text and returns
-        a predefined response if profanity is detected. Otherwise, it builds the system
-        prompt, constructs the messages, invokes the AI model, logs the response,
-        updates the history, and optionally saves the response to a file.
+        a predefined response if profanity is detected.
+        The method then builds the system prompt, constructs the messages,
+        invokes the primary AI model, logs the response, updates the conversation
+        history, and optionally saves the response to a file.
+        Additionally, if `editing_files` is enabled, the primary model's response
+        is passed (along with the full file context and unread file names) to a
+        second model (Qwen) that converts the changes into a strict JSON object.
+        The JSON is then applied via `logic_editing_files` to modify the actual
+        files on disk. If the JSON parsing fails, up to `self.retries` attempts
+        are made to regenerate it.
         :param user_text: Optional new user input; if given, replaces the current request.
-        :return: The AI-generated response.
+        :return: The AI-generated response (the primary model's answer, not the JSON).
         """
         logger.info("Challenge _send_message")
         if user_text is not None:
@@ -560,15 +602,8 @@ class AlexRadar:
             messages=messages,
             repo_id=self.repo_id,
             filename=self.filename,
-            n_ctx=self.n_ctx,
-            n_gpu_layers=self.n_gpu_layers,
             template_prompt=self.main_prompt,
-            verbose=self.verbose,
-            echo=self.echo,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            models_dir=self.models_dir,
-            prefer_mirror=self.prefer_mirror
+            **self.__settings_for_launching_ai_model()
         )
         logger.info("AI response received, length: %d characters", len(ai_answer))
 
@@ -576,6 +611,47 @@ class AlexRadar:
         self._add_to_history("assistant", ai_answer)
 
         self._creating_chat_record(ai_answer=ai_answer)
+
+        if self.editing_files:
+            logger.info("Automatic file modification has been selected thanks to AI.")
+            is_json = False
+            un_files = None
+
+            if self.unread_files:
+                un_files = "\n".join(self.unread_files)
+            else:
+                un_files = NOT_UNREAD_FILES
+
+            final_messages = (
+                f"{'=' * 5}PROJECT ROOT{'=' * 5}\n{os.getcwd()}\n"
+                f"{'=' * 5}ALL USER CONTEXT AND READ FILES{'=' * 5}\n"
+                f"{self.files_context}\n"
+                f"{'=' * 5}ALL UNREAD FILES{'=' * 5}\n"
+                f"{un_files}\n"
+                f"{'=' * 5}THE FINAL RESPONSE FROM THE AI MODEL{'=' * 5}\n"
+                f"{ai_answer}\n")
+
+            for attempt in range(NUMBER_ATTEMPTS):
+                logger.info(f"Attempt number {attempt} to change files automatically.")
+                json_answer = launching_ai_model_and_requesting(
+                    messages=final_messages,
+                    repo_id=MAIN_REPO_ID,
+                    filename=MAIN_FILENAME,
+                    template_prompt=PROMPT_FOR_JSON_FORMATTER,
+                    **self.__settings_for_launching_ai_model()
+                )
+                file_answer = logic_editing_files(str_json=json_answer)
+
+                if file_answer is False:
+                    continue
+                else:
+                    is_json = True
+                    break
+
+            if is_json:
+                logger.info("After a number of attempts, the file modification was successful.")
+            else:
+                logger.warning("For all attempts, the files could not be overwritten, the usual response was given.")
 
         return ai_answer
 
@@ -621,5 +697,5 @@ class AlexRadar:
 
 
 if __name__ == "__main__":
-    alex = AlexRadar(request="")
-    alex.chat()
+    biNeuron = BiNeuron(request="")
+    biNeuron.chat()

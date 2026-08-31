@@ -2,8 +2,8 @@ import requests
 from requests import Response
 from requests.exceptions import RequestException
 from typing import List, Optional, Dict
-from AlexRadar.data.headers_for_response import HEADERS_LIST
-from AlexRadar.data.constants_for_functions import (MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
+from BiNeuron.data.headers_for_response import HEADERS_LIST
+from BiNeuron.data.constants_for_functions import (MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
                                                     PROTOCOL_LST, HTTP_PROTOCOL, HTTPS_PROTOCOL)
 import random
 import logging

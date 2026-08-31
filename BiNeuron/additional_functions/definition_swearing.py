@@ -1,5 +1,5 @@
 from badwords import ProfanityFilter
-from AlexRadar.data.constants_for_functions import MAIN_LANGUAGE
+from BiNeuron.data.constants_for_functions import MAIN_LANGUAGE
 import logging
 
 

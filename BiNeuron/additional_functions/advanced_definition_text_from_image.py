@@ -2,15 +2,15 @@ from deepseek_ocr import DeepSeekOCR as CloudDeepSeek
 import logging
 from typing import Literal, Optional
 import random
-from AlexRadar.data.constants_for_functions import (MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
+from BiNeuron.data.constants_for_functions import (MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
                                                     NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
                                                     RETURN_TENSORS, MAX_NEW_TOKENS, DEEPSEEK_LOCAL_OCR)
-from AlexRadar.additional_functions.checking_integer_for_condition import checking_int_and_float
+from BiNeuron.additional_functions.checking_integer_for_condition import checking_int_and_float
 import torch
 from transformers import AutoProcessor, AutoModelForImageTextToText
 from PIL import Image
-from AlexRadar.data.prompt_for_ocr import PROMPT
-from AlexRadar.data.model_repo_map import MODEL_REPO_MAP
+from BiNeuron.data.prompt_for_ocr import PROMPT
+from BiNeuron.data.model_repo_map import MODEL_REPO_MAP
 
 
 logger = logging.getLogger(__name__)

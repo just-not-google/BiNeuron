@@ -3,7 +3,7 @@ from typing import Dict
 import logging
 from langdetect import detect as ln_detect
 from fast_langdetect import detect as fst_detect
-from AlexRadar.data.constants_for_functions import MAIN_LANGUAGE, LITE_TYPE
+from BiNeuron.data.constants_for_functions import MAIN_LANGUAGE, LITE_TYPE
 from typing import Optional, Literal
 import deepl
 from functools import lru_cache

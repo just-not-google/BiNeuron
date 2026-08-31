@@ -1,9 +1,9 @@
-from AlexRadar.additional_functions.getting_text_from_files import main_get_text_from_files
-from AlexRadar.additional_functions.detect_programming_language import detect_programming_language
+from BiNeuron.additional_functions.getting_text_from_files import main_get_text_from_files
+from BiNeuron.additional_functions.detect_programming_language import detect_programming_language
 from typing import List, Optional, Literal, Dict
-from AlexRadar.data.hint_words_for_defining_programming_languages import HINT_WORDS
-from AlexRadar.additional_functions.logic_orchestra.orchestrator_ai_models import orchestrator_ai_models
-from AlexRadar.data.constants_for_functions import (TYPE_DEFAULT, MARKER_FOR_FILES, MAIN_LANGUAGE,
+from BiNeuron.data.hint_words_for_defining_programming_languages import HINT_WORDS
+from BiNeuron.additional_functions.logic_orchestra.orchestrator_ai_models import orchestrator_ai_models
+from BiNeuron.data.constants_for_functions import (TYPE_DEFAULT, MARKER_FOR_FILES, MAIN_LANGUAGE,
                                                     LITE_TYPE, TINY_TYPE, NUMBER_ATTEMPTS)
 import logging
 

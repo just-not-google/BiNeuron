@@ -1,9 +1,9 @@
 from typing import Optional, List, Dict, Literal
 from pathlib import Path
-from AlexRadar.data.supported_formats import SUPPORTED_FORMATS_WITHOUT_PHOTO, PHOTO_SUPPORTED_FORMATS
-from AlexRadar.data.constants_for_functions import TYPE_FORMATS
-from AlexRadar.additional_functions.text_translation import TranslatorText
-from AlexRadar.data.constants_for_functions import MAIN_LANGUAGE
+from BiNeuron.data.supported_formats import SUPPORTED_FORMATS_WITHOUT_PHOTO, PHOTO_SUPPORTED_FORMATS
+from BiNeuron.data.constants_for_functions import TYPE_FORMATS
+from BiNeuron.additional_functions.text_translation import TranslatorText
+from BiNeuron.data.constants_for_functions import MAIN_LANGUAGE
 import logging
 
 

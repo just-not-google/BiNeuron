@@ -1,5 +1,5 @@
 import requests
-from AlexRadar.additional_functions.proxy_from_raw_github import _template_for_requests
+from BiNeuron.additional_functions.proxy_from_raw_github import _template_for_requests
 import logging
 
 

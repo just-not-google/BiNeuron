@@ -1,8 +1,8 @@
 from typing import Optional, List, Dict, Union
 from llama_cpp import Llama
-from AlexRadar.additional_functions.checking_and_downloading_ai_model import ModelDownloader
-from AlexRadar.additional_functions.checking_integer_for_condition import checking_int_and_float
-from AlexRadar.data.constants_for_functions import MAX_TOKENS_LITE
+from BiNeuron.additional_functions.checking_and_downloading_ai_model import ModelDownloader
+from BiNeuron.additional_functions.checking_integer_for_condition import checking_int_and_float
+from BiNeuron.data.constants_for_functions import MAX_TOKENS_LITE
 import logging
 
 

@@ -1,10 +1,10 @@
 import click
-from AlexRadar.main import AlexRadar
-import AlexRadar.main_logger
+from BiNeuron.main import BiNeuron
+import BiNeuron.main_logger
 from typing import Optional
-from AlexRadar.data import TYPE_DEFAULT
-from AlexRadar.data.preferences_in_ai import PreferenceInAI
-from AlexRadar.data.constants_for_functions import (HTTP_PROTOCOL, MAX_TIMEOUT, MAX_TOKENS,
+from BiNeuron.data import TYPE_DEFAULT
+from BiNeuron.data.preferences_in_ai import PreferenceInAI
+from BiNeuron.data.constants_for_functions import (HTTP_PROTOCOL, MAX_TIMEOUT, MAX_TOKENS,
                                                     MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
                                                     MAIN_LANGUAGE, NUMBER_ATTEMPTS, MAIN_PROXY_ATTEMPTS,
                                                     TINY_TYPE)
@@ -201,6 +201,10 @@ from AlexRadar.data.constants_for_functions import (HTTP_PROTOCOL, MAX_TIMEOUT, 
               is_flag=True,
               default=False,
               help="If True, forces using the mirror endpoint (hf-mirror.com).")
+@click.option("--editing_files", "-ef",
+              is_flag=True,
+              default=False,
+              help="If True, the files are automatically created and modified.")
 def main(request: str,
          preferences_in_ai: str,
          filter_for_swearing: bool,
@@ -252,19 +256,29 @@ def main(request: str,
          api_key_for_deepseek_ocr: Optional[str],
          timeout_for_deepseek_ocr: Optional[int],
          max_rate_limit_retries: int,
-         prefer_mirror: bool) -> None:
+         prefer_mirror: bool,
+         editing_files: bool) -> None:
     """
-    CLI entry point for AlexRadar.
+    CLI entry point for BiNeuron.
     Processes the user request with the given options, initializes the
-    AlexRadar instance, and prints the generated response.
+    BiNeuron instance, and prints the generated response.
     """
     banner = """
-       █████╗ ██╗     ███████╗██╗  ██╗██████╗  █████╗ ██████╗  █████╗ ██████╗ 
-      ██╔══██╗██║     ██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔══██╗
-      ███████║██║     █████╗   ╚███╔╝ ██████╔╝███████║██║  ██║███████║██████╔╝
-      ██╔══██║██║     ██╔══╝   ██╔██╗ ██╔══██╗██╔══██║██║  ██║██╔══██║██╔══██╗
-      ██║  ██║███████╗███████╗██╔╝ ██╗██║  ██║██║  ██║██████╔╝██║  ██║██║  ██║
-      ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+    ██████╗ ██╗███╗   ██╗███████╗██╗   ██╗██████╗  ██████╗ ███╗   ██╗
+    ██╔══██╗██║████╗  ██║██╔════╝██║   ██║██╔══██╗██╔═══██╗████╗  ██║
+    ██████╔╝██║██╔██╗ ██║█████╗  ██║   ██║██████╔╝██║   ██║██╔██╗ ██║
+    ██╔══██╗██║██║╚██╗██║██╔══╝  ██║   ██║██╔══██╗██║   ██║██║╚██╗██║
+    ██████╔╝██║██║ ╚████║███████╗╚██████╔╝██║  ██║╚██████╔╝██║ ╚████║
+    ╚═════╝ ╚═╝╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+    
+                                                      Version - 0.0.1
+                                                      
+>>  Secure and completely local launch of neural networks for coding, 
+    with an autonomous choice of models and flexible configuration.
+    
+>>  Write the --help command to view possible commands in the program.
+
+>>  Enjoy using it and thank you for downloading this program.                                           
         """
     click.echo(banner)
 
@@ -275,7 +289,7 @@ def main(request: str,
     pref_enum = PreferenceInAI(preferences_in_ai)
 
     try:
-        alex_radar = AlexRadar(
+        biNeuron = BiNeuron(
             request=request,
             preferences_in_ai=pref_enum,
             filter_for_swearing=filter_for_swearing,
@@ -327,9 +341,10 @@ def main(request: str,
             api_key_for_deepseek_ocr=api_key_for_deepseek_ocr,
             timeout_for_deepseek_ocr=timeout_for_deepseek_ocr,
             max_rate_limit_retries=max_rate_limit_retries,
-            prefer_mirror=prefer_mirror
+            prefer_mirror=prefer_mirror,
+            editing_files=editing_files
         )
-        result = alex_radar.final_ai_request()
+        result = biNeuron.final_ai_request()
         click.echo(result)
     except Exception as e:
         click.echo(f"Error - {e}")

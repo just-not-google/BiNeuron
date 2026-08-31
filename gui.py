@@ -1,4 +1,5 @@
-from tkinter import filedialog, messagebox, ttk
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox
 import threading
 import queue
 import logging
@@ -6,57 +7,51 @@ import traceback
 import json
 import os
 from datetime import datetime
-import customtkinter as ctk
-from AlexRadar import AlexRadar
-from AlexRadar.data.constants_for_functions import (HTTP_PROTOCOL, HTTPS_PROTOCOL,
-                                                    TYPES_POWER,PREFERENCES_IN_AI_LIST,
+from BiNeuron import BiNeuron
+from BiNeuron.data.constants_for_functions import (HTTP_PROTOCOL, HTTPS_PROTOCOL,
+                                                    TYPES_POWER, PREFERENCES_IN_AI_LIST,
                                                     DETERMINANT_MODE_LIST)
-from AlexRadar.data.variants_industrial_scenarios import ALL_MAIN_PROMPTS
-from AlexRadar.data.natural_languages import NATURAL_LANGUAGES
+from BiNeuron.data.variants_industrial_scenarios import ALL_MAIN_PROMPTS
+from BiNeuron.data.natural_languages import NATURAL_LANGUAGES
 
-ctk.set_appearance_mode("Dark")
-ctk.set_default_color_theme("dark-blue")
+# --- OpenCode-like color scheme ---
+BG_MAIN = "#1e1e1e"
+BG_FRAME = "#252526"
+BG_ENTRY = "#3c3c3c"
+BG_TEXT = "#1e1e1e"
+FG_TEXT = "#d4d4d4"
+FG_DARK = "#808080"
+ACCENT = "#007acc"
+ACCENT_HOVER = "#1a8cff"
+BORDER = "#3f3f46"
+SELECT_BG = "#094771"
+TREE_BG = "#252526"
+TREE_FG = "#d4d4d4"
+TREE_SELECT_BG = "#094771"
+TREE_SELECT_FG = "#ffffff"
 
-COLOR_BG = ("#f0f0f0", "#1a1a1a")
-COLOR_FRAME = ("#e8e8e8", "#252525")
-COLOR_FRAME_DARK = ("#dcdcdc", "#2e2e2e")
-COLOR_ENTRY = ("#ffffff", "#2d2d2d")
-COLOR_TEXTBOX = ("#fafafa", "#1f1f1f")
-COLOR_BUTTON = ("#d0d0d0", "#3a3a3a")
-COLOR_BUTTON_HOVER = ("#b0b0b0", "#505050")
-COLOR_BORDER = ("#aaaaaa", "#444444")
-COLOR_SELECT = ("#888888", "#666666")
-COLOR_SWITCH = ("#999999", "#555555")
+FONT_MAIN = ("Segoe UI", 10)
+FONT_BOLD = ("Segoe UI", 11, "bold")
+FONT_TITLE = ("Segoe UI", 14, "bold")
+FONT_SECTION = ("Segoe UI", 12, "bold")
+FONT_SMALL = ("Segoe UI", 9)
 
-FRAME_CORNER = 10
-LABEL_FONT = ("Segoe UI", 13)
-TITLE_FONT = ("Segoe UI", 18, "bold")
-SECTION_FONT = ("Segoe UI", 15, "bold")
-SMALL_FONT = ("Segoe UI", 10)
 
-def validate_number(char, current_value):
-    if char == "":
-        return True
-    if char.isdigit() or char == ".":
-        if char == "." and "." in current_value:
-            return False
-        return True
-    return False
-
-class NumericEntry(ctk.CTkEntry):
+class NumericEntry(ttk.Entry):
+    """Entry that only accepts numeric values."""
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
-        vcmd = (self.register(self._validate), "%P", "%s")
-        self.configure(validate="key", validatecommand=vcmd)
+        vcmd = (self.register(self._validate), "%P")
+        self.config(validate="key", validatecommand=vcmd)
 
-    def _validate(self, new_value, old_value):
+    def _validate(self, new_value):
         if new_value == "":
             return True
-        if new_value.replace(".", "", 1).isdigit():
-            if new_value.count(".") > 1:
-                return False
+        try:
+            float(new_value)
             return True
-        return False
+        except ValueError:
+            return False
 
     def get_float(self, default=0.0):
         try:
@@ -70,35 +65,25 @@ class NumericEntry(ctk.CTkEntry):
         except ValueError:
             return default
 
-class SpinEntry(ctk.CTkFrame):
+
+class SpinEntry(ttk.Frame):
+    """A frame containing an entry and up/down buttons."""
     def __init__(self, master, step=1, default=0, **kwargs):
-        super().__init__(master, fg_color="transparent")
+        super().__init__(master)
         self.step = step
         self.entry = NumericEntry(self, **kwargs)
-        self.entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        self.entry.pack(side="left", fill="x", expand=True, padx=(0, 2))
         self.entry.insert(0, str(default))
 
-        self.btn_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.btn_frame.pack(side="left")
-        self.btn_up = ctk.CTkButton(
-            self.btn_frame, text="▲", width=25, height=20,
-            command=self.increment,
-            fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-            text_color=("black", "white"), corner_radius=4
-        )
-        self.btn_up.pack(side="top", pady=1)
-        self.btn_down = ctk.CTkButton(
-            self.btn_frame, text="▼", width=25, height=20,
-            command=self.decrement,
-            fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-            text_color=("black", "white"), corner_radius=4
-        )
-        self.btn_down.pack(side="top", pady=1)
+        self.btn_up = ttk.Button(self, text="▲", width=2, command=self.increment)
+        self.btn_up.pack(side="left", padx=1)
+        self.btn_down = ttk.Button(self, text="▼", width=2, command=self.decrement)
+        self.btn_down.pack(side="left", padx=1)
 
     def increment(self):
         try:
             val = float(self.entry.get())
-        except:
+        except ValueError:
             val = 0.0
         val += self.step
         self._set_value(val)
@@ -106,13 +91,13 @@ class SpinEntry(ctk.CTkFrame):
     def decrement(self):
         try:
             val = float(self.entry.get())
-        except:
+        except ValueError:
             val = 0.0
         val -= self.step
         self._set_value(val)
 
     def _set_value(self, val):
-        if self.step == int(self.step):
+        if isinstance(self.step, int) or self.step == int(self.step):
             self.entry.delete(0, "end")
             self.entry.insert(0, str(int(val)))
         else:
@@ -135,12 +120,51 @@ class SpinEntry(ctk.CTkFrame):
     def insert(self, index, string):
         self.entry.insert(index, string)
 
+
+class ScrollableFrame(ttk.Frame):
+    """A scrollable frame for settings and history."""
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.canvas = tk.Canvas(self, bg=BG_FRAME, highlightthickness=0, borderwidth=0)
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.canvas, style="TFrame")
+
+        self.scrollable_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+
+        # Bind mousewheel scrolling
+        self.canvas.bind("<Enter>", self._bind_mousewheel)
+        self.canvas.bind("<Leave>", self._unbind_mousewheel)
+
+    def _bind_mousewheel(self, event):
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _unbind_mousewheel(self, event):
+        self.canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    def get_frame(self):
+        return self.scrollable_frame
+
+
 class AlexRadarGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("AlexRadar")
         self.root.geometry("1500x900")
         self.root.minsize(1200, 700)
+        self.root.configure(bg=BG_MAIN)
+
+        # Configure ttk styles
+        self.style = ttk.Style()
+        self.style.theme_use("clam")
+        self._setup_styles()
 
         self.alex_instance = None
         self.is_busy = False
@@ -155,9 +179,10 @@ class AlexRadarGUI:
 
         self.storage_path = self.load_storage_path()
 
-        self.root.grid_columnconfigure(0, weight=1, uniform="main")
-        self.root.grid_columnconfigure(1, weight=3, uniform="main")
-        self.root.grid_columnconfigure(2, weight=1, uniform="main")
+        # Main layout: 3 columns – settings panel narrower
+        self.root.grid_columnconfigure(0, weight=1, uniform="main")   # settings
+        self.root.grid_columnconfigure(1, weight=4, uniform="main")   # chat
+        self.root.grid_columnconfigure(2, weight=1, uniform="main")   # history
         self.root.grid_rowconfigure(0, weight=1)
 
         self.create_settings_panel()
@@ -172,27 +197,88 @@ class AlexRadarGUI:
         self.show_welcome_placeholder()
         self.check_pending_message()
 
-        self.tree_style_configured = False
-        self.setup_tree_style()
-
         self.load_settings()
 
+    def _setup_styles(self):
+        """Configure ttk styles for OpenCode-like appearance."""
+        self.style.configure(".", background=BG_MAIN, foreground=FG_TEXT, font=FONT_MAIN)
+        self.style.configure("TFrame", background=BG_MAIN)
+        self.style.configure("TLabel", background=BG_MAIN, foreground=FG_TEXT, font=FONT_MAIN)
+        self.style.configure("TButton", background=BG_FRAME, foreground=FG_TEXT,
+                             bordercolor=BORDER, lightcolor=BG_FRAME, darkcolor=BG_FRAME,
+                             focusthickness=0, focuscolor=BG_FRAME, padding=5)
+        self.style.map("TButton",
+                       background=[("active", ACCENT_HOVER), ("pressed", ACCENT)],
+                       foreground=[("active", "white"), ("pressed", "white")])
+        self.style.configure("TEntry", fieldbackground=BG_ENTRY, foreground=FG_TEXT,
+                             bordercolor=BORDER, lightcolor=BORDER, darkcolor=BORDER,
+                             insertcolor=FG_TEXT, padding=3)
+        self.style.configure("TCheckbutton", background=BG_MAIN, foreground=FG_TEXT,
+                             focusthickness=0, focuscolor=BG_MAIN)
+        self.style.map("TCheckbutton",
+                       background=[("active", BG_MAIN)],
+                       foreground=[("active", FG_TEXT)])
+        self.style.configure("TCombobox", fieldbackground=BG_ENTRY, background=BG_ENTRY,
+                             foreground=FG_TEXT, arrowcolor=FG_TEXT, bordercolor=BORDER,
+                             lightcolor=BORDER, darkcolor=BORDER, padding=3)
+        self.style.map("TCombobox",
+                       fieldbackground=[("readonly", BG_ENTRY)],
+                       selectbackground=[("readonly", BG_ENTRY)],
+                       selectforeground=[("readonly", FG_TEXT)])
+        self.style.configure("Treeview", background=TREE_BG, foreground=TREE_FG,
+                             fieldbackground=TREE_BG, borderwidth=0, font=FONT_MAIN)
+        self.style.map("Treeview",
+                       background=[("selected", TREE_SELECT_BG)],
+                       foreground=[("selected", TREE_SELECT_FG)])
+        self.style.configure("Treeview.Heading", background=BG_FRAME, foreground=FG_TEXT,
+                             relief="flat", font=FONT_BOLD)
+        self.style.map("Treeview.Heading",
+                       background=[("active", BG_FRAME)],
+                       foreground=[("active", FG_TEXT)])
+        self.style.configure("Vertical.TScrollbar", background=BG_FRAME, troughcolor=BG_MAIN,
+                             bordercolor=BG_MAIN, arrowcolor=FG_TEXT)
+        self.style.configure("Horizontal.TScrollbar", background=BG_FRAME, troughcolor=BG_MAIN,
+                             bordercolor=BG_MAIN, arrowcolor=FG_TEXT)
+
     def setup_logging(self):
-        class TextHandler(logging.Handler):
-            def __init__(self, text_widget):
+        """Redirect logging to chat area (messages_frame) with white text."""
+        class ChatHandler(logging.Handler):
+            def __init__(self, gui):
                 super().__init__()
-                self.text_widget = text_widget
+                self.gui = gui
+
             def emit(self, record):
                 msg = self.format(record)
-                self.text_widget.after(0, self.text_widget.insert, "end", msg + "\n")
-                self.text_widget.after(0, self.text_widget.see, "end")
+                self.gui.root.after(0, self.gui.display_log_message, msg)
+
+        # Remove existing handlers and add our own to root logger
+        root_logger = logging.getLogger()
+        for handler in root_logger.handlers[:]:
+            root_logger.removeHandler(handler)
+        handler = ChatHandler(self)
+        handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+        root_logger.addHandler(handler)
+        root_logger.setLevel(logging.INFO)
+
+        # Also keep our named logger for compatibility
         logger = logging.getLogger("AlexRadar")
         logger.setLevel(logging.INFO)
         for handler in logger.handlers[:]:
             logger.removeHandler(handler)
-        handler = TextHandler(self.logs_textbox)
-        handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
         logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+
+    def display_log_message(self, text):
+        """Insert a log entry into the chat with white text color and [LOG] prefix."""
+        if self.welcome_label is not None:
+            self.hide_welcome_placeholder()
+        frame = tk.Frame(self.messages_frame, bg=BG_FRAME, bd=0)
+        frame.pack(fill="x", padx=10, pady=2)
+        label = tk.Label(frame, text=f"[LOG] {text}", fg=FG_TEXT, bg=BG_FRAME,
+                         font=FONT_SMALL, wraplength=600, justify="left", anchor="w")
+        label.pack(padx=10, pady=2, fill="x")
+        self.messages_frame.update_idletasks()
+        self.messages_canvas.yview_moveto(1.0)  # auto-scroll to bottom
 
     def load_storage_path(self):
         if os.path.exists(self.storage_path_file):
@@ -212,249 +298,176 @@ class AlexRadarGUI:
 
     def get_all_settings(self):
         return {
-            "theme": self.theme_option_menu.get(),
-            "language": self.language_option_menu.get(),
+            "theme": "dark",
+            "language": self.language_combobox.get(),
             "country": self.country_entry.get(),
-            "protocol": self.protocol_option_menu.get(),
+            "protocol": self.protocol_combobox.get(),
             "max_timeout": self.max_timeout_entry.get(),
-            "is_working": str(self.is_working_checkbox.get()),
-            "auto_proxies": str(self.auto_proxies_checkbox.get()),
-            "your_proxies_dict": self.your_proxies_dict_textbox.get("1.0", "end-1c"),
-            "min_timeout_for_checking_availability": self.min_timeout_for_checking_availability_entry.get(),
-            "max_timeout_for_checking_availability": self.max_timeout_for_checking_availability_entry.get(),
+            "is_working": "1" if self.is_working_var.get() else "0",
+            "auto_proxies": "1" if self.auto_proxies_var.get() else "0",
+            "your_proxies_dict": self.your_proxies_dict_text.get("1.0", "end-1c"),
+            "min_timeout_for_checking_availability": self.min_timeout_entry.get(),
+            "max_timeout_for_checking_availability": self.max_timeout_entry.get(),
             "retries": self.retries_entry.get(),
-            "github_proxies": str(self.github_proxies_checkbox.get()),
-            "url_lst": self.url_lst_textbox.get("1.0", "end-1c"),
+            "github_proxies": "1" if self.github_proxies_var.get() else "0",
+            "url_lst": self.url_lst_text.get("1.0", "end-1c"),
             "proxy_retries": self.proxy_retries_entry.get(),
             "main_retries": self.main_retries_entry.get(),
-            "preferences_in_ai": self.preferences_in_ai_option_menu.get(),
+            "preferences_in_ai": self.preferences_combobox.get(),
             "models_dir": self.models_dir_entry.get(),
-            "with_ai_orchestrator": str(self.with_ai_orchestrator_checkbox.get()),
+            "with_ai_orchestrator": "1" if self.with_ai_orchestrator_var.get() else "0",
             "n_ctx": self.n_ctx_entry.get(),
             "n_gpu_layers": self.n_gpu_layers_entry.get(),
             "max_tokens": self.max_tokens_entry.get(),
-            "your_token_for_hf": self.your_token_for_hf_entry.get(),
+            "your_token_for_hf": self.token_hf_entry.get(),
             "subdomain": self.subdomain_entry.get(),
             "repo_id": self.repo_id_entry.get(),
             "filename": self.filename_entry.get(),
-            "prefer_mirror": str(self.prefer_mirror_checkbox.get()),
-            "main_prompt_mode": self.main_prompt_mode_option_menu.get(),
-            "main_prompt": self.main_prompt_textbox.get("1.0", "end-1c"),
+            "prefer_mirror": "1" if self.prefer_mirror_var.get() else "0",
+            "main_prompt_mode": self.main_prompt_mode_combobox.get(),
+            "main_prompt": self.main_prompt_text.get("1.0", "end-1c"),
             "temperature": self.temperature_entry.get(),
-            "determinant_mode": self.determinant_mode_option_menu.get(),
-            "accurate_translation": str(self.accurate_translation_checkbox.get()),
-            "your_key_for_deepl": self.your_key_for_deepl_entry.get(),
+            "determinant_mode": self.determinant_mode_combobox.get(),
+            "accurate_translation": "1" if self.accurate_translation_var.get() else "0",
+            "your_key_for_deepl": self.deepl_key_entry.get(),
             "request_language": self.request_language_entry.get(),
-            "lang_lst": self.lang_lst_textbox.get("1.0", "end-1c"),
-            "use_gpu_for_ocr": str(self.use_gpu_for_ocr_checkbox.get()),
-            "with_ocr": str(self.with_ocr_checkbox.get()),
-            "cloud_version": str(self.cloud_version_checkbox.get()),
-            "with_deepseek": str(self.with_deepseek_checkbox.get()),
-            "model_size": self.model_size_option_menu.get(),
-            "crop_mode": str(self.crop_mode_checkbox.get()),
+            "lang_lst": self.lang_lst_text.get("1.0", "end-1c"),
+            "use_gpu_for_ocr": "1" if self.use_gpu_ocr_var.get() else "0",
+            "with_ocr": "1" if self.with_ocr_var.get() else "0",
+            "cloud_version": "1" if self.cloud_version_var.get() else "0",
+            "with_deepseek": "1" if self.with_deepseek_var.get() else "0",
+            "model_size": self.model_size_combobox.get(),
+            "crop_mode": "1" if self.crop_mode_var.get() else "0",
             "base_url": self.base_url_entry.get(),
-            "api_key_for_deepseek_ocr": self.api_key_for_deepseek_ocr_entry.get(),
-            "timeout_for_deepseek_ocr": self.timeout_for_deepseek_ocr_entry.get(),
+            "api_key_for_deepseek_ocr": self.deepseek_api_entry.get(),
+            "timeout_for_deepseek_ocr": self.deepseek_timeout_entry.get(),
             "max_rate_limit_retries": self.max_rate_limit_retries_entry.get(),
-            "filter_for_swearing": str(self.filter_for_swearing_checkbox.get()),
-            "verbose": str(self.verbose_checkbox.get()),
-            "echo": str(self.echo_checkbox.get()),
-            "type_computer": self.type_computer_option_menu.get(),
-            "proprietary_algorithms": str(self.proprietary_algorithms_checkbox.get()),
-            "writing_response_to_file": str(self.writing_response_to_file_checkbox.get()),
-            "virtual_storage": str(self.mode_switch.get()),
+            "filter_for_swearing": "1" if self.filter_swearing_var.get() else "0",
+            "verbose": "1" if self.verbose_var.get() else "0",
+            "echo": "1" if self.echo_var.get() else "0",
+            "type_computer": self.type_computer_combobox.get(),
+            "proprietary_algorithms": "1" if self.proprietary_algorithms_var.get() else "0",
+            "writing_response_to_file": "1" if self.writing_response_var.get() else "0",
+            "virtual_storage": "1" if self.virtual_storage_var.get() else "0",
             "storage_path": self.storage_path,
         }
 
     def set_all_settings(self, settings):
-        if "theme" in settings:
-            self.theme_option_menu.set(settings["theme"])
-            ctk.set_appearance_mode(settings["theme"])
-            self.update_tree_style()
+        def set_entry(entry, value):
+            entry.delete(0, "end")
+            entry.insert(0, str(value))
+
         if "language" in settings:
-            self.language_option_menu.set(settings["language"])
+            self.language_combobox.set(settings["language"])
         if "country" in settings:
-            self.country_entry.delete(0, "end")
-            self.country_entry.insert(0, settings["country"])
+            set_entry(self.country_entry, settings["country"])
         if "protocol" in settings:
-            self.protocol_option_menu.set(settings["protocol"])
+            self.protocol_combobox.set(settings["protocol"])
         if "max_timeout" in settings:
-            self.max_timeout_entry.delete(0, "end")
-            self.max_timeout_entry.insert(0, settings["max_timeout"])
+            set_entry(self.max_timeout_entry.entry, settings["max_timeout"])
         if "is_working" in settings:
-            if settings["is_working"] == "1":
-                self.is_working_checkbox.select()
-            else:
-                self.is_working_checkbox.deselect()
+            self.is_working_var.set(settings["is_working"] == "1")
         if "auto_proxies" in settings:
-            if settings["auto_proxies"] == "1":
-                self.auto_proxies_checkbox.select()
-            else:
-                self.auto_proxies_checkbox.deselect()
+            self.auto_proxies_var.set(settings["auto_proxies"] == "1")
         if "your_proxies_dict" in settings:
-            self.your_proxies_dict_textbox.delete("1.0", "end")
-            self.your_proxies_dict_textbox.insert("1.0", settings["your_proxies_dict"])
+            self.your_proxies_dict_text.delete("1.0", "end")
+            self.your_proxies_dict_text.insert("1.0", settings["your_proxies_dict"])
         if "min_timeout_for_checking_availability" in settings:
-            self.min_timeout_for_checking_availability_entry.delete(0, "end")
-            self.min_timeout_for_checking_availability_entry.insert(0, settings["min_timeout_for_checking_availability"])
+            set_entry(self.min_timeout_entry.entry, settings["min_timeout_for_checking_availability"])
         if "max_timeout_for_checking_availability" in settings:
-            self.max_timeout_for_checking_availability_entry.delete(0, "end")
-            self.max_timeout_for_checking_availability_entry.insert(0, settings["max_timeout_for_checking_availability"])
+            set_entry(self.max_timeout_entry.entry, settings["max_timeout_for_checking_availability"])
         if "retries" in settings:
-            self.retries_entry.delete(0, "end")
-            self.retries_entry.insert(0, settings["retries"])
+            set_entry(self.retries_entry.entry, settings["retries"])
         if "github_proxies" in settings:
-            if settings["github_proxies"] == "1":
-                self.github_proxies_checkbox.select()
-            else:
-                self.github_proxies_checkbox.deselect()
+            self.github_proxies_var.set(settings["github_proxies"] == "1")
         if "url_lst" in settings:
-            self.url_lst_textbox.delete("1.0", "end")
-            self.url_lst_textbox.insert("1.0", settings["url_lst"])
+            self.url_lst_text.delete("1.0", "end")
+            self.url_lst_text.insert("1.0", settings["url_lst"])
         if "proxy_retries" in settings:
-            self.proxy_retries_entry.delete(0, "end")
-            self.proxy_retries_entry.insert(0, settings["proxy_retries"])
+            set_entry(self.proxy_retries_entry.entry, settings["proxy_retries"])
         if "main_retries" in settings:
-            self.main_retries_entry.delete(0, "end")
-            self.main_retries_entry.insert(0, settings["main_retries"])
+            set_entry(self.main_retries_entry.entry, settings["main_retries"])
         if "preferences_in_ai" in settings:
-            self.preferences_in_ai_option_menu.set(settings["preferences_in_ai"])
+            self.preferences_combobox.set(settings["preferences_in_ai"])
         if "models_dir" in settings:
-            self.models_dir_entry.delete(0, "end")
-            self.models_dir_entry.insert(0, settings["models_dir"])
+            set_entry(self.models_dir_entry, settings["models_dir"])
         if "with_ai_orchestrator" in settings:
-            if settings["with_ai_orchestrator"] == "1":
-                self.with_ai_orchestrator_checkbox.select()
-            else:
-                self.with_ai_orchestrator_checkbox.deselect()
+            self.with_ai_orchestrator_var.set(settings["with_ai_orchestrator"] == "1")
         if "n_ctx" in settings:
-            self.n_ctx_entry.delete(0, "end")
-            self.n_ctx_entry.insert(0, settings["n_ctx"])
+            set_entry(self.n_ctx_entry.entry, settings["n_ctx"])
         if "n_gpu_layers" in settings:
-            self.n_gpu_layers_entry.delete(0, "end")
-            self.n_gpu_layers_entry.insert(0, settings["n_gpu_layers"])
+            set_entry(self.n_gpu_layers_entry.entry, settings["n_gpu_layers"])
         if "max_tokens" in settings:
-            self.max_tokens_entry.delete(0, "end")
-            self.max_tokens_entry.insert(0, settings["max_tokens"])
+            set_entry(self.max_tokens_entry.entry, settings["max_tokens"])
         if "your_token_for_hf" in settings:
-            self.your_token_for_hf_entry.delete(0, "end")
-            self.your_token_for_hf_entry.insert(0, settings["your_token_for_hf"])
+            set_entry(self.token_hf_entry, settings["your_token_for_hf"])
         if "subdomain" in settings:
-            self.subdomain_entry.delete(0, "end")
-            self.subdomain_entry.insert(0, settings["subdomain"])
+            set_entry(self.subdomain_entry, settings["subdomain"])
         if "repo_id" in settings:
-            self.repo_id_entry.delete(0, "end")
-            self.repo_id_entry.insert(0, settings["repo_id"])
+            set_entry(self.repo_id_entry, settings["repo_id"])
         if "filename" in settings:
-            self.filename_entry.delete(0, "end")
-            self.filename_entry.insert(0, settings["filename"])
+            set_entry(self.filename_entry, settings["filename"])
         if "prefer_mirror" in settings:
-            if settings["prefer_mirror"] == "1":
-                self.prefer_mirror_checkbox.select()
-            else:
-                self.prefer_mirror_checkbox.deselect()
+            self.prefer_mirror_var.set(settings["prefer_mirror"] == "1")
         if "main_prompt_mode" in settings:
-            self.main_prompt_mode_option_menu.set(settings["main_prompt_mode"])
+            self.main_prompt_mode_combobox.set(settings["main_prompt_mode"])
         if "main_prompt" in settings:
-            self.main_prompt_textbox.delete("1.0", "end")
-            self.main_prompt_textbox.insert("1.0", settings["main_prompt"])
+            self.main_prompt_text.delete("1.0", "end")
+            self.main_prompt_text.insert("1.0", settings["main_prompt"])
         if "temperature" in settings:
-            self.temperature_entry.delete(0, "end")
-            self.temperature_entry.insert(0, settings["temperature"])
+            set_entry(self.temperature_entry.entry, settings["temperature"])
         if "determinant_mode" in settings:
-            self.determinant_mode_option_menu.set(settings["determinant_mode"])
+            self.determinant_mode_combobox.set(settings["determinant_mode"])
         if "accurate_translation" in settings:
-            if settings["accurate_translation"] == "1":
-                self.accurate_translation_checkbox.select()
-            else:
-                self.accurate_translation_checkbox.deselect()
+            self.accurate_translation_var.set(settings["accurate_translation"] == "1")
         if "your_key_for_deepl" in settings:
-            self.your_key_for_deepl_entry.delete(0, "end")
-            self.your_key_for_deepl_entry.insert(0, settings["your_key_for_deepl"])
+            set_entry(self.deepl_key_entry, settings["your_key_for_deepl"])
         if "request_language" in settings:
-            self.request_language_entry.delete(0, "end")
-            self.request_language_entry.insert(0, settings["request_language"])
+            set_entry(self.request_language_entry, settings["request_language"])
         if "lang_lst" in settings:
-            self.lang_lst_textbox.delete("1.0", "end")
-            self.lang_lst_textbox.insert("1.0", settings["lang_lst"])
+            self.lang_lst_text.delete("1.0", "end")
+            self.lang_lst_text.insert("1.0", settings["lang_lst"])
         if "use_gpu_for_ocr" in settings:
-            if settings["use_gpu_for_ocr"] == "1":
-                self.use_gpu_for_ocr_checkbox.select()
-            else:
-                self.use_gpu_for_ocr_checkbox.deselect()
+            self.use_gpu_ocr_var.set(settings["use_gpu_for_ocr"] == "1")
         if "with_ocr" in settings:
-            if settings["with_ocr"] == "1":
-                self.with_ocr_checkbox.select()
-            else:
-                self.with_ocr_checkbox.deselect()
+            self.with_ocr_var.set(settings["with_ocr"] == "1")
         if "cloud_version" in settings:
-            if settings["cloud_version"] == "1":
-                self.cloud_version_checkbox.select()
-            else:
-                self.cloud_version_checkbox.deselect()
+            self.cloud_version_var.set(settings["cloud_version"] == "1")
         if "with_deepseek" in settings:
-            if settings["with_deepseek"] == "1":
-                self.with_deepseek_checkbox.select()
-            else:
-                self.with_deepseek_checkbox.deselect()
+            self.with_deepseek_var.set(settings["with_deepseek"] == "1")
         if "model_size" in settings:
-            self.model_size_option_menu.set(settings["model_size"])
+            self.model_size_combobox.set(settings["model_size"])
         if "crop_mode" in settings:
-            if settings["crop_mode"] == "1":
-                self.crop_mode_checkbox.select()
-            else:
-                self.crop_mode_checkbox.deselect()
+            self.crop_mode_var.set(settings["crop_mode"] == "1")
         if "base_url" in settings:
-            self.base_url_entry.delete(0, "end")
-            self.base_url_entry.insert(0, settings["base_url"])
+            set_entry(self.base_url_entry, settings["base_url"])
         if "api_key_for_deepseek_ocr" in settings:
-            self.api_key_for_deepseek_ocr_entry.delete(0, "end")
-            self.api_key_for_deepseek_ocr_entry.insert(0, settings["api_key_for_deepseek_ocr"])
+            set_entry(self.deepseek_api_entry, settings["api_key_for_deepseek_ocr"])
         if "timeout_for_deepseek_ocr" in settings:
-            self.timeout_for_deepseek_ocr_entry.delete(0, "end")
-            self.timeout_for_deepseek_ocr_entry.insert(0, settings["timeout_for_deepseek_ocr"])
+            set_entry(self.deepseek_timeout_entry.entry, settings["timeout_for_deepseek_ocr"])
         if "max_rate_limit_retries" in settings:
-            self.max_rate_limit_retries_entry.delete(0, "end")
-            self.max_rate_limit_retries_entry.insert(0, settings["max_rate_limit_retries"])
+            set_entry(self.max_rate_limit_retries_entry.entry, settings["max_rate_limit_retries"])
         if "filter_for_swearing" in settings:
-            if settings["filter_for_swearing"] == "1":
-                self.filter_for_swearing_checkbox.select()
-            else:
-                self.filter_for_swearing_checkbox.deselect()
+            self.filter_swearing_var.set(settings["filter_for_swearing"] == "1")
         if "verbose" in settings:
-            if settings["verbose"] == "1":
-                self.verbose_checkbox.select()
-            else:
-                self.verbose_checkbox.deselect()
+            self.verbose_var.set(settings["verbose"] == "1")
         if "echo" in settings:
-            if settings["echo"] == "1":
-                self.echo_checkbox.select()
-            else:
-                self.echo_checkbox.deselect()
+            self.echo_var.set(settings["echo"] == "1")
         if "type_computer" in settings:
-            self.type_computer_option_menu.set(settings["type_computer"])
+            self.type_computer_combobox.set(settings["type_computer"])
         if "proprietary_algorithms" in settings:
-            if settings["proprietary_algorithms"] == "1":
-                self.proprietary_algorithms_checkbox.select()
-            else:
-                self.proprietary_algorithms_checkbox.deselect()
+            self.proprietary_algorithms_var.set(settings["proprietary_algorithms"] == "1")
         if "writing_response_to_file" in settings:
-            if settings["writing_response_to_file"] == "1":
-                self.writing_response_to_file_checkbox.select()
-            else:
-                self.writing_response_to_file_checkbox.deselect()
+            self.writing_response_var.set(settings["writing_response_to_file"] == "1")
         if "virtual_storage" in settings:
-            if settings["virtual_storage"] == "1":
-                self.mode_switch.select()
-            else:
-                self.mode_switch.deselect()
-            self.switch_mode()
+            self.virtual_storage_var.set(settings["virtual_storage"] == "1")
         if "storage_path" in settings:
             self.storage_path = settings["storage_path"]
-            self.storage_path_entry.delete(0, "end")
-            self.storage_path_entry.insert(0, self.storage_path)
+            if hasattr(self, "storage_path_entry"):
+                self.storage_path_entry.delete(0, "end")
+                self.storage_path_entry.insert(0, self.storage_path)
             self.save_storage_path()
-            if self.mode_switch.get() == 1:
+            if self.virtual_storage_var.get():
                 self.build_tree()
 
         self.update_attached_text()
@@ -579,17 +592,451 @@ class AlexRadarGUI:
         self.save_settings()
         self.root.destroy()
 
+    # --- UI creation methods ---
+
+    def create_settings_panel(self):
+        # Left panel with scrollable settings
+        settings_outer = tk.Frame(self.root, bg=BG_MAIN)
+        settings_outer.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
+        settings_outer.grid_rowconfigure(1, weight=1)
+        settings_outer.grid_columnconfigure(0, weight=1)
+
+        # Title "Settings" outside scrollable area
+        title_label = ttk.Label(settings_outer, text="Settings", font=FONT_TITLE)
+        title_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
+
+        settings_scroll = ScrollableFrame(settings_outer)
+        settings_scroll.grid(row=1, column=0, sticky="nsew")
+        settings_frame = settings_scroll.get_frame()
+
+        # Reset/Export/Delete buttons - compact, left-aligned
+        btn_frame = ttk.Frame(settings_frame)
+        btn_frame.grid(row=0, column=0, sticky="w", padx=5, pady=(0, 10))
+        ttk.Button(btn_frame, text="Reset", width=10, command=self.reset_settings).pack(side="left", padx=2)
+        ttk.Button(btn_frame, text="Export All", width=10, command=self.export_all_chats).pack(side="left", padx=2)
+        ttk.Button(btn_frame, text="Delete All", width=10, command=self.delete_all_chats).pack(side="left", padx=2)
+
+        # Interface section
+        interface_frame = ttk.LabelFrame(settings_frame, text="Interface", padding=5)
+        interface_frame.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+        interface_frame.grid_columnconfigure(0, weight=0)
+        interface_frame.grid_columnconfigure(1, weight=1)
+
+        row = 0
+        ttk.Label(interface_frame, text="Language").grid(row=row, column=0, sticky="w", pady=2)
+        self.language_combobox = ttk.Combobox(interface_frame, values=list(NATURAL_LANGUAGES.keys()), state="readonly", width=23)
+        self.language_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        # Network section
+        network_frame = ttk.LabelFrame(settings_frame, text="Network", padding=5)
+        network_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
+        network_frame.grid_columnconfigure(0, weight=0)
+        network_frame.grid_columnconfigure(1, weight=1)
+
+        row = 0
+        ttk.Label(network_frame, text="Country").grid(row=row, column=0, sticky="w", pady=2)
+        self.country_entry = ttk.Entry(network_frame, width=25)
+        self.country_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="Protocol").grid(row=row, column=0, sticky="w", pady=2)
+        self.protocol_combobox = ttk.Combobox(network_frame, values=[HTTP_PROTOCOL, HTTPS_PROTOCOL], state="readonly", width=23)
+        self.protocol_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="Max Timeout").grid(row=row, column=0, sticky="w", pady=2)
+        self.max_timeout_entry = SpinEntry(network_frame, step=1, default=30, width=25)
+        self.max_timeout_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="Is Working").grid(row=row, column=0, sticky="w", pady=2)
+        self.is_working_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(network_frame, variable=self.is_working_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="Auto Proxies").grid(row=row, column=0, sticky="w", pady=2)
+        self.auto_proxies_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(network_frame, variable=self.auto_proxies_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="Your Proxies").grid(row=row, column=0, sticky="nw", pady=2)
+        self.your_proxies_dict_text = tk.Text(network_frame, height=3, width=25, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
+                                              relief="flat", borderwidth=1, highlightthickness=1,
+                                              highlightbackground=BORDER, highlightcolor=BORDER)
+        self.your_proxies_dict_text.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="Min Timeout For Check").grid(row=row, column=0, sticky="w", pady=2)
+        self.min_timeout_entry = SpinEntry(network_frame, step=1, default=5, width=25)
+        self.min_timeout_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="Max Timeout For Check").grid(row=row, column=0, sticky="w", pady=2)
+        self.max_timeout_entry = SpinEntry(network_frame, step=1, default=15, width=25)
+        self.max_timeout_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="Retries").grid(row=row, column=0, sticky="w", pady=2)
+        self.retries_entry = SpinEntry(network_frame, step=1, default=3, width=25)
+        self.retries_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="GitHub Proxies").grid(row=row, column=0, sticky="w", pady=2)
+        self.github_proxies_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(network_frame, variable=self.github_proxies_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="URL List").grid(row=row, column=0, sticky="nw", pady=2)
+        self.url_lst_text = tk.Text(network_frame, height=3, width=25, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
+                                    relief="flat", borderwidth=1, highlightthickness=1,
+                                    highlightbackground=BORDER, highlightcolor=BORDER)
+        self.url_lst_text.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="Proxy Retries").grid(row=row, column=0, sticky="w", pady=2)
+        self.proxy_retries_entry = SpinEntry(network_frame, step=1, default=3, width=25)
+        self.proxy_retries_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(network_frame, text="Main Retries").grid(row=row, column=0, sticky="w", pady=2)
+        self.main_retries_entry = SpinEntry(network_frame, step=1, default=3, width=25)
+        self.main_retries_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        # Model section
+        model_frame = ttk.LabelFrame(settings_frame, text="Model", padding=5)
+        model_frame.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
+        model_frame.grid_columnconfigure(0, weight=0)
+        model_frame.grid_columnconfigure(1, weight=1)
+
+        row = 0
+        ttk.Label(model_frame, text="Preferences In AI").grid(row=row, column=0, sticky="w", pady=2)
+        self.preferences_combobox = ttk.Combobox(model_frame, values=PREFERENCES_IN_AI_LIST, state="readonly", width=23)
+        self.preferences_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="Models Dir").grid(row=row, column=0, sticky="w", pady=2)
+        self.models_dir_entry = ttk.Entry(model_frame, width=25)
+        self.models_dir_entry.insert(0, "./models")
+        self.models_dir_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="With AI Orchestrator").grid(row=row, column=0, sticky="w", pady=2)
+        self.with_ai_orchestrator_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(model_frame, variable=self.with_ai_orchestrator_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="N CTX").grid(row=row, column=0, sticky="w", pady=2)
+        self.n_ctx_entry = SpinEntry(model_frame, step=1, default=0, width=25)
+        self.n_ctx_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="N GPU Layers").grid(row=row, column=0, sticky="w", pady=2)
+        self.n_gpu_layers_entry = SpinEntry(model_frame, step=1, default=0, width=25)
+        self.n_gpu_layers_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="Max Tokens").grid(row=row, column=0, sticky="w", pady=2)
+        self.max_tokens_entry = SpinEntry(model_frame, step=1, default=4096, width=25)
+        self.max_tokens_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="Token Hugging Face").grid(row=row, column=0, sticky="w", pady=2)
+        self.token_hf_entry = ttk.Entry(model_frame, width=25)
+        self.token_hf_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="Subdomain").grid(row=row, column=0, sticky="w", pady=2)
+        self.subdomain_entry = ttk.Entry(model_frame, width=25)
+        self.subdomain_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="Repo ID").grid(row=row, column=0, sticky="w", pady=2)
+        self.repo_id_entry = ttk.Entry(model_frame, width=25)
+        self.repo_id_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="Filename").grid(row=row, column=0, sticky="w", pady=2)
+        self.filename_entry = ttk.Entry(model_frame, width=25)
+        self.filename_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="Prefer Mirror").grid(row=row, column=0, sticky="w", pady=2)
+        self.prefer_mirror_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(model_frame, variable=self.prefer_mirror_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="Main Prompt Mode").grid(row=row, column=0, sticky="w", pady=2)
+        self.main_prompt_mode_combobox = ttk.Combobox(model_frame, values=list(ALL_MAIN_PROMPTS.keys()), state="readonly", width=23)
+        self.main_prompt_mode_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="Main Prompt").grid(row=row, column=0, sticky="nw", pady=2)
+        self.main_prompt_text = tk.Text(model_frame, height=3, width=25, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
+                                        relief="flat", borderwidth=1, highlightthickness=1,
+                                        highlightbackground=BORDER, highlightcolor=BORDER)
+        self.main_prompt_text.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(model_frame, text="Temperature").grid(row=row, column=0, sticky="w", pady=2)
+        self.temperature_entry = SpinEntry(model_frame, step=0.1, default=0.1, width=25)
+        self.temperature_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        # Translator section
+        translator_frame = ttk.LabelFrame(settings_frame, text="Translator", padding=5)
+        translator_frame.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
+        translator_frame.grid_columnconfigure(0, weight=0)
+        translator_frame.grid_columnconfigure(1, weight=1)
+
+        row = 0
+        ttk.Label(translator_frame, text="Determinant Mode").grid(row=row, column=0, sticky="w", pady=2)
+        self.determinant_mode_combobox = ttk.Combobox(translator_frame, values=DETERMINANT_MODE_LIST, state="readonly", width=23)
+        self.determinant_mode_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(translator_frame, text="Accurate Translation").grid(row=row, column=0, sticky="w", pady=2)
+        self.accurate_translation_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(translator_frame, variable=self.accurate_translation_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(translator_frame, text="API KEY DeepL").grid(row=row, column=0, sticky="w", pady=2)
+        self.deepl_key_entry = ttk.Entry(translator_frame, width=25)
+        self.deepl_key_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(translator_frame, text="Request Language").grid(row=row, column=0, sticky="w", pady=2)
+        self.request_language_entry = ttk.Entry(translator_frame, width=25)
+        self.request_language_entry.insert(0, "en")
+        self.request_language_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        # OCR section
+        ocr_frame = ttk.LabelFrame(settings_frame, text="OCR", padding=5)
+        ocr_frame.grid(row=5, column=0, sticky="ew", padx=5, pady=5)
+        ocr_frame.grid_columnconfigure(0, weight=0)
+        ocr_frame.grid_columnconfigure(1, weight=1)
+
+        row = 0
+        ttk.Label(ocr_frame, text="Languages List").grid(row=row, column=0, sticky="nw", pady=2)
+        self.lang_lst_text = tk.Text(ocr_frame, height=3, width=25, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
+                                     relief="flat", borderwidth=1, highlightthickness=1,
+                                     highlightbackground=BORDER, highlightcolor=BORDER)
+        self.lang_lst_text.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(ocr_frame, text="Use GPU").grid(row=row, column=0, sticky="w", pady=2)
+        self.use_gpu_ocr_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(ocr_frame, variable=self.use_gpu_ocr_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(ocr_frame, text="With OCR").grid(row=row, column=0, sticky="w", pady=2)
+        self.with_ocr_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(ocr_frame, variable=self.with_ocr_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(ocr_frame, text="Cloud Version").grid(row=row, column=0, sticky="w", pady=2)
+        self.cloud_version_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(ocr_frame, variable=self.cloud_version_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(ocr_frame, text="With DeepSeek").grid(row=row, column=0, sticky="w", pady=2)
+        self.with_deepseek_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(ocr_frame, variable=self.with_deepseek_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(ocr_frame, text="Model Size").grid(row=row, column=0, sticky="w", pady=2)
+        self.model_size_combobox = ttk.Combobox(ocr_frame, values=["tiny", "small", "base", "large", "gundam"], state="readonly", width=23)
+        self.model_size_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(ocr_frame, text="Crop Mode").grid(row=row, column=0, sticky="w", pady=2)
+        self.crop_mode_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(ocr_frame, variable=self.crop_mode_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(ocr_frame, text="Base URL").grid(row=row, column=0, sticky="w", pady=2)
+        self.base_url_entry = ttk.Entry(ocr_frame, width=25)
+        self.base_url_entry.insert(0, "https://api.siliconflow.cn/v1/chat/completions")
+        self.base_url_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(ocr_frame, text="API Key DeepSeek OCR").grid(row=row, column=0, sticky="w", pady=2)
+        self.deepseek_api_entry = ttk.Entry(ocr_frame, width=25)
+        self.deepseek_api_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(ocr_frame, text="Timeout DeepSeek OCR").grid(row=row, column=0, sticky="w", pady=2)
+        self.deepseek_timeout_entry = SpinEntry(ocr_frame, step=1, default=30, width=25)
+        self.deepseek_timeout_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(ocr_frame, text="Max Rate Limit Retries").grid(row=row, column=0, sticky="w", pady=2)
+        self.max_rate_limit_retries_entry = SpinEntry(ocr_frame, step=1, default=3, width=25)
+        self.max_rate_limit_retries_entry.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        # Other section
+        other_frame = ttk.LabelFrame(settings_frame, text="Other", padding=5)
+        other_frame.grid(row=6, column=0, sticky="ew", padx=5, pady=5)
+        other_frame.grid_columnconfigure(0, weight=0)
+        other_frame.grid_columnconfigure(1, weight=1)
+
+        row = 0
+        ttk.Label(other_frame, text="Filter For Swearing").grid(row=row, column=0, sticky="w", pady=2)
+        self.filter_swearing_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(other_frame, variable=self.filter_swearing_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(other_frame, text="Verbose").grid(row=row, column=0, sticky="w", pady=2)
+        self.verbose_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(other_frame, variable=self.verbose_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(other_frame, text="Echo").grid(row=row, column=0, sticky="w", pady=2)
+        self.echo_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(other_frame, variable=self.echo_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(other_frame, text="Type Computer").grid(row=row, column=0, sticky="w", pady=2)
+        self.type_computer_combobox = ttk.Combobox(other_frame, values=["auto"] + TYPES_POWER, state="readonly", width=23)
+        self.type_computer_combobox.grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(other_frame, text="Proprietary Algorithms").grid(row=row, column=0, sticky="w", pady=2)
+        self.proprietary_algorithms_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(other_frame, variable=self.proprietary_algorithms_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+        ttk.Label(other_frame, text="Writing Response To File").grid(row=row, column=0, sticky="w", pady=2)
+        self.writing_response_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(other_frame, variable=self.writing_response_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        row += 1
+
+    def create_chat_panel(self):
+        # Center panel with chat
+        chat_frame = tk.Frame(self.root, bg=BG_MAIN)
+        chat_frame.grid(row=0, column=1, sticky="nsew", padx=8, pady=8)
+        chat_frame.grid_rowconfigure(1, weight=1)
+        chat_frame.grid_columnconfigure(0, weight=1)
+
+        ttk.Label(chat_frame, text="Chat With AI", font=FONT_TITLE).grid(row=0, column=0, pady=(10, 5))
+
+        # Resume button (hidden initially)
+        self.resume_button = ttk.Button(chat_frame, text="Resume pending request", command=self.resume_request)
+        self.resume_button.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 5))
+        self.resume_button.grid_remove()
+
+        # Messages area (scrollable)
+        messages_container = tk.Frame(chat_frame, bg=BG_FRAME)
+        messages_container.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
+        messages_container.grid_rowconfigure(0, weight=1)
+        messages_container.grid_columnconfigure(0, weight=1)
+
+        self.messages_canvas = tk.Canvas(messages_container, bg=BG_FRAME, highlightthickness=0)
+        self.messages_scrollbar = ttk.Scrollbar(messages_container, orient="vertical", command=self.messages_canvas.yview)
+        self.messages_frame = tk.Frame(self.messages_canvas, bg=BG_FRAME)
+        self.messages_frame.bind("<Configure>", lambda e: self.messages_canvas.configure(scrollregion=self.messages_canvas.bbox("all")))
+        self.messages_canvas.create_window((0, 0), window=self.messages_frame, anchor="nw")
+        self.messages_canvas.configure(yscrollcommand=self.messages_scrollbar.set)
+        self.messages_canvas.pack(side="left", fill="both", expand=True)
+        self.messages_scrollbar.pack(side="right", fill="y")
+
+        # Bind mousewheel
+        self.messages_canvas.bind("<Enter>", self._bind_mousewheel_messages)
+        self.messages_canvas.bind("<Leave>", self._unbind_mousewheel_messages)
+
+        # Attached files
+        attached_frame = ttk.LabelFrame(chat_frame, text="Attached files", padding=5)
+        attached_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=5)
+        attached_frame.grid_columnconfigure(0, weight=1)
+        self.attached_textbox = tk.Text(attached_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
+                                        relief="flat", borderwidth=1, highlightthickness=1,
+                                        highlightbackground=BORDER, highlightcolor=BORDER, state="disabled")
+        self.attached_textbox.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+
+        # Input area
+        input_frame = ttk.Frame(chat_frame)
+        input_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=5)
+        input_frame.grid_columnconfigure(0, weight=1)
+        self.request_entry = ttk.Entry(input_frame)
+        self.request_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+        self.request_entry.bind("<Return>", lambda event: self.send_message())
+        ttk.Button(input_frame, text="Upload", command=self.upload_files).grid(row=0, column=1, padx=2)
+        ttk.Button(input_frame, text="Send", command=self.send_message).grid(row=0, column=2, padx=2)
+
+    def _bind_mousewheel_messages(self, event):
+        self.messages_canvas.bind_all("<MouseWheel>", self._on_mousewheel_messages)
+
+    def _unbind_mousewheel_messages(self, event):
+        self.messages_canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel_messages(self, event):
+        self.messages_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    def create_history_panel(self):
+        # Right panel with history and virtual storage
+        history_outer = tk.Frame(self.root, bg=BG_MAIN)
+        history_outer.grid(row=0, column=2, sticky="nsew", padx=8, pady=8)
+        # Give row 2 (content) all extra space
+        history_outer.grid_rowconfigure(2, weight=1)
+        history_outer.grid_columnconfigure(0, weight=1)
+
+        title_frame = ttk.Frame(history_outer)
+        title_frame.grid(row=0, column=0, sticky="ew", pady=(10, 5), padx=5)
+        title_frame.grid_columnconfigure(0, weight=1)
+
+        self.history_title = ttk.Label(title_frame, text="History", font=FONT_TITLE)
+        self.history_title.grid(row=0, column=0, sticky="w")
+
+        self.virtual_storage_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(title_frame, text="Virtual Storage", variable=self.virtual_storage_var,
+                        command=self.switch_mode).grid(row=0, column=1, sticky="e", padx=10)
+
+        # Controls for history
+        self.history_controls = ttk.Frame(history_outer)
+        self.history_controls.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+        self.history_controls.grid_columnconfigure(0, weight=1)
+        self.find_story_entry = ttk.Entry(self.history_controls)
+        self.find_story_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+        self.find_story_entry.bind("<KeyRelease>", lambda e: self.filter_history())
+        ttk.Button(self.history_controls, text="Add", width=6, command=self.add_new_chat).grid(row=0, column=1, padx=2)
+        ttk.Button(self.history_controls, text="Delete", width=6, command=self.delete_current_chat).grid(row=0, column=2, padx=2)
+        ttk.Button(self.history_controls, text="Download", width=6, command=self.download_chat).grid(row=0, column=3, padx=2)
+
+        # Controls for storage
+        self.storage_controls = ttk.Frame(history_outer)
+        self.storage_controls.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+        self.storage_controls.grid_columnconfigure(0, weight=1)
+        self.storage_path_entry = ttk.Entry(self.storage_controls)
+        self.storage_path_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+        ttk.Button(self.storage_controls, text="Browse", width=6, command=self.browse_storage).grid(row=0, column=1, padx=2)
+        ttk.Button(self.storage_controls, text="Refresh", width=6, command=self.refresh_storage).grid(row=0, column=2, padx=2)
+        self.storage_controls.grid_remove()
+
+        # Container for history list (ScrollableFrame) and tree view (Frame with Treeview)
+        self.history_normal_frame = ScrollableFrame(history_outer)
+        self.history_normal_frame.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
+        self.history_tree_frame = tk.Frame(history_outer, bg=BG_FRAME)
+        self.history_tree_frame.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
+        self.history_tree_frame.grid_remove()
+
+        self.current_chat_id = None
+        self.chats = {}
+        self.update_history_list()
+
+        self.tree = None  # for virtual storage Treeview
+
+    # --- Helper methods for UI ---
+
     def show_welcome_placeholder(self):
         self.hide_welcome_placeholder()
         if not self.messages_frame.winfo_children():
-            self.welcome_label = ctk.CTkLabel(
-                self.messages_frame,
-                text="Welcome to AlexRadar! How can I help?\n"
-                     "(The GUI was created using the CLI version of the app)",
-                font=("Segoe UI", 16),
-                text_color=("gray60", "gray60"),
-                justify="center"
-            )
+            self.welcome_label = tk.Label(self.messages_frame, text="Welcome to AlexRadar! How can I help?\n"
+                                                                   "(The GUI was created using the CLI version of the app)",
+                                         font=("Segoe UI", 12), fg=FG_DARK, bg=BG_FRAME,
+                                         justify="center")
             self.welcome_label.pack(expand=True, fill="both")
 
     def hide_welcome_placeholder(self):
@@ -602,742 +1049,32 @@ class AlexRadarGUI:
             widget.destroy()
         self.welcome_label = None
 
-    def setup_tree_style(self):
-        self.style = ttk.Style()
-        self.style.theme_use("clam")
-        self.update_tree_style()
-
-    def update_tree_style(self):
-        mode = ctk.get_appearance_mode()
-        if mode == "Dark":
-            bg = "#252525"
-            fg = "white"
-            sel_bg = "#3a3a3a"
-            sel_fg = "white"
-            arrow_color = "#666666"
+    def update_attached_text(self):
+        self.attached_textbox.config(state="normal")
+        self.attached_textbox.delete("1.0", "end")
+        if self.virtual_storage_var.get():
+            self.attached_textbox.insert("1.0", "All files in virtual storage")
         else:
-            bg = "#e8e8e8"
-            fg = "black"
-            sel_bg = "#d0d0d0"
-            sel_fg = "black"
-            arrow_color = "#888888"
-
-        self.style.configure("Treeview",
-                             background=bg,
-                             foreground=fg,
-                             fieldbackground=bg,
-                             borderwidth=0,
-                             highlightthickness=0,
-                             font=("Segoe UI", 11))
-        self.style.configure("Treeview.Item", background=bg, foreground=fg)
-        self.style.map("Treeview",
-                       background=[("selected", sel_bg)],
-                       foreground=[("selected", sel_fg)])
-        self.style.configure("Treeview.Heading",
-                             background=bg,
-                             foreground=fg,
-                             borderwidth=0,
-                             relief="flat",
-                             font=("Segoe UI", 11, "bold"))
-        self.style.map("Treeview.Heading",
-                       background=[("active", sel_bg)],
-                       foreground=[("active", fg)])
-        self.style.layout("Treeview", [("Treeview.treearea", {"sticky": "nswe"})])
-        self.tree_style_configured = True
-
-    def create_settings_panel(self):
-        settings_frame = ctk.CTkScrollableFrame(self.root, width=420, corner_radius=FRAME_CORNER, fg_color="transparent")
-        settings_frame.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
-        settings_frame.grid_columnconfigure(0, weight=1)
-
-        ctk.CTkLabel(settings_frame, text="Settings", font=TITLE_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(10, 5))
-
-        reset_frame = ctk.CTkFrame(settings_frame, fg_color="transparent")
-        reset_frame.grid(row=1, column=0, sticky="ew", padx=5, pady=(0, 10))
-        reset_frame.grid_columnconfigure(0, weight=1)
-        reset_frame.grid_columnconfigure(1, weight=1)
-        reset_frame.grid_columnconfigure(2, weight=1)
-
-        reset_btn = ctk.CTkButton(reset_frame, text="Reset", corner_radius=8,
-                                  fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                  text_color=("black", "white"), command=self.reset_settings)
-        reset_btn.grid(row=0, column=0, sticky="ew", padx=2)
-
-        export_all_btn = ctk.CTkButton(reset_frame, text="Export All", corner_radius=8,
-                                       fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                       text_color=("black", "white"), command=self.export_all_chats)
-        export_all_btn.grid(row=0, column=1, sticky="ew", padx=2)
-
-        delete_all_btn = ctk.CTkButton(reset_frame, text="Delete All", corner_radius=8,
-                                       fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                       text_color=("black", "white"), command=self.delete_all_chats)
-        delete_all_btn.grid(row=0, column=2, sticky="ew", padx=2)
-
-        interface_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        interface_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
-        interface_frame.grid_columnconfigure(0, weight=1)
-        ctk.CTkLabel(interface_frame, text="Interface", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
-        interface_subframe = ctk.CTkFrame(interface_frame, fg_color="transparent", corner_radius=0)
-        interface_subframe.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
-        interface_subframe.grid_columnconfigure(0, weight=0, minsize=140)
-        interface_subframe.grid_columnconfigure(1, weight=1)
-
-        row = 0
-        ctk.CTkLabel(interface_subframe, text="Theme", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.theme_option_menu = ctk.CTkOptionMenu(interface_subframe, values=["dark", "light", "system"],
-                                                   command=self.change_theme,
-                                                   corner_radius=8, fg_color=COLOR_BUTTON,
-                                                   button_color=COLOR_BUTTON, button_hover_color=COLOR_BUTTON_HOVER,
-                                                   dropdown_fg_color=COLOR_FRAME_DARK,
-                                                   dropdown_hover_color=COLOR_BUTTON_HOVER,
-                                                   text_color=("black", "white"))
-        self.theme_option_menu.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(interface_subframe, text="Language", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.language_option_menu = ctk.CTkOptionMenu(interface_subframe, values=list(NATURAL_LANGUAGES.keys()), corner_radius=8,
-                                                      fg_color=COLOR_BUTTON, button_color=COLOR_BUTTON,
-                                                      button_hover_color=COLOR_BUTTON_HOVER,
-                                                      dropdown_fg_color=COLOR_FRAME_DARK,
-                                                      dropdown_hover_color=COLOR_BUTTON_HOVER,
-                                                      text_color=("black", "white"))
-        self.language_option_menu.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        network_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        network_frame.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
-        network_frame.grid_columnconfigure(0, weight=1)
-        ctk.CTkLabel(network_frame, text="Network", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
-        network_subframe = ctk.CTkFrame(network_frame, fg_color="transparent", corner_radius=0)
-        network_subframe.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
-        network_subframe.grid_columnconfigure(0, weight=0, minsize=140)
-        network_subframe.grid_columnconfigure(1, weight=1)
-
-        row = 0
-        ctk.CTkLabel(network_subframe, text="Country", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.country_entry = ctk.CTkEntry(network_subframe, corner_radius=8, fg_color=COLOR_ENTRY,
-                                          border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.country_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="Protocol", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.protocol_option_menu = ctk.CTkOptionMenu(network_subframe, values=[HTTP_PROTOCOL, HTTPS_PROTOCOL], corner_radius=8,
-                                                      fg_color=COLOR_BUTTON, button_color=COLOR_BUTTON,
-                                                      button_hover_color=COLOR_BUTTON_HOVER,
-                                                      dropdown_fg_color=COLOR_FRAME_DARK,
-                                                      dropdown_hover_color=COLOR_BUTTON_HOVER,
-                                                      text_color=("black", "white"))
-        self.protocol_option_menu.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="Max Timeout", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.max_timeout_entry = SpinEntry(network_subframe, step=1, default=30, corner_radius=8,
-                                           fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                           text_color=("black", "white"))
-        self.max_timeout_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="Is Working", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.is_working_checkbox = ctk.CTkCheckBox(network_subframe, text="", corner_radius=6,
-                                                   fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                   border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.is_working_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="Auto Proxies", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.auto_proxies_checkbox = ctk.CTkCheckBox(network_subframe, text="", corner_radius=6,
-                                                     fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                     border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.auto_proxies_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="Your Proxies", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="nw", pady=4)
-        self.your_proxies_dict_textbox = ctk.CTkTextbox(network_subframe, height=60, corner_radius=8,
-                                                        fg_color=COLOR_TEXTBOX, border_color=COLOR_BORDER,
-                                                        text_color=("black", "white"))
-        self.your_proxies_dict_textbox.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="Min Timeout For Check", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.min_timeout_for_checking_availability_entry = SpinEntry(network_subframe, step=1, default=5, corner_radius=8,
-                                                                     fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                                                     text_color=("black", "white"))
-        self.min_timeout_for_checking_availability_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="Max Timeout For Check", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.max_timeout_for_checking_availability_entry = SpinEntry(network_subframe, step=1, default=15, corner_radius=8,
-                                                                     fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                                                     text_color=("black", "white"))
-        self.max_timeout_for_checking_availability_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="Retries", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.retries_entry = SpinEntry(network_subframe, step=1, default=3, corner_radius=8,
-                                       fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                       text_color=("black", "white"))
-        self.retries_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="GitHub Proxies", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.github_proxies_checkbox = ctk.CTkCheckBox(network_subframe, text="", corner_radius=6,
-                                                       fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                       border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.github_proxies_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="URL List", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="nw", pady=4)
-        self.url_lst_textbox = ctk.CTkTextbox(network_subframe, height=60, corner_radius=8,
-                                              fg_color=COLOR_TEXTBOX, border_color=COLOR_BORDER,
-                                              text_color=("black", "white"))
-        self.url_lst_textbox.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="Proxy Retries", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.proxy_retries_entry = SpinEntry(network_subframe, step=1, default=3, corner_radius=8,
-                                             fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                             text_color=("black", "white"))
-        self.proxy_retries_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(network_subframe, text="Main Retries", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.main_retries_entry = SpinEntry(network_subframe, step=1, default=3, corner_radius=8,
-                                            fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                            text_color=("black", "white"))
-        self.main_retries_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        model_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        model_frame.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
-        model_frame.grid_columnconfigure(0, weight=1)
-        ctk.CTkLabel(model_frame, text="Model", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
-        model_subframe = ctk.CTkFrame(model_frame, fg_color="transparent", corner_radius=0)
-        model_subframe.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
-        model_subframe.grid_columnconfigure(0, weight=0, minsize=140)
-        model_subframe.grid_columnconfigure(1, weight=1)
-
-        row = 0
-        ctk.CTkLabel(model_subframe, text="Preferences In AI", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.preferences_in_ai_option_menu = ctk.CTkOptionMenu(model_subframe, values=PREFERENCES_IN_AI_LIST, corner_radius=8,
-                                                               fg_color=COLOR_BUTTON, button_color=COLOR_BUTTON,
-                                                               button_hover_color=COLOR_BUTTON_HOVER,
-                                                               dropdown_fg_color=COLOR_FRAME_DARK,
-                                                               dropdown_hover_color=COLOR_BUTTON_HOVER,
-                                                               text_color=("black", "white"))
-        self.preferences_in_ai_option_menu.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="Models Dir", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.models_dir_entry = ctk.CTkEntry(model_subframe, corner_radius=8, fg_color=COLOR_ENTRY,
-                                             border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.models_dir_entry.insert(0, "./models")
-        self.models_dir_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="With AI Orchestrator", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.with_ai_orchestrator_checkbox = ctk.CTkCheckBox(model_subframe, text="", corner_radius=6,
-                                                             fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                             border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.with_ai_orchestrator_checkbox.select()
-        self.with_ai_orchestrator_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="N CTX", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.n_ctx_entry = SpinEntry(model_subframe, step=1, default=0, corner_radius=8,
-                                     fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                     text_color=("black", "white"))
-        self.n_ctx_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="N GPU Layers", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.n_gpu_layers_entry = SpinEntry(model_subframe, step=1, default=0, corner_radius=8,
-                                            fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                            text_color=("black", "white"))
-        self.n_gpu_layers_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="Max Tokens", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.max_tokens_entry = SpinEntry(model_subframe, step=1, default=4096, corner_radius=8,
-                                          fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                          text_color=("black", "white"))
-        self.max_tokens_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="Token Hugging Face", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.your_token_for_hf_entry = ctk.CTkEntry(model_subframe, corner_radius=8, fg_color=COLOR_ENTRY,
-                                                    border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.your_token_for_hf_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="Subdomain", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.subdomain_entry = ctk.CTkEntry(model_subframe, corner_radius=8, fg_color=COLOR_ENTRY,
-                                            border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.subdomain_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="Repo ID", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.repo_id_entry = ctk.CTkEntry(model_subframe, corner_radius=8, fg_color=COLOR_ENTRY,
-                                          border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.repo_id_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="Filename", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.filename_entry = ctk.CTkEntry(model_subframe, corner_radius=8, fg_color=COLOR_ENTRY,
-                                           border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.filename_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="Prefer Mirror", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.prefer_mirror_checkbox = ctk.CTkCheckBox(model_subframe, text="", corner_radius=6,
-                                                      fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                      border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.prefer_mirror_checkbox.select()
-        self.prefer_mirror_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="Main Prompt Mode", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.main_prompt_mode_option_menu = ctk.CTkOptionMenu(model_subframe, values=list(ALL_MAIN_PROMPTS.keys()), corner_radius=8,
-                                                              fg_color=COLOR_BUTTON, button_color=COLOR_BUTTON,
-                                                              button_hover_color=COLOR_BUTTON_HOVER,
-                                                              dropdown_fg_color=COLOR_FRAME_DARK,
-                                                              dropdown_hover_color=COLOR_BUTTON_HOVER,
-                                                              text_color=("black", "white"))
-        self.main_prompt_mode_option_menu.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="Main Prompt", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="nw", pady=4)
-        self.main_prompt_textbox = ctk.CTkTextbox(model_subframe, height=60, corner_radius=8,
-                                                  fg_color=COLOR_TEXTBOX, border_color=COLOR_BORDER,
-                                                  text_color=("black", "white"))
-        self.main_prompt_textbox.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(model_subframe, text="Temperature", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.temperature_entry = SpinEntry(model_subframe, step=0.1, default=0.1, corner_radius=8,
-                                           fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                           text_color=("black", "white"))
-        self.temperature_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        translator_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        translator_frame.grid(row=5, column=0, sticky="ew", padx=5, pady=5)
-        translator_frame.grid_columnconfigure(0, weight=1)
-        ctk.CTkLabel(translator_frame, text="Translator", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
-        translator_subframe = ctk.CTkFrame(translator_frame, fg_color="transparent", corner_radius=0)
-        translator_subframe.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
-        translator_subframe.grid_columnconfigure(0, weight=0, minsize=140)
-        translator_subframe.grid_columnconfigure(1, weight=1)
-
-        row = 0
-        ctk.CTkLabel(translator_subframe, text="Determinant Mode", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.determinant_mode_option_menu = ctk.CTkOptionMenu(translator_subframe, values=DETERMINANT_MODE_LIST, corner_radius=8,
-                                                              fg_color=COLOR_BUTTON, button_color=COLOR_BUTTON,
-                                                              button_hover_color=COLOR_BUTTON_HOVER,
-                                                              dropdown_fg_color=COLOR_FRAME_DARK,
-                                                              dropdown_hover_color=COLOR_BUTTON_HOVER,
-                                                              text_color=("black", "white"))
-        self.determinant_mode_option_menu.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(translator_subframe, text="Accurate Translation", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.accurate_translation_checkbox = ctk.CTkCheckBox(translator_subframe, text="", corner_radius=6,
-                                                             fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                             border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.accurate_translation_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(translator_subframe, text="API KEY DeepL", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.your_key_for_deepl_entry = ctk.CTkEntry(translator_subframe, corner_radius=8, fg_color=COLOR_ENTRY,
-                                                     border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.your_key_for_deepl_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(translator_subframe, text="Request Language", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.request_language_entry = ctk.CTkEntry(translator_subframe, corner_radius=8, fg_color=COLOR_ENTRY,
-                                                   border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.request_language_entry.insert(0, "en")
-        self.request_language_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ocr_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        ocr_frame.grid(row=6, column=0, sticky="ew", padx=5, pady=5)
-        ocr_frame.grid_columnconfigure(0, weight=1)
-        ctk.CTkLabel(ocr_frame, text="OCR", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
-        ocr_subframe = ctk.CTkFrame(ocr_frame, fg_color="transparent", corner_radius=0)
-        ocr_subframe.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
-        ocr_subframe.grid_columnconfigure(0, weight=0, minsize=140)
-        ocr_subframe.grid_columnconfigure(1, weight=1)
-
-        row = 0
-        ctk.CTkLabel(ocr_subframe, text="Languages List", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="nw", pady=4)
-        self.lang_lst_textbox = ctk.CTkTextbox(ocr_subframe, height=60, corner_radius=8,
-                                               fg_color=COLOR_TEXTBOX, border_color=COLOR_BORDER,
-                                               text_color=("black", "white"))
-        self.lang_lst_textbox.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(ocr_subframe, text="Use GPU", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.use_gpu_for_ocr_checkbox = ctk.CTkCheckBox(ocr_subframe, text="", corner_radius=6,
-                                                        fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                        border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.use_gpu_for_ocr_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(ocr_subframe, text="With OCR", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.with_ocr_checkbox = ctk.CTkCheckBox(ocr_subframe, text="", corner_radius=6,
-                                                 fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                 border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.with_ocr_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(ocr_subframe, text="Cloud Version", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.cloud_version_checkbox = ctk.CTkCheckBox(ocr_subframe, text="", corner_radius=6,
-                                                      fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                      border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.cloud_version_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(ocr_subframe, text="With DeepSeek", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.with_deepseek_checkbox = ctk.CTkCheckBox(ocr_subframe, text="", corner_radius=6,
-                                                      fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                      border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.with_deepseek_checkbox.select()
-        self.with_deepseek_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(ocr_subframe, text="Model Size", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.model_size_option_menu = ctk.CTkOptionMenu(ocr_subframe, values=["tiny", "small", "base", "large", "gundam"], corner_radius=8,
-                                                        fg_color=COLOR_BUTTON, button_color=COLOR_BUTTON,
-                                                        button_hover_color=COLOR_BUTTON_HOVER,
-                                                        dropdown_fg_color=COLOR_FRAME_DARK,
-                                                        dropdown_hover_color=COLOR_BUTTON_HOVER,
-                                                        text_color=("black", "white"))
-        self.model_size_option_menu.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(ocr_subframe, text="Crop Mode", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.crop_mode_checkbox = ctk.CTkCheckBox(ocr_subframe, text="", corner_radius=6,
-                                                  fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                  border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.crop_mode_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(ocr_subframe, text="Base URL", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.base_url_entry = ctk.CTkEntry(ocr_subframe, corner_radius=8, fg_color=COLOR_ENTRY,
-                                           border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.base_url_entry.insert(0, "https://api.siliconflow.cn/v1/chat/completions")
-        self.base_url_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(ocr_subframe, text="API Key DeepSeek OCR", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.api_key_for_deepseek_ocr_entry = ctk.CTkEntry(ocr_subframe, corner_radius=8, fg_color=COLOR_ENTRY,
-                                                           border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.api_key_for_deepseek_ocr_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(ocr_subframe, text="Timeout DeepSeek OCR", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.timeout_for_deepseek_ocr_entry = SpinEntry(ocr_subframe, step=1, default=30, corner_radius=8,
-                                                        fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                                        text_color=("black", "white"))
-        self.timeout_for_deepseek_ocr_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(ocr_subframe, text="Max Rate Limit Retries", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.max_rate_limit_retries_entry = SpinEntry(ocr_subframe, step=1, default=3, corner_radius=8,
-                                                      fg_color=COLOR_ENTRY, border_color=COLOR_BORDER,
-                                                      text_color=("black", "white"))
-        self.max_rate_limit_retries_entry.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        other_frame = ctk.CTkFrame(settings_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        other_frame.grid(row=7, column=0, sticky="ew", padx=5, pady=5)
-        other_frame.grid_columnconfigure(0, weight=1)
-        ctk.CTkLabel(other_frame, text="Other", font=SECTION_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(8, 5), padx=10, sticky="w")
-        other_subframe = ctk.CTkFrame(other_frame, fg_color="transparent", corner_radius=0)
-        other_subframe.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
-        other_subframe.grid_columnconfigure(0, weight=0, minsize=140)
-        other_subframe.grid_columnconfigure(1, weight=1)
-
-        row = 0
-        ctk.CTkLabel(other_subframe, text="Filter For Swearing", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.filter_for_swearing_checkbox = ctk.CTkCheckBox(other_subframe, text="", corner_radius=6,
-                                                            fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                            border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.filter_for_swearing_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(other_subframe, text="Verbose", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.verbose_checkbox = ctk.CTkCheckBox(other_subframe, text="", corner_radius=6,
-                                                fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.verbose_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(other_subframe, text="Echo", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.echo_checkbox = ctk.CTkCheckBox(other_subframe, text="", corner_radius=6,
-                                             fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                             border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.echo_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(other_subframe, text="Type Computer", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.type_computer_option_menu = ctk.CTkOptionMenu(other_subframe, values=["auto"] + TYPES_POWER, corner_radius=8,
-                                                           fg_color=COLOR_BUTTON, button_color=COLOR_BUTTON,
-                                                           button_hover_color=COLOR_BUTTON_HOVER,
-                                                           dropdown_fg_color=COLOR_FRAME_DARK,
-                                                           dropdown_hover_color=COLOR_BUTTON_HOVER,
-                                                           text_color=("black", "white"))
-        self.type_computer_option_menu.grid(row=row, column=1, sticky="ew", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(other_subframe, text="Proprietary Algorithms", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.proprietary_algorithms_checkbox = ctk.CTkCheckBox(other_subframe, text="", corner_radius=6,
-                                                               fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                               border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.proprietary_algorithms_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-        ctk.CTkLabel(other_subframe, text="Writing Response To File", font=LABEL_FONT, text_color=("black", "white")).grid(row=row, column=0, sticky="w", pady=4)
-        self.writing_response_to_file_checkbox = ctk.CTkCheckBox(other_subframe, text="", corner_radius=6,
-                                                                 fg_color=COLOR_SWITCH, hover_color=COLOR_BUTTON_HOVER,
-                                                                 border_color=COLOR_BORDER, checkmark_color=("black", "white"))
-        self.writing_response_to_file_checkbox.grid(row=row, column=1, sticky="w", pady=4, padx=(8,0))
-        row += 1
-
-    def change_theme(self, theme):
-        ctk.set_appearance_mode(theme)
-        self.update_tree_style()
-
-    def create_chat_panel(self):
-        chat_frame = ctk.CTkFrame(self.root, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME_DARK)
-        chat_frame.grid(row=0, column=1, sticky="nsew", padx=8, pady=8)
-        chat_frame.grid_rowconfigure(1, weight=1)
-        chat_frame.grid_rowconfigure(2, weight=0)
-        chat_frame.grid_rowconfigure(3, weight=0)
-        chat_frame.grid_rowconfigure(4, weight=0)
-        chat_frame.grid_columnconfigure(0, weight=1)
-
-        ctk.CTkLabel(chat_frame, text="Chat With AI", font=TITLE_FONT, text_color=("black", "white")).grid(row=0, column=0, pady=(10, 5))
-
-        self.resume_button = ctk.CTkButton(
-            chat_frame, text="Resume pending request", corner_radius=8,
-            fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-            text_color=("black", "white"), command=self.resume_request
-        )
-        self.resume_button.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 5))
-        self.resume_button.grid_remove()
-
-        self.messages_frame = ctk.CTkScrollableFrame(chat_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        self.messages_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
-        self.messages_frame.grid_columnconfigure(0, weight=1)
-
-        attached_frame = ctk.CTkFrame(chat_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        attached_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=5)
-        attached_frame.grid_columnconfigure(0, weight=1)
-        ctk.CTkLabel(attached_frame, text="Attached files", font=LABEL_FONT, text_color=("black", "white")).grid(row=0, column=0, sticky="w", padx=10, pady=(5,0))
-        self.attached_textbox = ctk.CTkTextbox(attached_frame, height=80, corner_radius=8,
-                                               fg_color=COLOR_TEXTBOX, border_color=COLOR_BORDER,
-                                               text_color=("black", "white"))
-        self.attached_textbox.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
-        self.attached_textbox.configure(state="disabled")
-
-        request_frame = ctk.CTkFrame(chat_frame, fg_color="transparent")
-        request_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=5)
-        request_frame.grid_columnconfigure(0, weight=1)
-        request_frame.grid_columnconfigure(1, weight=0)
-        request_frame.grid_columnconfigure(2, weight=0)
-
-        self.request_entry = ctk.CTkEntry(request_frame, corner_radius=8, placeholder_text="Type your message...",
-                                          fg_color=COLOR_ENTRY, border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.request_entry.grid(row=0, column=0, sticky="ew", padx=(0,8))
-        self.request_entry.bind("<Return>", lambda event: self.send_message())
-
-        files_button = ctk.CTkButton(request_frame, text="Upload", corner_radius=8, width=90,
-                                     fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                     text_color=("black", "white"), command=self.upload_files)
-        files_button.grid(row=0, column=1, padx=4)
-
-        send_button = ctk.CTkButton(request_frame, text="Send", corner_radius=8, width=90,
-                                    fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                    text_color=("black", "white"), command=self.send_message)
-        send_button.grid(row=0, column=2, padx=(4,0))
-
-    def create_history_panel(self):
-        history_frame = ctk.CTkFrame(self.root, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME_DARK)
-        history_frame.grid(row=0, column=2, sticky="nsew", padx=8, pady=8)
-        history_frame.grid_rowconfigure(0, weight=0)
-        history_frame.grid_rowconfigure(1, weight=0)
-        history_frame.grid_rowconfigure(2, weight=1)
-        history_frame.grid_rowconfigure(3, weight=0)
-        history_frame.grid_columnconfigure(0, weight=1)
-
-        history_title_frame = ctk.CTkFrame(history_frame, fg_color="transparent")
-        history_title_frame.grid(row=0, column=0, sticky="ew", pady=(10,5), padx=5)
-        history_title_frame.grid_columnconfigure(0, weight=1)
-        history_title_frame.grid_columnconfigure(1, weight=0)
-
-        self.history_title = ctk.CTkLabel(history_title_frame, text="History", font=TITLE_FONT, text_color=("black", "white"))
-        self.history_title.grid(row=0, column=0, sticky="w")
-
-        self.mode_switch = ctk.CTkSwitch(history_title_frame, text="Virtual Storage", font=LABEL_FONT,
-                                         command=self.switch_mode,
-                                         fg_color=COLOR_SWITCH, progress_color=COLOR_SELECT,
-                                         button_color=COLOR_BUTTON, button_hover_color=COLOR_BUTTON_HOVER,
-                                         text_color=("black", "white"))
-        self.mode_switch.grid(row=0, column=1, sticky="e", padx=10)
-
-        self.history_subframe = ctk.CTkFrame(history_frame, fg_color="transparent")
-        self.history_subframe.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-        self.history_subframe.grid_columnconfigure(0, weight=1)
-
-        self.history_controls = ctk.CTkFrame(self.history_subframe, fg_color="transparent")
-        self.history_controls.grid(row=0, column=0, sticky="ew")
-        self.history_controls.grid_columnconfigure(0, weight=1)
-        self.history_controls.grid_columnconfigure(1, weight=0)
-        self.history_controls.grid_columnconfigure(2, weight=0)
-        self.history_controls.grid_columnconfigure(3, weight=0)
-
-        self.find_story_entry = ctk.CTkEntry(self.history_controls, corner_radius=8, placeholder_text="Search...",
-                                             fg_color=COLOR_ENTRY, border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.find_story_entry.grid(row=0, column=0, sticky="ew", padx=(0,5))
-        self.find_story_entry.bind("<KeyRelease>", lambda e: self.filter_history())
-
-        add_chats_button = ctk.CTkButton(self.history_controls, text="Add", width=60, height=30, corner_radius=8,
-                                         fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                         text_color=("black", "white"), command=self.add_new_chat)
-        add_chats_button.grid(row=0, column=1, padx=2, sticky="w")
-
-        delete_chats_button = ctk.CTkButton(self.history_controls, text="Delete", width=60, height=30, corner_radius=8,
-                                            fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                            text_color=("black", "white"), command=self.delete_current_chat)
-        delete_chats_button.grid(row=0, column=2, padx=2, sticky="w")
-
-        download_chats_button = ctk.CTkButton(self.history_controls, text="Download", width=60, height=30, corner_radius=8,
-                                              fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                              text_color=("black", "white"), command=self.download_chat)
-        download_chats_button.grid(row=0, column=3, padx=2, sticky="w")
-
-        self.storage_controls = ctk.CTkFrame(self.history_subframe, fg_color="transparent")
-        self.storage_controls.grid(row=0, column=0, sticky="ew")
-        self.storage_controls.grid_columnconfigure(0, weight=1)
-        self.storage_controls.grid_columnconfigure(1, weight=0)
-        self.storage_controls.grid_columnconfigure(2, weight=0)
-        self.storage_controls.grid_remove()
-
-        self.storage_path_entry = ctk.CTkEntry(self.storage_controls, corner_radius=8, placeholder_text="Storage path...",
-                                               fg_color=COLOR_ENTRY, border_color=COLOR_BORDER, text_color=("black", "white"))
-        self.storage_path_entry.grid(row=0, column=0, sticky="ew", padx=(0,5))
-        if self.storage_path:
-            self.storage_path_entry.insert(0, self.storage_path)
-
-        browse_storage_button = ctk.CTkButton(self.storage_controls, text="Browse", width=70, height=30, corner_radius=8,
-                                              fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                              text_color=("black", "white"), command=self.browse_storage)
-        browse_storage_button.grid(row=0, column=1, padx=2, sticky="w")
-
-        refresh_storage_button = ctk.CTkButton(self.storage_controls, text="Refresh", width=70, height=30, corner_radius=8,
-                                               fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                               text_color=("black", "white"), command=self.refresh_storage)
-        refresh_storage_button.grid(row=0, column=2, padx=2, sticky="w")
-
-        self.history_field_frame = ctk.CTkScrollableFrame(history_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        self.history_field_frame.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
-        self.history_field_frame.grid_rowconfigure(0, weight=1)
-        self.history_field_frame.grid_columnconfigure(0, weight=1)
-
-        logs_frame = ctk.CTkFrame(history_frame, corner_radius=FRAME_CORNER, fg_color=COLOR_FRAME)
-        logs_frame.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
-        logs_frame.grid_columnconfigure(0, weight=1)
-
-        logs_header = ctk.CTkFrame(logs_frame, fg_color="transparent")
-        logs_header.grid(row=0, column=0, sticky="ew", padx=5, pady=2)
-        logs_header.grid_columnconfigure(0, weight=1)
-        logs_header.grid_columnconfigure(1, weight=0)
-        logs_header.grid_columnconfigure(2, weight=0)
-
-        ctk.CTkLabel(logs_header, text="Logs", font=LABEL_FONT, text_color=("black", "white")).grid(row=0, column=0, sticky="w")
-        download_logs_button = ctk.CTkButton(logs_header, text="Download", width=60, height=25, corner_radius=8,
-                                             command=self.download_logs,
-                                             fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                             text_color=("black", "white"))
-        download_logs_button.grid(row=0, column=1, padx=2, sticky="e")
-        clear_logs_button = ctk.CTkButton(logs_header, text="Clear", width=60, height=25, corner_radius=8,
-                                          command=self.clear_logs,
-                                          fg_color=COLOR_BUTTON, hover_color=COLOR_BUTTON_HOVER,
-                                          text_color=("black", "white"))
-        clear_logs_button.grid(row=0, column=2, padx=(2,0), sticky="e")
-
-        self.logs_textbox = ctk.CTkTextbox(logs_frame, height=150, corner_radius=8,
-                                           fg_color=COLOR_TEXTBOX, border_color=COLOR_BORDER,
-                                           text_color=("black", "white"))
-        self.logs_textbox.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-
-        self.current_chat_id = None
-        self.chats = {}
-        self.update_history_list()
-
-        self.tree = None
-
-    def export_all_chats(self):
-        if not self.chats:
-            messagebox.showinfo("Info", "No chats to export.")
-            return
-        folder = filedialog.askdirectory(title="Select folder to export all chats")
-        if not folder:
-            return
-        count = 0
-        for chat_id, chat_data in self.chats.items():
-            messages = chat_data.get("messages", [])
-            if not messages:
-                continue
-            first_user = next((m["content"] for m in messages if m.get("role") == "user"), "empty")
-            safe_title = "".join(c for c in first_user[:30] if c.isalnum() or c in (' ', '_')).strip()
-            if not safe_title:
-                safe_title = "chat"
-            timestamp = chat_data.get("created_at", "unknown").replace(":", "-").replace(" ", "_")
-            filename = f"{timestamp}_{safe_title}.txt"
-            filepath = os.path.join(folder, filename)
-            with open(filepath, "w", encoding="utf-8") as f:
-                for msg in messages:
-                    f.write(f"{msg['role'].capitalize()}: {msg['content']}\n")
-            count += 1
-        messagebox.showinfo("Export", f"Exported {count} chat(s) to {folder}")
-
-    def delete_all_chats(self):
-        if not self.chats:
-            return
-        if not messagebox.askyesno("Delete All", "Are you sure you want to delete ALL chats?"):
-            return
-        self.chats.clear()
-        self.add_new_chat()
-        self.save_chats_to_file()
-        self.update_history_list()
-        self.resume_button.grid_remove()
-
-    def clear_current_chat(self):
-        if self.current_chat_id is None or self.current_chat_id not in self.chats:
-            messagebox.showwarning("Warning", "No chat selected.")
-            return
-        if not messagebox.askyesno("Clear Chat", "Are you sure you want to clear all messages in this chat?"):
-            return
-        self.chats[self.current_chat_id]["messages"] = []
-        self.save_chats_to_file()
-        self.load_chat(self.current_chat_id)
-        self.resume_button.grid_remove()
+            if self.attached_files:
+                self.attached_textbox.insert("1.0", "\n".join(self.attached_files))
+        self.attached_textbox.config(state="disabled")
 
     def switch_mode(self):
-        if self.mode_switch.get() == 1:
+        if self.virtual_storage_var.get():
             self.history_controls.grid_remove()
             self.storage_controls.grid()
-            self.history_title.configure(text="Virtual Storage")
+            self.history_title.config(text="Virtual Storage")
+            self.history_normal_frame.grid_remove()
+            self.history_tree_frame.grid()
             self.build_tree()
-            self.update_attached_text()
         else:
             self.storage_controls.grid_remove()
             self.history_controls.grid()
-            self.history_title.configure(text="History")
+            self.history_title.config(text="History")
+            self.history_tree_frame.grid_remove()
+            self.history_normal_frame.grid()
             self.update_history_list()
-            self.update_attached_text()
+        self.update_attached_text()
 
     def build_tree(self):
         if self.is_scanning:
@@ -1351,24 +1088,25 @@ class AlexRadarGUI:
         threading.Thread(target=worker, daemon=True).start()
 
     def _build_tree_ui(self):
-        for widget in self.history_field_frame.winfo_children():
+        # Clear previous tree frame
+        for widget in self.history_tree_frame.winfo_children():
             widget.destroy()
         if not self.storage_path or not os.path.isdir(self.storage_path):
-            label = ctk.CTkLabel(self.history_field_frame, text="No storage path selected", font=LABEL_FONT,
-                                 text_color=("black", "white"))
-            label.pack(pady=10)
+            ttk.Label(self.history_tree_frame, text="No storage path selected").pack(pady=10)
             return
-
-        self.tree = ttk.Treeview(self.history_field_frame, selectmode="browse")
-        self.tree.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-        self.history_field_frame.grid_rowconfigure(0, weight=1)
-        self.history_field_frame.grid_columnconfigure(0, weight=1)
+        # Create Treeview with own scrollbar
+        tree_container = tk.Frame(self.history_tree_frame, bg=BG_FRAME)
+        tree_container.pack(fill="both", expand=True)
+        scrollbar = ttk.Scrollbar(tree_container, orient="vertical")
+        scrollbar.pack(side="right", fill="y")
+        self.tree = ttk.Treeview(tree_container, yscrollcommand=scrollbar.set, selectmode="browse")
+        self.tree.pack(side="left", fill="both", expand=True)
+        scrollbar.config(command=self.tree.yview)
 
         self.virtual_tree_data = {}
         root_node = self.tree.insert("", "end", text=os.path.basename(self.storage_path), open=True)
         self.virtual_tree_data[root_node] = self.storage_path
         self._populate_tree(root_node, self.storage_path)
-
         self.tree.bind("<Double-1>", self.on_tree_double_click)
 
     def _populate_tree(self, parent, path):
@@ -1399,10 +1137,6 @@ class AlexRadarGUI:
                 except Exception as e:
                     logging.error(f"Failed to open file: {e}")
 
-    def scan_storage(self):
-        if self.mode_switch.get() == 1:
-            self.build_tree()
-
     def browse_storage(self):
         path = filedialog.askdirectory(title="Select Virtual Storage Folder")
         if path:
@@ -1410,154 +1144,53 @@ class AlexRadarGUI:
             self.storage_path_entry.delete(0, "end")
             self.storage_path_entry.insert(0, path)
             self.save_storage_path()
-            self.scan_storage()
+            self.build_tree()
 
     def refresh_storage(self):
         self.storage_path = self.storage_path_entry.get().strip()
         self.save_storage_path()
-        self.scan_storage()
-
-    def update_attached_text(self):
-        self.attached_textbox.configure(state="normal")
-        self.attached_textbox.delete("1.0", "end")
-        if self.mode_switch.get() == 1:
-            self.attached_textbox.insert("1.0", "All files in virtual storage")
-        else:
-            if self.attached_files:
-                self.attached_textbox.insert("1.0", "\n".join(self.attached_files))
-            else:
-                self.attached_textbox.insert("1.0", "")
-        self.attached_textbox.configure(state="disabled")
-
-    def upload_files(self):
-        if self.mode_switch.get() == 1:
-            messagebox.showinfo("Info", "Virtual storage is active. Use the virtual storage path.")
-            return
-        files = filedialog.askopenfilenames()
-        if files:
-            self.attached_files = list(files)
-            self.update_attached_text()
-
-    def collect_parameters(self):
-        def parse_textbox_list(widget):
-            text = widget.get("1.0", "end-1c").strip()
-            if not text:
-                return []
-            return [line.strip() for line in text.splitlines() if line.strip()]
-
-        virtual_storage = bool(self.mode_switch.get())
-        virtual_storage_path = self.storage_path if virtual_storage else None
-
-        additional = []
-        if virtual_storage and self.storage_path and os.path.isdir(self.storage_path):
-            for root, dirs, files in os.walk(self.storage_path):
-                for f in files:
-                    additional.append(os.path.join(root, f))
-        elif self.attached_files:
-            additional = self.attached_files.copy()
-
-        params = {
-            "request": self.request_entry.get().strip(),
-            "preferences_in_ai": self.preferences_in_ai_option_menu.get(),
-            "filter_for_swearing": bool(self.filter_for_swearing_checkbox.get()),
-            "additional_files": additional if additional else None,
-            "models_dir": self.models_dir_entry.get().strip() or "./models",
-            "with_ai_orchestrator": bool(self.with_ai_orchestrator_checkbox.get()),
-            "verbose": bool(self.verbose_checkbox.get()),
-            "n_ctx": self.n_ctx_entry.get_int(default=0) or None,
-            "n_gpu_layers": self.n_gpu_layers_entry.get_int(default=0),
-            "echo": bool(self.echo_checkbox.get()),
-            "max_tokens": self.max_tokens_entry.get_int(default=4096),
-            "your_token_for_hf": self.your_token_for_hf_entry.get().strip() or None,
-            "subdomain": self.subdomain_entry.get().strip() or "",
-            "country": self.country_entry.get().strip() or None,
-            "protocol": self.protocol_option_menu.get(),
-            "max_timeout": self.max_timeout_entry.get_int(default=30),
-            "is_working": bool(self.is_working_checkbox.get()),
-            "type_computer": self.type_computer_option_menu.get() if self.type_computer_option_menu.get() != "auto" else None,
-            "auto_proxies": bool(self.auto_proxies_checkbox.get()),
-            "writing_response_to_file": bool(self.writing_response_to_file_checkbox.get()),
-            "your_proxies_dict": parse_textbox_list(self.your_proxies_dict_textbox) or None,
-            "determinant_mode": self.determinant_mode_option_menu.get(),
-            "accurate_translation": bool(self.accurate_translation_checkbox.get()),
-            "your_key_for_deepl": self.your_key_for_deepl_entry.get().strip() or "",
-            "proprietary_algorithms": bool(self.proprietary_algorithms_checkbox.get()),
-            "repo_id": self.repo_id_entry.get().strip() or None,
-            "filename": self.filename_entry.get().strip() or None,
-            "min_timeout_for_checking_availability": self.min_timeout_for_checking_availability_entry.get_int(default=5),
-            "max_timeout_for_checking_availability": self.max_timeout_for_checking_availability_entry.get_int(default=15),
-            "request_language": self.request_language_entry.get().strip() or "en",
-            "main_prompt_mode": self.main_prompt_mode_option_menu.get(),
-            "main_prompt": self.main_prompt_textbox.get("1.0", "end-1c").strip() or None,
-            "temperature": self.temperature_entry.get_float(default=0.1),
-            "retries": self.retries_entry.get_int(default=3),
-            "github_proxies": bool(self.github_proxies_checkbox.get()),
-            "url_lst": parse_textbox_list(self.url_lst_textbox) or None,
-            "proxy_retries": self.proxy_retries_entry.get_int(default=3),
-            "main_retries": self.main_retries_entry.get_int(default=3),
-            "lang_lst": parse_textbox_list(self.lang_lst_textbox) or None,
-            "use_gpu_for_ocr": bool(self.use_gpu_for_ocr_checkbox.get()),
-            "virtual_storage": virtual_storage,
-            "virtual_storage_path": virtual_storage_path,
-            "with_ocr": bool(self.with_ocr_checkbox.get()),
-            "cloud_version": bool(self.cloud_version_checkbox.get()),
-            "with_deepseek": bool(self.with_deepseek_checkbox.get()),
-            "model_size": self.model_size_option_menu.get(),
-            "crop_mode": bool(self.crop_mode_checkbox.get()),
-            "base_url": self.base_url_entry.get().strip(),
-            "api_key_for_deepseek_ocr": self.api_key_for_deepseek_ocr_entry.get().strip() or None,
-            "timeout_for_deepseek_ocr": self.timeout_for_deepseek_ocr_entry.get_int(default=30) or None,
-            "max_rate_limit_retries": self.max_rate_limit_retries_entry.get_int(default=3),
-            "prefer_mirror": bool(self.prefer_mirror_checkbox.get())
-        }
-        return params
+        self.build_tree()
 
     def update_history_list(self):
-        for widget in self.history_field_frame.winfo_children():
+        # Clear and repopulate history buttons in normal frame
+        for widget in self.history_normal_frame.get_frame().winfo_children():
             widget.destroy()
         for chat_id, chat_data in self.chats.items():
             messages = chat_data.get("messages", [])
-            first_user_msg = None
-            for m in messages:
-                if m.get("role") == "user":
-                    first_user_msg = m["content"]
-                    break
-            if first_user_msg:
-                title = first_user_msg[:30] + ("..." if len(first_user_msg) > 30 else "")
-            else:
-                title = "Empty chat"
+            first_user_msg = next((m["content"] for m in messages if m.get("role") == "user"), "")
+            title = first_user_msg[:30] + ("..." if len(first_user_msg) > 30 else "") if first_user_msg else "Empty chat"
             created_at = chat_data.get("created_at", "Unknown date")
             btn_text = f"{created_at} - {title}"
-            btn = ctk.CTkButton(self.history_field_frame, text=btn_text,
-                                anchor="w", corner_radius=6, height=30,
-                                fg_color="transparent", hover_color=COLOR_BUTTON_HOVER,
-                                text_color=("black", "white"),
-                                command=lambda cid=chat_id: self.load_chat(cid))
+            # Use tk.Button with anchor='w' for left alignment and dark style
+            btn = tk.Button(self.history_normal_frame.get_frame(), text=btn_text,
+                            command=lambda cid=chat_id: self.load_chat(cid),
+                            anchor='w', justify='left', bg=BG_FRAME, fg=FG_TEXT,
+                            relief='flat', activebackground=ACCENT_HOVER, activeforeground='white',
+                            font=FONT_MAIN, padx=5, pady=2)
             btn.pack(fill="x", padx=5, pady=2)
+        # Force update scrollregion and move to top
+        self.history_normal_frame.canvas.configure(scrollregion=self.history_normal_frame.canvas.bbox("all"))
+        self.history_normal_frame.canvas.yview_moveto(0.0)
 
     def filter_history(self):
         query = self.find_story_entry.get().lower()
-        for widget in self.history_field_frame.winfo_children():
+        for widget in self.history_normal_frame.get_frame().winfo_children():
             widget.destroy()
         for chat_id, chat_data in self.chats.items():
             messages = chat_data.get("messages", [])
-            first_user_msg = None
-            for m in messages:
-                if m.get("role") == "user":
-                    first_user_msg = m["content"]
-                    break
-            if first_user_msg:
-                title = first_user_msg[:30] + ("..." if len(first_user_msg) > 30 else "")
-            else:
-                title = "Empty chat"
+            first_user_msg = next((m["content"] for m in messages if m.get("role") == "user"), "")
+            title = first_user_msg[:30] + ("..." if len(first_user_msg) > 30 else "") if first_user_msg else "Empty chat"
             created_at = chat_data.get("created_at", "Unknown date")
             if query in f"{created_at} {title}".lower():
-                btn = ctk.CTkButton(self.history_field_frame, text=f"{created_at} - {title}",
-                                    anchor="w", corner_radius=6, height=30,
-                                    fg_color="transparent", hover_color=COLOR_BUTTON_HOVER,
-                                    text_color=("black", "white"),
-                                    command=lambda cid=chat_id: self.load_chat(cid))
+                btn = tk.Button(self.history_normal_frame.get_frame(), text=f"{created_at} - {title}",
+                                command=lambda cid=chat_id: self.load_chat(cid),
+                                anchor='w', justify='left', bg=BG_FRAME, fg=FG_TEXT,
+                                relief='flat', activebackground=ACCENT_HOVER, activeforeground='white',
+                                font=FONT_MAIN, padx=5, pady=2)
                 btn.pack(fill="x", padx=5, pady=2)
+        # Force update scrollregion and move to top
+        self.history_normal_frame.canvas.configure(scrollregion=self.history_normal_frame.canvas.bbox("all"))
+        self.history_normal_frame.canvas.yview_moveto(0.0)
 
     def add_new_chat(self):
         new_id = datetime.now().strftime("%Y%m%d%H%M%S%f")
@@ -1593,7 +1226,11 @@ class AlexRadarGUI:
                 role = msg.get("role")
                 if role in ("user", "assistant"):
                     self.display_message(role, msg["content"], msg.get("timestamp", ""))
+                elif role == "system":  # log messages from previous session?
+                    self.display_log_message(msg["content"])
         self.check_pending_message()
+        # Scroll to bottom after loading chat
+        self.messages_canvas.yview_moveto(1.0)
 
     def display_message(self, role, content, timestamp=None):
         if role not in ("user", "assistant"):
@@ -1602,27 +1239,29 @@ class AlexRadarGUI:
             timestamp = datetime.now().strftime("%H:%M")
         self.hide_welcome_placeholder()
 
-        bg = ("#e0e0e0", "#2d2d2d") if role == "user" else ("#d0d0d0", "#3a3a3a")
-        bubble = ctk.CTkFrame(self.messages_frame, corner_radius=10, fg_color=bg)
+        # Choose bubble color
+        if role == "user":
+            bg = "#3a3a3a"
+        else:
+            bg = "#2d2d2d"
+        bubble = tk.Frame(self.messages_frame, bg=bg, bd=0)
         bubble.pack(fill="x", padx=10, pady=5, anchor="e" if role == "user" else "w")
 
-        label = ctk.CTkLabel(bubble, text=content, wraplength=600, justify="left",
-                             text_color=("black", "white"))
+        label = tk.Label(bubble, text=content, wraplength=600, justify="left",
+                         fg=FG_TEXT, bg=bg, font=FONT_MAIN)
         label.pack(padx=10, pady=(10, 5), anchor="w")
 
-        bottom_frame = ctk.CTkFrame(bubble, fg_color="transparent")
-        bottom_frame.pack(fill="x", padx=10, pady=(0, 5))
+        bottom = tk.Frame(bubble, bg=bg)
+        bottom.pack(fill="x", padx=10, pady=(0, 5))
 
-        time_label = ctk.CTkLabel(bottom_frame, text=timestamp, font=("Segoe UI", 9),
-                                  text_color=("gray40", "gray60"))
+        time_label = tk.Label(bottom, text=timestamp, font=FONT_SMALL, fg=FG_DARK, bg=bg)
         time_label.pack(side="left")
 
-        copy_btn = ctk.CTkButton(bottom_frame, text="Copy", width=50, height=20,
-                                 corner_radius=4, fg_color=COLOR_BUTTON,
-                                 hover_color=COLOR_BUTTON_HOVER,
-                                 text_color=("black", "white"),
-                                 command=lambda: self.copy_to_clipboard(content))
-        copy_btn.pack(side="right", padx=(5,0))
+        copy_btn = ttk.Button(bottom, text="Copy", width=6, command=lambda: self.copy_to_clipboard(content))
+        copy_btn.pack(side="right", padx=(5, 0))
+
+        # Scroll to bottom after adding message
+        self.messages_canvas.yview_moveto(1.0)
 
     def copy_to_clipboard(self, text):
         self.root.clipboard_clear()
@@ -1661,11 +1300,85 @@ class AlexRadarGUI:
         thread.daemon = True
         thread.start()
 
+    def collect_parameters(self):
+        def parse_textbox_list(widget):
+            text = widget.get("1.0", "end-1c").strip()
+            if not text:
+                return []
+            return [line.strip() for line in text.splitlines() if line.strip()]
+
+        virtual_storage = self.virtual_storage_var.get()
+        virtual_storage_path = self.storage_path if virtual_storage else None
+
+        additional = []
+        if virtual_storage and self.storage_path and os.path.isdir(self.storage_path):
+            for root, dirs, files in os.walk(self.storage_path):
+                for f in files:
+                    additional.append(os.path.join(root, f))
+        elif self.attached_files:
+            additional = self.attached_files.copy()
+
+        params = {
+            "request": self.request_entry.get().strip(),
+            "preferences_in_ai": self.preferences_combobox.get(),
+            "filter_for_swearing": self.filter_swearing_var.get(),
+            "additional_files": additional if additional else None,
+            "models_dir": self.models_dir_entry.get().strip() or "./models",
+            "with_ai_orchestrator": self.with_ai_orchestrator_var.get(),
+            "verbose": self.verbose_var.get(),
+            "n_ctx": self.n_ctx_entry.get_int(default=0) or None,
+            "n_gpu_layers": self.n_gpu_layers_entry.get_int(default=0),
+            "echo": self.echo_var.get(),
+            "max_tokens": self.max_tokens_entry.get_int(default=4096),
+            "your_token_for_hf": self.token_hf_entry.get().strip() or None,
+            "subdomain": self.subdomain_entry.get().strip() or "",
+            "country": self.country_entry.get().strip() or None,
+            "protocol": self.protocol_combobox.get(),
+            "max_timeout": self.max_timeout_entry.get_int(default=30),
+            "is_working": self.is_working_var.get(),
+            "type_computer": self.type_computer_combobox.get() if self.type_computer_combobox.get() != "auto" else None,
+            "auto_proxies": self.auto_proxies_var.get(),
+            "writing_response_to_file": self.writing_response_var.get(),
+            "your_proxies_dict": parse_textbox_list(self.your_proxies_dict_text) or None,
+            "determinant_mode": self.determinant_mode_combobox.get(),
+            "accurate_translation": self.accurate_translation_var.get(),
+            "your_key_for_deepl": self.deepl_key_entry.get().strip() or "",
+            "proprietary_algorithms": self.proprietary_algorithms_var.get(),
+            "repo_id": self.repo_id_entry.get().strip() or None,
+            "filename": self.filename_entry.get().strip() or None,
+            "min_timeout_for_checking_availability": self.min_timeout_entry.get_int(default=5),
+            "max_timeout_for_checking_availability": self.max_timeout_entry.get_int(default=15),
+            "request_language": self.request_language_entry.get().strip() or "en",
+            "main_prompt_mode": self.main_prompt_mode_combobox.get(),
+            "main_prompt": self.main_prompt_text.get("1.0", "end-1c").strip() or None,
+            "temperature": self.temperature_entry.get_float(default=0.1),
+            "retries": self.retries_entry.get_int(default=3),
+            "github_proxies": self.github_proxies_var.get(),
+            "url_lst": parse_textbox_list(self.url_lst_text) or None,
+            "proxy_retries": self.proxy_retries_entry.get_int(default=3),
+            "main_retries": self.main_retries_entry.get_int(default=3),
+            "lang_lst": parse_textbox_list(self.lang_lst_text) or None,
+            "use_gpu_for_ocr": self.use_gpu_ocr_var.get(),
+            "virtual_storage": virtual_storage,
+            "virtual_storage_path": virtual_storage_path,
+            "with_ocr": self.with_ocr_var.get(),
+            "cloud_version": self.cloud_version_var.get(),
+            "with_deepseek": self.with_deepseek_var.get(),
+            "model_size": self.model_size_combobox.get(),
+            "crop_mode": self.crop_mode_var.get(),
+            "base_url": self.base_url_entry.get().strip(),
+            "api_key_for_deepseek_ocr": self.deepseek_api_entry.get().strip() or None,
+            "timeout_for_deepseek_ocr": self.deepseek_timeout_entry.get_int(default=30) or None,
+            "max_rate_limit_retries": self.max_rate_limit_retries_entry.get_int(default=3),
+            "prefer_mirror": self.prefer_mirror_var.get()
+        }
+        return params
+
     def process_request(self, user_text):
         try:
             params = self.collect_parameters()
             params["request"] = user_text
-            alex = AlexRadar(**params)
+            alex = BiNeuron(**params)
             answer = alex.final_ai_request()
             self.message_queue.put(("response", answer))
         except Exception as e:
@@ -1710,7 +1423,7 @@ class AlexRadarGUI:
             return
         if last_user_idx == len(messages) - 1:
             self.resume_button.grid()
-            self.resume_button.configure(text="Resume pending request")
+            self.resume_button.config(text="Resume pending request")
         else:
             self.resume_button.grid_remove()
 
@@ -1732,18 +1445,46 @@ class AlexRadarGUI:
             self.save_chats_to_file()
             self.load_chat(self.current_chat_id)
         self.resume_button.grid_remove()
-        self.process_request(last_user_msg)
+        self.is_busy = True
+        thread = threading.Thread(target=self.process_request, args=(last_user_msg,))
+        thread.daemon = True
+        thread.start()
 
-    def download_logs(self):
-        file_path = filedialog.asksaveasfilename(defaultextension=".txt",
-                                                 filetypes=[("Text files", "*.txt")])
-        if file_path:
-            content = self.logs_textbox.get("1.0", "end-1c")
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.write(content)
+    def export_all_chats(self):
+        if not self.chats:
+            messagebox.showinfo("Info", "No chats to export.")
+            return
+        folder = filedialog.askdirectory(title="Select folder to export all chats")
+        if not folder:
+            return
+        count = 0
+        for chat_id, chat_data in self.chats.items():
+            messages = chat_data.get("messages", [])
+            if not messages:
+                continue
+            first_user = next((m["content"] for m in messages if m.get("role") == "user"), "empty")
+            safe_title = "".join(c for c in first_user[:30] if c.isalnum() or c in (' ', '_')).strip()
+            if not safe_title:
+                safe_title = "chat"
+            timestamp = chat_data.get("created_at", "unknown").replace(":", "-").replace(" ", "_")
+            filename = f"{timestamp}_{safe_title}.txt"
+            filepath = os.path.join(folder, filename)
+            with open(filepath, "w", encoding="utf-8") as f:
+                for msg in messages:
+                    f.write(f"{msg['role'].capitalize()}: {msg['content']}\n")
+            count += 1
+        messagebox.showinfo("Export", f"Exported {count} chat(s) to {folder}")
 
-    def clear_logs(self):
-        self.logs_textbox.delete("1.0", "end")
+    def delete_all_chats(self):
+        if not self.chats:
+            return
+        if not messagebox.askyesno("Delete All", "Are you sure you want to delete ALL chats?"):
+            return
+        self.chats.clear()
+        self.add_new_chat()
+        self.save_chats_to_file()
+        self.update_history_list()
+        self.resume_button.grid_remove()
 
     def download_chat(self):
         if self.current_chat_id is None:
@@ -1757,7 +1498,17 @@ class AlexRadarGUI:
                     f.write(f"{msg['role'].capitalize()}: {msg['content']}\n")
             messagebox.showinfo("Success", "Chat saved.")
 
+    def upload_files(self):
+        if self.virtual_storage_var.get():
+            messagebox.showinfo("Info", "Virtual storage is active. Use the virtual storage path.")
+            return
+        files = filedialog.askopenfilenames()
+        if files:
+            self.attached_files = list(files)
+            self.update_attached_text()
+
+
 if __name__ == "__main__":
-    root = ctk.CTk()
+    root = tk.Tk()
     app = AlexRadarGUI(root)
     root.mainloop()

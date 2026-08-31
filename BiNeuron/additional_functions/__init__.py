@@ -13,3 +13,4 @@ from .proxy_from_raw_github import check_github_proxy
 from .checking_site_access import checking_site_access
 from .logic_virtual_storage import logic_virtual_storage
 from .advanced_definition_text_from_image import LaunchDeepSeekOCR
+from .logic_editing_files import logic_editing_files

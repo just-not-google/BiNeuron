@@ -4,7 +4,7 @@ import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import psutil
 from typing import Dict, Tuple
-from AlexRadar.data.constants_for_functions import (TYPES_POWER, POINTS_PER_CORE,
+from BiNeuron.data.constants_for_functions import (TYPES_POWER, POINTS_PER_CORE,
                                                     REF_POINTS, HARD_VALUE, EASY_VALUE,
                                                     VERY_HARD_VALUE)
 import logging

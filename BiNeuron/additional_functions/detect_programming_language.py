@@ -1,7 +1,7 @@
 from codelang_detect import detect
 from whats_that_code.election import guess_language_all_methods
 from typing import List
-from AlexRadar.data.abbreviations_full_names_programming_languages import LANG_SHORTCUT_TO_FULL
+from BiNeuron.data.abbreviations_full_names_programming_languages import LANG_SHORTCUT_TO_FULL
 import logging
 
 

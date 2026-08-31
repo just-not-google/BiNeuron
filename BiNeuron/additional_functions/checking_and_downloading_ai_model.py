@@ -1,7 +1,7 @@
 from huggingface_hub import hf_hub_download, set_client_factory
 import os
-from AlexRadar.additional_functions.proxy_for_circumventing_restrictions import working_with_proxy
-from AlexRadar.data.constants_for_functions import (HTTP_PROTOCOL, MAX_TIMEOUT, HF_MIRROR,
+from BiNeuron.additional_functions.proxy_for_circumventing_restrictions import working_with_proxy
+from BiNeuron.data.constants_for_functions import (HTTP_PROTOCOL, MAX_TIMEOUT, HF_MIRROR,
                                                     MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
                                                     NUMBER_ATTEMPTS, MAIN_PROXY_ATTEMPTS)
 import logging
@@ -10,9 +10,9 @@ import requests
 from requests.exceptions import RequestException, ConnectionError as RequestsConnectionError
 from requests.models import Response
 import random
-from AlexRadar.data.headers_for_response import HEADERS_LIST
-from AlexRadar.additional_functions.checking_integer_for_condition import checking_int_and_float
-from AlexRadar.data.links_to_raw_github_proxies import PROXY_LINK_LST
+from BiNeuron.data.headers_for_response import HEADERS_LIST
+from BiNeuron.additional_functions.checking_integer_for_condition import checking_int_and_float
+from BiNeuron.data.links_to_raw_github_proxies import PROXY_LINK_LST
 import time
 
 

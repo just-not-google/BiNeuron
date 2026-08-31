@@ -1,20 +1,22 @@
 from typing import List
-from AlexRadar.data.prompt_for_orchestrator_ai_models import PROMPT
-from AlexRadar.additional_functions.launching_ai_model_and_requesting import launching_ai_model_and_requesting
+from BiNeuron.data.prompt_for_orchestrator_ai_models import PROMPT
+from BiNeuron.additional_functions.launching_ai_model_and_requesting import launching_ai_model_and_requesting
+from BiNeuron.data.constants_for_functions import MAIN_REPO_ID, MAIN_FILENAME
 import logging
 
 
 logger = logging.getLogger(__name__)
 
 def orchestrator_ai_models(user_prompt: str,
-                           repo_id: str = "Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF",
-                           filename: str = "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+                           repo_id: str = MAIN_REPO_ID,
+                           filename: str = MAIN_FILENAME,
                            n_ctx: int = 8192,
                            n_gpu_layers: int = 0,
                            verbose: bool = False,
                            echo: bool = False,
                            models_dir: str = "./models",
-                           prefer_mirror: bool = True) -> List[str]:
+                           prefer_mirror: bool = True,
+                           template_prompt: str = PROMPT) -> List[str]:
     """
     Orchestrates AI model to extract programming languages from user prompt.
     :param user_prompt: The user's input text.
@@ -26,6 +28,7 @@ def orchestrator_ai_models(user_prompt: str,
     :param echo: Whether to echo input.
     :param models_dir: Directory to cache downloaded models.
     :param prefer_mirror: If True, forces using the mirror endpoint (hf-mirror.com).
+    :param template_prompt: Template string with '{your_prompt_for_ai}' placeholder (for string messages).
     :return: List of programming language names extracted from the prompt.
     """
     logger.info("Challenge orchestrator_ai_models")
@@ -36,7 +39,7 @@ def orchestrator_ai_models(user_prompt: str,
             filename=filename,
             n_ctx=n_ctx,
             n_gpu_layers=n_gpu_layers,
-            template_prompt=PROMPT,
+            template_prompt=template_prompt,
             verbose=verbose,
             echo=echo,
             models_dir=models_dir,

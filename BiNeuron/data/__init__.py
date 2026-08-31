@@ -13,3 +13,5 @@ from .natural_languages import NATURAL_LANGUAGES
 from .supported_formats import *
 from .prompt_for_ocr import PROMPT
 from .model_repo_map import MODEL_REPO_MAP
+from .prompt_for_json_formatter import PROMPT_FOR_JSON_FORMATTER
+from .supported_formats_and_writemode import *

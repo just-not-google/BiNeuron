@@ -1,4 +1,4 @@
-from AlexRadar.additional_functions.text_translation import TranslatorText
+from BiNeuron.additional_functions.text_translation import TranslatorText
 import easyocr
 import pymupdf
 import functools
@@ -8,10 +8,10 @@ from odfdo import Document
 import pptx2txt2
 from typing import List, Optional, Literal, Dict
 from pathlib import Path
-from AlexRadar.data.constants_for_functions import PHOTO_FORMATS
-from AlexRadar.data.constants_for_functions import (NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
+from BiNeuron.data.constants_for_functions import PHOTO_FORMATS
+from BiNeuron.data.constants_for_functions import (NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
                                                     MAIN_LANGUAGE, LITE_TYPE)
-from AlexRadar.additional_functions.advanced_definition_text_from_image import LaunchDeepSeekOCR
+from BiNeuron.additional_functions.advanced_definition_text_from_image import LaunchDeepSeekOCR
 
 
 logger = logging.getLogger(__name__)
