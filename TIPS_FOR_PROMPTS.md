@@ -134,8 +134,6 @@ By following these guidelines, you will harness the full potential of AI assista
 
 </details>
 
----
-
 <details>
 <summary>🇷🇺 Русский</summary>
 
