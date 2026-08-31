@@ -5,7 +5,7 @@
 # BiNeuron  
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 
 <details>
 <summary>🇬🇧 English</summary>
@@ -45,6 +45,7 @@ At its core, BiNeuron automatically identifies the programming language of a giv
 ### Virtual Storage Mode  
 - Allows scanning and processing of entire folders or mounted virtual directories.  
 - Recursively identifies supported files, extracts their content, and incorporates it into the analysis context—perfect for large codebases or repositories.  
+- **Interactive File Explorer**: In GUI mode, the virtual storage is displayed as a tree view. Double‑click any file to open it in the default system application.  
 
 ### Multilingual Translation  
 - Built‑in translation engine normalises user requests to English (or any configured target language) to ensure consistent AI interactions.  
@@ -72,7 +73,7 @@ The architecture emphasises reusability, fault tolerance, and performance, allow
 - **EasyOCR, DeepSeek OCR** – optical character recognition  
 - **deep‑translator, DeepL** – translation services  
 - **PyMuPDF, docx2txt, python‑pptx, odfpy** – document parsing  
-- **CustomTkinter** – modern, themeable GUI  
+- **Tkinter** – modern, themeable GUI  
 - **Click** – command‑line interface  
 - **requests, httpx** – network communication  
 - **psutil, multiprocessing** – system resource monitoring and benchmarking  
@@ -86,10 +87,12 @@ BiNeuron leverages a hand‑picked collection of open‑source code generation m
 
 ### Graphical Interface  
 A desktop application built with CustomTkinter, offering:  
-- Intuitive chat interface with message history and file attachments.  
-- Real‑time logs and performance diagnostics.  
-- Virtual storage explorer for scanning directories.  
-- Comprehensive settings panel for fine‑tuning every aspect of the platform.  
+- **Intuitive Chat Interface** – message history, file attachments, and real‑time log display.  
+- **Virtual Storage Explorer** – scan and navigate directories in a tree view.  
+- **Comprehensive Settings Panel** – fine‑tune every aspect of the platform: network, model selection, OCR, translation, and more.  
+- **Chat Management** – create, delete, download, and filter conversation history.  
+- **Live Logging** – see what the AI is doing in real time.  
+- **Dark Theme** – optimized for long coding sessions.  
 
 ### Command‑Line Interface  
 A Click‑based CLI that exposes the full functionality of BiNeuron through terminal arguments, making it suitable for automation, scripting, and integration into CI/CD pipelines.  
@@ -105,7 +108,7 @@ A Click‑based CLI that exposes the full functionality of BiNeuron through term
 
 BiNeuron ‑ это сложное программное решение, которое устраняет разрыв между намерениями человека и машинным кодом. Он объединяет продвинутую обработку естественного языка, оптическое распознавание символов и адаптивный выбор модели в единый мощный инструмент, предназначенный для разработчиков, исследователей и технических групп.  
 
-По своей сути, BiNeuron автоматически определяет язык программирования для данного запроса, извлекает содержимое из широкого спектра форматов файлов, включая изображения и документы, а затем генерирует контекстно—зависимый, готовый к работе код, используя лучшие в своем классе локальные или облачные языковые модели.
+По своей сути, BiNeuron автоматически определяет язык программирования для данного запроса, извлекает содержимое из широкого спектра форматов файлов, включая изображения и документы, а затем генерирует контекстно‑зависимый, готовый к работе код, используя лучшие в своем классе локальные или облачные языковые модели.
 
 ## Ключевые возможности  
 
@@ -136,6 +139,7 @@ BiNeuron ‑ это сложное программное решение, кот
 ### Режим виртуального хранилища  
 - Позволяет сканировать и обрабатывать целые папки или смонтированные виртуальные директории.  
 - Рекурсивно определяет поддерживаемые файлы, извлекает их содержимое и включает его в контекст анализа — идеально для больших кодовых баз или репозиториев.  
+- **Интерактивный файловый менеджер**: В режиме GUI виртуальное хранилище отображается в виде дерева. Двойной клик по файлу открывает его в системном приложении по умолчанию.  
 
 ### Многоязычный перевод  
 - Встроенный механизм перевода приводит запросы пользователя к английскому (или любому другому настроенному языку) для единообразного взаимодействия с ИИ.  
@@ -163,7 +167,7 @@ BiNeuron спроектирован по модульному принципу �
 - **EasyOCR, DeepSeek OCR** – оптическое распознавание символов  
 - **deep‑translator, DeepL** – сервисы перевода  
 - **PyMuPDF, docx2txt, python‑pptx, odfpy** – парсинг документов  
-- **CustomTkinter** – современный, настраиваемый GUI  
+- **Tkinter** – современный, настраиваемый GUI  
 - **Click** – интерфейс командной строки  
 - **requests, httpx** – сетевое взаимодействие  
 - **psutil, multiprocessing** – мониторинг системных ресурсов и бенчмаркинг  
@@ -177,10 +181,12 @@ BiNeuron использует тщательно подобранную колл
 
 ### Графический интерфейс  
 Десктопное приложение на CustomTkinter, предлагающее:  
-- Интуитивный чат с историей сообщений и прикреплением файлов.  
-- Логи в реальном времени и диагностика производительности.  
-- Обозреватель виртуального хранилища для сканирования каталогов.  
-- Всеобъемлющую панель настроек для тонкой настройки каждого аспекта платформы.  
+- **Интуитивный чат** – история сообщений, прикрепление файлов и отображение логов в реальном времени.  
+- **Обозреватель виртуального хранилища** – сканирование и навигация по директориям в виде дерева.  
+- **Всеобъемлющая панель настроек** – тонкая настройка каждого аспекта платформы: сеть, выбор модели, OCR, перевод и многое другое.  
+- **Управление чатами** – создание, удаление, загрузка и фильтрация истории диалогов.  
+- **Live‑логи** – просмотр действий ИИ в реальном времени.  
+- **Тёмная тема** – оптимизирована для длительных сессий разработки.  
 
 ### Интерфейс командной строки  
 CLI на базе Click, открывающий всю функциональность BiNeuron через аргументы терминала, что делает его пригодным для автоматизации, скриптов и интеграции в CI/CD пайплайны.  

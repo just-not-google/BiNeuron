@@ -19,7 +19,6 @@ badwords-py~=2.1.0
 deepseek-ocr~=0.3.0
 easyocr~=1.7.2
 pptx2txt2~=1.1.0
-customtkinter~=6.0.0
 torch~=2.6.0
 transformers~=5.15.1
 pillow~=12.3.0
