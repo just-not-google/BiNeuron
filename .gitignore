@@ -21,3 +21,6 @@ env/
 /chats.json
 /settings.json
 /storage_path.json
+/models/
+/dist/
+/build/

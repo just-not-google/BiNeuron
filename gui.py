@@ -6,34 +6,22 @@ import logging
 import traceback
 import json
 import os
+import sys
 from datetime import datetime
 from BiNeuron import BiNeuron
 from BiNeuron.data.constants_for_functions import (HTTP_PROTOCOL, HTTPS_PROTOCOL,
-                                                    TYPES_POWER, PREFERENCES_IN_AI_LIST,
-                                                    DETERMINANT_MODE_LIST)
+                                                   TYPES_POWER, PREFERENCES_IN_AI_LIST,
+                                                   DETERMINANT_MODE_LIST)
 from BiNeuron.data.variants_industrial_scenarios import ALL_MAIN_PROMPTS
 from BiNeuron.data.natural_languages import NATURAL_LANGUAGES
+from BiNeuron.data.translated_ui import TRANSLATED_UI
+from BiNeuron.data.fonts_and_colors import *
 
-BG_MAIN = "#1e1e1e"
-BG_FRAME = "#252526"
-BG_ENTRY = "#3c3c3c"
-BG_TEXT = "#1e1e1e"
-FG_TEXT = "#d4d4d4"
-FG_DARK = "#808080"
-ACCENT = "#007acc"
-ACCENT_HOVER = "#1a8cff"
-BORDER = "#3f3f46"
-SELECT_BG = "#094771"
-TREE_BG = "#252526"
-TREE_FG = "#d4d4d4"
-TREE_SELECT_BG = "#094771"
-TREE_SELECT_FG = "#ffffff"
 
-FONT_MAIN = ("Segoe UI", 10)
-FONT_BOLD = ("Segoe UI", 11, "bold")
-FONT_TITLE = ("Segoe UI", 14, "bold")
-FONT_SECTION = ("Segoe UI", 12, "bold")
-FONT_SMALL = ("Segoe UI", 9)
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 
 class NumericEntry(ttk.Entry):
@@ -71,13 +59,11 @@ class SpinEntry(ttk.Frame):
         self.entry = NumericEntry(self, **kwargs)
         self.entry.grid(row=0, column=0, sticky="ew", padx=(0, 2))
         self.entry.insert(0, str(default))
-
         self.btn_up = ttk.Button(self, text="▲", width=2, command=self.increment)
         self.btn_up.grid(row=0, column=1, padx=1, sticky="e")
         self.btn_down = ttk.Button(self, text="▼", width=2, command=self.decrement)
         self.btn_down.grid(row=0, column=2, padx=1, sticky="e")
-
-        self.grid_columnconfigure(0, weight=1)  # поле ввода расширяется
+        self.grid_columnconfigure(0, weight=1)
 
     def increment(self):
         try:
@@ -126,17 +112,14 @@ class ScrollableFrame(ttk.Frame):
         self.canvas = tk.Canvas(self, bg=BG_FRAME, highlightthickness=0, borderwidth=0)
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
         self.scrollable_frame = ttk.Frame(self.canvas, style="TFrame")
-
-        self.scrollable_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.scrollable_frame.bind("<Configure>",
+                                   lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
         self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
-
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
-
         self.canvas.bind("<Enter>", self._bind_mousewheel)
         self.canvas.bind("<Leave>", self._unbind_mousewheel)
-
         self.canvas.bind("<Configure>", self._on_canvas_configure)
 
     def _on_canvas_configure(self, event):
@@ -160,13 +143,12 @@ class BiNeuronGUI:
         self.root = root
         self.root.title("BiNeuron")
         self.root.geometry("1500x900")
-        self.root.minsize(1200, 700)
+        self.root.minsize(1500, 900)
+        self.root.iconbitmap(resource_path("img_files/logo.ico"))
         self.root.configure(bg=BG_MAIN)
-
         self.style = ttk.Style()
         self.style.theme_use("clam")
         self._setup_styles()
-
         self.alex_instance = None
         self.is_busy = False
         self.is_scanning = False
@@ -177,15 +159,14 @@ class BiNeuronGUI:
         self.chats_file = "chats.json"
         self.storage_path_file = "storage_path.json"
         self.settings_file = "settings.json"
-
         self.storage_path = self.load_storage_path()
-
-        # Увеличены минимальные ширины панелей
+        self.translations = TRANSLATED_UI
+        self.widgets_to_translate = []
+        self.select_language()
         self.root.grid_columnconfigure(0, weight=1, uniform="main", minsize=320)
         self.root.grid_columnconfigure(1, weight=4, uniform="main")
         self.root.grid_columnconfigure(2, weight=1, uniform="main", minsize=200)
         self.root.grid_rowconfigure(0, weight=1)
-
         self.create_settings_panel()
         self.create_chat_panel()
         self.create_history_panel()
@@ -193,52 +174,177 @@ class BiNeuronGUI:
         self.load_chats_from_file()
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.poll_queue()
-
         self.welcome_label = None
         self.show_welcome_placeholder()
         self.check_pending_message()
-
         self.load_settings()
+        self.apply_language()
 
     def _setup_styles(self):
-        self.style.configure(".", background=BG_MAIN, foreground=FG_TEXT, font=FONT_MAIN)
-        self.style.configure("TFrame", background=BG_MAIN)
-        self.style.configure("TLabel", background=BG_MAIN, foreground=FG_TEXT, font=FONT_MAIN)
-        self.style.configure("TButton", background=BG_FRAME, foreground=FG_TEXT,
-                             bordercolor=BORDER, lightcolor=BG_FRAME, darkcolor=BG_FRAME,
-                             focusthickness=0, focuscolor=BG_FRAME, padding=5)
+        self.style.configure(".",
+                             background=BG_MAIN,
+                             foreground=FG_TEXT,
+                             font=FONT_MAIN)
+        self.style.configure("TFrame",
+                             background=BG_MAIN)
+        self.style.configure("TLabel",
+                             background=BG_MAIN,
+                             foreground=FG_TEXT,
+                             font=FONT_MAIN)
+        self.style.configure("TButton",
+                             background=BG_FRAME,
+                             foreground=FG_TEXT,
+                             bordercolor=BORDER,
+                             lightcolor=BG_FRAME,
+                             darkcolor=BG_FRAME,
+                             focusthickness=0,
+                             focuscolor=BG_FRAME,
+                             padding=5)
         self.style.map("TButton",
                        background=[("active", ACCENT_HOVER), ("pressed", ACCENT)],
                        foreground=[("active", "white"), ("pressed", "white")])
-        self.style.configure("TEntry", fieldbackground=BG_ENTRY, foreground=FG_TEXT,
-                             bordercolor=BORDER, lightcolor=BORDER, darkcolor=BORDER,
-                             insertcolor=FG_TEXT, padding=3)
-        self.style.configure("TCheckbutton", background=BG_MAIN, foreground=FG_TEXT,
-                             focusthickness=0, focuscolor=BG_MAIN)
+        self.style.configure("TEntry",
+                             fieldbackground=BG_ENTRY,
+                             foreground=FG_TEXT,
+                             bordercolor=BORDER,
+                             lightcolor=BORDER,
+                             darkcolor=BORDER,
+                             insertcolor=FG_TEXT,
+                             padding=3)
+        self.style.configure("TCheckbutton",
+                             background=BG_MAIN,
+                             foreground=FG_TEXT,
+                             focusthickness=0,
+                             focuscolor=BG_MAIN)
         self.style.map("TCheckbutton",
                        background=[("active", BG_MAIN)],
                        foreground=[("active", FG_TEXT)])
-        self.style.configure("TCombobox", fieldbackground=BG_ENTRY, background=BG_ENTRY,
-                             foreground=FG_TEXT, arrowcolor=FG_TEXT, bordercolor=BORDER,
-                             lightcolor=BORDER, darkcolor=BORDER, padding=3)
+        self.style.configure("TCombobox",
+                             fieldbackground=BG_ENTRY,
+                             background=BG_ENTRY,
+                             foreground=FG_TEXT,
+                             arrowcolor=FG_TEXT,
+                             bordercolor=BORDER,
+                             lightcolor=BORDER,
+                             darkcolor=BORDER,
+                             padding=3)
         self.style.map("TCombobox",
                        fieldbackground=[("readonly", BG_ENTRY)],
                        selectbackground=[("readonly", BG_ENTRY)],
                        selectforeground=[("readonly", FG_TEXT)])
-        self.style.configure("Treeview", background=TREE_BG, foreground=TREE_FG,
-                             fieldbackground=TREE_BG, borderwidth=0, font=FONT_MAIN)
+        self.style.configure("Treeview",
+                             background=TREE_BG,
+                             foreground=TREE_FG,
+                             fieldbackground=TREE_BG,
+                             borderwidth=0,
+                             font=FONT_MAIN)
         self.style.map("Treeview",
                        background=[("selected", TREE_SELECT_BG)],
                        foreground=[("selected", TREE_SELECT_FG)])
-        self.style.configure("Treeview.Heading", background=BG_FRAME, foreground=FG_TEXT,
-                             relief="flat", font=FONT_BOLD)
+        self.style.configure("Treeview.Heading",
+                             background=BG_FRAME,
+                             foreground=FG_TEXT,
+                             relief="flat",
+                             font=FONT_BOLD)
         self.style.map("Treeview.Heading",
                        background=[("active", BG_FRAME)],
                        foreground=[("active", FG_TEXT)])
-        self.style.configure("Vertical.TScrollbar", background=BG_FRAME, troughcolor=BG_MAIN,
-                             bordercolor=BG_MAIN, arrowcolor=FG_TEXT)
-        self.style.configure("Horizontal.TScrollbar", background=BG_FRAME, troughcolor=BG_MAIN,
-                             bordercolor=BG_MAIN, arrowcolor=FG_TEXT)
+        self.style.configure("Vertical.TScrollbar",
+                             background=BG_FRAME,
+                             troughcolor=BG_MAIN,
+                             bordercolor=BG_MAIN,
+                             arrowcolor=FG_TEXT)
+        self.style.configure("Horizontal.TScrollbar",
+                             background=BG_FRAME,
+                             troughcolor=BG_MAIN,
+                             bordercolor=BG_MAIN,
+                             arrowcolor=FG_TEXT)
+
+    def select_language(self):
+        dialog = tk.Toplevel(self.root)
+        dialog.title("BiNeuron")
+        dialog.geometry("300x100")
+        dialog.resizable(False, False)
+        dialog.configure(bg=BG_MAIN)
+        dialog.transient(self.root)
+        dialog.iconbitmap(resource_path("img_files/logo.ico"))
+        dialog.grab_set()
+        dialog.update_idletasks()
+        x = self.root.winfo_screenwidth() // 2 - 150
+        y = self.root.winfo_screenheight() // 2 - 75
+        dialog.geometry(f"+{x}+{y}")
+
+        if isinstance(NATURAL_LANGUAGES, dict):
+            lang_names = list(NATURAL_LANGUAGES.keys())
+        else:
+            lang_names = list(NATURAL_LANGUAGES) \
+                if NATURAL_LANGUAGES else ["English", "Russian"]
+
+        combo = ttk.Combobox(dialog, values=lang_names, state="readonly")
+        combo.pack(pady=10)
+
+        if lang_names:
+            combo.current(0)
+
+        def on_ok():
+            selected = combo.get()
+            if selected:
+                self.current_lang = self._get_lang_code(selected)
+            else:
+                self.current_lang = "en"
+            dialog.destroy()
+
+        ok_btn = ttk.Button(dialog, text="OK", command=on_ok)
+        ok_btn.pack(pady=10)
+        self.root.wait_window(dialog)
+
+    def _get_lang_code(self, lang_name):
+        if hasattr(NATURAL_LANGUAGES, 'get'):
+            code = NATURAL_LANGUAGES.get(lang_name)
+            if code:
+                return code
+
+        mapping = {"English": "en", "Russian": "ru"}
+        return mapping.get(lang_name, "en")
+
+    def translate(self, key, **kwargs):
+        lang_dict = self.translations.get(self.current_lang, self.translations["en"])
+        text = lang_dict.get(key, key)
+
+        if kwargs:
+            try:
+                text = text.format(**kwargs)
+            except KeyError:
+                pass
+        return text
+
+    def apply_language(self):
+        for widget, key, attr in self.widgets_to_translate:
+            try:
+                if attr == "text":
+                    widget.config(text=self.translate(key))
+                elif attr == "title":
+                    widget.title(self.translate(key))
+            except Exception:
+                pass
+        self.root.title(self.translate("title"))
+
+        if hasattr(self, 'history_title'):
+            if self.virtual_storage_var.get():
+                self.history_title.config(text=self.translate("history_title_virtual"))
+            else:
+                self.history_title.config(text=self.translate("history_title"))
+
+        if hasattr(self, 'attached_frame'):
+            self.attached_frame.config(text=self.translate("attached_files_label"))
+
+        if hasattr(self, 'resume_button'):
+            self.resume_button.config(text=self.translate("resume_button_text"))
+
+        if self.welcome_label is not None:
+            self.welcome_label.config(text=self.translate("welcome_text"))
+
+        self.update_attached_text()
 
     def setup_logging(self):
         class ChatHandler(logging.Handler):
@@ -268,21 +374,31 @@ class BiNeuronGUI:
     def display_log_message(self, text, save=True):
         if self.welcome_label is not None:
             self.hide_welcome_placeholder()
+        was_at_bottom = self._is_scrolled_to_bottom()
         frame = tk.Frame(self.messages_frame, bg=BG_FRAME, bd=0)
         frame.pack(fill="x", padx=10, pady=2)
 
-        label = tk.Label(frame, text=f"[LOG] {text}", fg=FG_TEXT, bg=BG_FRAME,
-                         font=FONT_SMALL, wraplength=600, justify="left", anchor="w")
+        label = tk.Label(frame,
+                         text=f"[LOG] {text}",
+                         fg=FG_TEXT,
+                         bg=BG_FRAME,
+                         font=FONT_SMALL,
+                         wraplength=600,
+                         justify="left",
+                         anchor="w")
         label.pack(side="left", padx=10, pady=2, fill="x", expand=True)
 
         self.messages_frame.update_idletasks()
-        self.messages_canvas.yview_moveto(1.0)
+        if was_at_bottom:
+            self.messages_canvas.yview_moveto(1.0)
 
         if save:
             self._save_log_to_chat(text)
 
     def _save_log_to_chat(self, text):
-        if hasattr(self, 'current_chat_id') and self.current_chat_id is not None and self.current_chat_id in self.chats:
+        if (hasattr(self, 'current_chat_id')
+                and self.current_chat_id is not None
+                and self.current_chat_id in self.chats):
             timestamp = datetime.now().strftime("%H:%M")
             log_entry = {"role": "system", "content": text, "timestamp": timestamp}
             self.chats[self.current_chat_id]["messages"].append(log_entry)
@@ -308,7 +424,6 @@ class BiNeuronGUI:
     def get_all_settings(self):
         return {
             "theme": "dark",
-            "language": self.language_combobox.get(),
             "country": self.country_entry.get(),
             "protocol": self.protocol_combobox.get(),
             "max_timeout": self.max_timeout_entry.get(),
@@ -367,8 +482,6 @@ class BiNeuronGUI:
             entry.delete(0, "end")
             entry.insert(0, str(value))
 
-        if "language" in settings:
-            self.language_combobox.set(settings["language"])
         if "country" in settings:
             set_entry(self.country_entry, settings["country"])
         if "protocol" in settings:
@@ -483,11 +596,11 @@ class BiNeuronGUI:
                 self.build_tree()
 
         self.update_attached_text()
+        self.apply_language()
 
     def set_default_settings(self):
         default = {
             "theme": "dark",
-            "language": list(NATURAL_LANGUAGES.keys())[0],
             "country": "",
             "protocol": HTTP_PROTOCOL,
             "max_timeout": "30",
@@ -565,15 +678,17 @@ class BiNeuronGUI:
     def reset_settings(self):
         self.set_default_settings()
         self.save_settings()
-        messagebox.showinfo("Settings", "Settings have been reset to default.")
+        messagebox.showinfo(self.translate("success_info"), self.translate("settings_reset"))
 
     def load_chats_from_file(self):
         if os.path.exists(self.chats_file):
             try:
                 with open(self.chats_file, "r", encoding="utf-8") as f:
                     self.chats = json.load(f)
+
                 if not isinstance(self.chats, dict):
                     self.chats = {}
+
             except Exception as e:
                 logging.error(f"Failed to load chats: {e}")
                 self.chats = {}
@@ -584,6 +699,7 @@ class BiNeuronGUI:
             self.add_new_chat()
 
         first_id = next(iter(self.chats.keys()), None)
+
         if first_id:
             self.current_chat_id = first_id
             self.load_chat(first_id)
@@ -610,319 +726,454 @@ class BiNeuronGUI:
         settings_outer.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
         settings_outer.grid_rowconfigure(1, weight=1)
         settings_outer.grid_columnconfigure(0, weight=1)
-
-        title_label = ttk.Label(settings_outer, text="Settings", font=FONT_TITLE)
+        title_label = ttk.Label(settings_outer,
+                                text=self.translate("settings_title"),
+                                font=FONT_TITLE)
         title_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
-
+        self.widgets_to_translate.append((title_label, "settings_title", "text"))
         settings_scroll = ScrollableFrame(settings_outer)
         settings_scroll.grid(row=1, column=0, sticky="nsew")
         settings_frame = settings_scroll.get_frame()
         settings_frame.grid_columnconfigure(0, weight=1)
-
         btn_frame = ttk.Frame(settings_frame)
         btn_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=(0, 10))
         btn_frame.grid_columnconfigure(0, weight=1)
         btn_frame.grid_columnconfigure(1, weight=1)
         btn_frame.grid_columnconfigure(2, weight=1)
-        ttk.Button(btn_frame, text="Reset", width=10, command=self.reset_settings).grid(row=0, column=0, sticky="ew", padx=2)
-        ttk.Button(btn_frame, text="Export All", width=10, command=self.export_all_chats).grid(row=0, column=1, sticky="ew", padx=2)
-        ttk.Button(btn_frame, text="Delete All", width=10, command=self.delete_all_chats).grid(row=0, column=2, sticky="ew", padx=2)
-
-        interface_frame = ttk.LabelFrame(settings_frame, text="Interface", padding=5)
-        interface_frame.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-        interface_frame.grid_columnconfigure(0, weight=0, minsize=160)
-        interface_frame.grid_columnconfigure(1, weight=1)
-
-        row = 0
-        ttk.Label(interface_frame, text="Language").grid(row=row, column=0, sticky="w", pady=2)
-        self.language_combobox = ttk.Combobox(interface_frame, values=list(NATURAL_LANGUAGES.keys()), state="readonly")
-        self.language_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
-        row += 1
-
-        network_frame = ttk.LabelFrame(settings_frame, text="Network", padding=5)
-        network_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
+        reset_btn = ttk.Button(btn_frame,
+                               text=self.translate("reset_btn"),
+                               width=10,
+                               command=self.reset_settings)
+        reset_btn.grid(row=0, column=0, sticky="ew", padx=2)
+        self.widgets_to_translate.append((reset_btn, "reset_btn", "text"))
+        export_btn = ttk.Button(btn_frame,
+                                text=self.translate("export_all_btn"),
+                                width=10,
+                                command=self.export_all_chats)
+        export_btn.grid(row=0, column=1, sticky="ew", padx=2)
+        self.widgets_to_translate.append((export_btn, "export_all_btn", "text"))
+        delete_btn = ttk.Button(btn_frame,
+                                text=self.translate("delete_all_btn"),
+                                width=10,
+                                command=self.delete_all_chats)
+        delete_btn.grid(row=0, column=2, sticky="ew", padx=2)
+        self.widgets_to_translate.append((delete_btn, "delete_all_btn", "text"))
+        network_frame = ttk.LabelFrame(settings_frame,
+                                       text=self.translate("network_frame"),
+                                       padding=5)
+        network_frame.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
         network_frame.grid_columnconfigure(0, weight=0, minsize=160)
         network_frame.grid_columnconfigure(1, weight=1)
-
+        self.widgets_to_translate.append((network_frame, "network_frame", "text"))
         row = 0
-        ttk.Label(network_frame, text="Country").grid(row=row, column=0, sticky="w", pady=2)
+        country_label = ttk.Label(network_frame, text=self.translate("country_label"))
+        country_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((country_label, "country_label", "text"))
         self.country_entry = ttk.Entry(network_frame)
         self.country_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(network_frame, text="Protocol").grid(row=row, column=0, sticky="w", pady=2)
-        self.protocol_combobox = ttk.Combobox(network_frame, values=[HTTP_PROTOCOL, HTTPS_PROTOCOL], state="readonly")
+        protocol_label = ttk.Label(network_frame, text=self.translate("protocol_label"))
+        protocol_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((protocol_label, "protocol_label", "text"))
+        self.protocol_combobox = ttk.Combobox(network_frame,
+                                              values=[HTTP_PROTOCOL, HTTPS_PROTOCOL],
+                                              state="readonly")
         self.protocol_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(network_frame, text="Max Timeout").grid(row=row, column=0, sticky="w", pady=2)
+        max_timeout_label = ttk.Label(network_frame, text=self.translate("max_timeout_label"))
+        max_timeout_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((max_timeout_label, "max_timeout_label", "text"))
         self.max_timeout_entry = SpinEntry(network_frame, step=1, default=30)
         self.max_timeout_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(network_frame, text="Is Working").grid(row=row, column=0, sticky="w", pady=2)
+        is_working_label = ttk.Label(network_frame, text=self.translate("is_working_label"))
+        is_working_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((is_working_label, "is_working_label", "text"))
         self.is_working_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(network_frame, variable=self.is_working_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(network_frame, variable=self.is_working_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(network_frame, text="Auto Proxies").grid(row=row, column=0, sticky="w", pady=2)
+        auto_proxies_label = ttk.Label(network_frame, text=self.translate("auto_proxies_label"))
+        auto_proxies_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((auto_proxies_label, "auto_proxies_label", "text"))
         self.auto_proxies_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(network_frame, variable=self.auto_proxies_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(network_frame, variable=self.auto_proxies_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(network_frame, text="Your Proxies").grid(row=row, column=0, sticky="nw", pady=2)
-        self.your_proxies_dict_text = tk.Text(network_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
-                                              relief="flat", borderwidth=1, highlightthickness=1,
-                                              highlightbackground=BORDER, highlightcolor=BORDER, wrap="word")
+        your_proxies_label = ttk.Label(network_frame, text=self.translate("your_proxies_label"))
+        your_proxies_label.grid(row=row, column=0, sticky="nw", pady=2)
+        self.widgets_to_translate.append((your_proxies_label, "your_proxies_label", "text"))
+        self.your_proxies_dict_text = tk.Text(network_frame,
+                                              height=3,
+                                              bg=BG_ENTRY,
+                                              fg=FG_TEXT,
+                                              insertbackground=FG_TEXT,
+                                              relief="flat",
+                                              borderwidth=1,
+                                              highlightthickness=1,
+                                              highlightbackground=BORDER,
+                                              highlightcolor=BORDER,
+                                              wrap="word")
         self.your_proxies_dict_text.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(network_frame, text="Min Timeout For Check").grid(row=row, column=0, sticky="w", pady=2)
+        min_timeout_check_label = ttk.Label(network_frame,
+                                            text=self.translate("min_timeout_check_label"))
+        min_timeout_check_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((min_timeout_check_label,
+                                          "min_timeout_check_label", "text"))
         self.min_timeout_entry = SpinEntry(network_frame, step=1, default=5)
         self.min_timeout_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(network_frame, text="Max Timeout For Check").grid(row=row, column=0, sticky="w", pady=2)
+        max_timeout_check_label = ttk.Label(network_frame,
+                                            text=self.translate("max_timeout_check_label"))
+        max_timeout_check_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((max_timeout_check_label,
+                                          "max_timeout_check_label", "text"))
         self.max_timeout_entry = SpinEntry(network_frame, step=1, default=15)
         self.max_timeout_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(network_frame, text="Retries").grid(row=row, column=0, sticky="w", pady=2)
+        retries_label = ttk.Label(network_frame, text=self.translate("retries_label"))
+        retries_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((retries_label, "retries_label", "text"))
         self.retries_entry = SpinEntry(network_frame, step=1, default=3)
         self.retries_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(network_frame, text="GitHub Proxies").grid(row=row, column=0, sticky="w", pady=2)
+        github_proxies_label = ttk.Label(network_frame,
+                                         text=self.translate("github_proxies_label"))
+        github_proxies_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((github_proxies_label,
+                                          "github_proxies_label", "text"))
         self.github_proxies_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(network_frame, variable=self.github_proxies_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(network_frame, variable=self.github_proxies_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(network_frame, text="URL List").grid(row=row, column=0, sticky="nw", pady=2)
-        self.url_lst_text = tk.Text(network_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
-                                    relief="flat", borderwidth=1, highlightthickness=1,
-                                    highlightbackground=BORDER, highlightcolor=BORDER, wrap="word")
+        url_list_label = ttk.Label(network_frame, text=self.translate("url_list_label"))
+        url_list_label.grid(row=row, column=0, sticky="nw", pady=2)
+        self.widgets_to_translate.append((url_list_label, "url_list_label", "text"))
+        self.url_lst_text = tk.Text(network_frame,
+                                    height=3,
+                                    bg=BG_ENTRY,
+                                    fg=FG_TEXT,
+                                    insertbackground=FG_TEXT,
+                                    relief="flat",
+                                    borderwidth=1,
+                                    highlightthickness=1,
+                                    highlightbackground=BORDER,
+                                    highlightcolor=BORDER,
+                                    wrap="word")
         self.url_lst_text.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(network_frame, text="Proxy Retries").grid(row=row, column=0, sticky="w", pady=2)
+        proxy_retries_label = ttk.Label(network_frame, text=self.translate("proxy_retries_label"))
+        proxy_retries_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((proxy_retries_label, "proxy_retries_label", "text"))
         self.proxy_retries_entry = SpinEntry(network_frame, step=1, default=3)
         self.proxy_retries_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(network_frame, text="Main Retries").grid(row=row, column=0, sticky="w", pady=2)
+        main_retries_label = ttk.Label(network_frame, text=self.translate("main_retries_label"))
+        main_retries_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((main_retries_label, "main_retries_label", "text"))
         self.main_retries_entry = SpinEntry(network_frame, step=1, default=3)
         self.main_retries_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        model_frame = ttk.LabelFrame(settings_frame, text="Model", padding=5)
-        model_frame.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
+        model_frame = ttk.LabelFrame(settings_frame, text=self.translate("model_frame"), padding=5)
+        model_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
         model_frame.grid_columnconfigure(0, weight=0, minsize=160)
         model_frame.grid_columnconfigure(1, weight=1)
-
+        self.widgets_to_translate.append((model_frame, "model_frame", "text"))
         row = 0
-        ttk.Label(model_frame, text="Preferences In AI").grid(row=row, column=0, sticky="w", pady=2)
-        self.preferences_combobox = ttk.Combobox(model_frame, values=PREFERENCES_IN_AI_LIST, state="readonly")
+        preferences_label = ttk.Label(model_frame, text=self.translate("preferences_in_ai_label"))
+        preferences_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((preferences_label, "preferences_in_ai_label", "text"))
+        self.preferences_combobox = ttk.Combobox(model_frame,
+                                                 values=PREFERENCES_IN_AI_LIST,
+                                                 state="readonly")
         self.preferences_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="Models Dir").grid(row=row, column=0, sticky="w", pady=2)
+        models_dir_label = ttk.Label(model_frame, text=self.translate("models_dir_label"))
+        models_dir_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((models_dir_label, "models_dir_label", "text"))
         self.models_dir_entry = ttk.Entry(model_frame)
         self.models_dir_entry.insert(0, "./models")
         self.models_dir_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="With AI Orchestrator").grid(row=row, column=0, sticky="w", pady=2)
+        with_ai_orchestrator_label = ttk.Label(model_frame,
+                                               text=self.translate("with_ai_orchestrator_label"))
+        with_ai_orchestrator_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((with_ai_orchestrator_label,
+                                          "with_ai_orchestrator_label", "text"))
         self.with_ai_orchestrator_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(model_frame, variable=self.with_ai_orchestrator_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(model_frame, variable=self.with_ai_orchestrator_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(model_frame, text="N CTX").grid(row=row, column=0, sticky="w", pady=2)
+        n_ctx_label = ttk.Label(model_frame, text=self.translate("n_ctx_label"))
+        n_ctx_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((n_ctx_label, "n_ctx_label", "text"))
         self.n_ctx_entry = SpinEntry(model_frame, step=1, default=0)
         self.n_ctx_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="N GPU Layers").grid(row=row, column=0, sticky="w", pady=2)
+        n_gpu_layers_label = ttk.Label(model_frame, text=self.translate("n_gpu_layers_label"))
+        n_gpu_layers_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((n_gpu_layers_label, "n_gpu_layers_label", "text"))
         self.n_gpu_layers_entry = SpinEntry(model_frame, step=1, default=0)
         self.n_gpu_layers_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="Max Tokens").grid(row=row, column=0, sticky="w", pady=2)
+        max_tokens_label = ttk.Label(model_frame, text=self.translate("max_tokens_label"))
+        max_tokens_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((max_tokens_label, "max_tokens_label", "text"))
         self.max_tokens_entry = SpinEntry(model_frame, step=1, default=4096)
         self.max_tokens_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="Token Hugging Face").grid(row=row, column=0, sticky="w", pady=2)
+        token_hf_label = ttk.Label(model_frame, text=self.translate("token_hf_label"))
+        token_hf_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((token_hf_label, "token_hf_label", "text"))
         self.token_hf_entry = ttk.Entry(model_frame)
         self.token_hf_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="Subdomain").grid(row=row, column=0, sticky="w", pady=2)
+        subdomain_label = ttk.Label(model_frame, text=self.translate("subdomain_label"))
+        subdomain_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((subdomain_label, "subdomain_label", "text"))
         self.subdomain_entry = ttk.Entry(model_frame)
         self.subdomain_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="Repo ID").grid(row=row, column=0, sticky="w", pady=2)
+        repo_id_label = ttk.Label(model_frame, text=self.translate("repo_id_label"))
+        repo_id_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((repo_id_label, "repo_id_label", "text"))
         self.repo_id_entry = ttk.Entry(model_frame)
         self.repo_id_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="Filename").grid(row=row, column=0, sticky="w", pady=2)
+        filename_label = ttk.Label(model_frame, text=self.translate("filename_label"))
+        filename_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((filename_label, "filename_label", "text"))
         self.filename_entry = ttk.Entry(model_frame)
         self.filename_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="Prefer Mirror").grid(row=row, column=0, sticky="w", pady=2)
+        prefer_mirror_label = ttk.Label(model_frame, text=self.translate("prefer_mirror_label"))
+        prefer_mirror_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((prefer_mirror_label, "prefer_mirror_label", "text"))
         self.prefer_mirror_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(model_frame, variable=self.prefer_mirror_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(model_frame, variable=self.prefer_mirror_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(model_frame, text="Main Prompt Mode").grid(row=row, column=0, sticky="w", pady=2)
-        self.main_prompt_mode_combobox = ttk.Combobox(model_frame, values=list(ALL_MAIN_PROMPTS.keys()), state="readonly")
+        main_prompt_mode_label = ttk.Label(model_frame, text=self.translate("main_prompt_mode_label"))
+        main_prompt_mode_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((main_prompt_mode_label, "main_prompt_mode_label", "text"))
+        self.main_prompt_mode_combobox = ttk.Combobox(model_frame,
+                                                      values=list(ALL_MAIN_PROMPTS.keys()),
+                                                      state="readonly")
         self.main_prompt_mode_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="Main Prompt").grid(row=row, column=0, sticky="nw", pady=2)
-        self.main_prompt_text = tk.Text(model_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
-                                        relief="flat", borderwidth=1, highlightthickness=1,
-                                        highlightbackground=BORDER, highlightcolor=BORDER, wrap="word")
+        main_prompt_label = ttk.Label(model_frame, text=self.translate("main_prompt_label"))
+        main_prompt_label.grid(row=row, column=0, sticky="nw", pady=2)
+        self.widgets_to_translate.append((main_prompt_label, "main_prompt_label", "text"))
+        self.main_prompt_text = tk.Text(model_frame,
+                                        height=3,
+                                        bg=BG_ENTRY,
+                                        fg=FG_TEXT,
+                                        insertbackground=FG_TEXT,
+                                        relief="flat",
+                                        borderwidth=1,
+                                        highlightthickness=1,
+                                        highlightbackground=BORDER,
+                                        highlightcolor=BORDER,
+                                        wrap="word")
         self.main_prompt_text.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(model_frame, text="Temperature").grid(row=row, column=0, sticky="w", pady=2)
+        temperature_label = ttk.Label(model_frame, text=self.translate("temperature_label"))
+        temperature_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((temperature_label, "temperature_label", "text"))
         self.temperature_entry = SpinEntry(model_frame, step=0.1, default=0.1)
         self.temperature_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        translator_frame = ttk.LabelFrame(settings_frame, text="Translator", padding=5)
-        translator_frame.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
+        translator_frame = ttk.LabelFrame(settings_frame,
+                                          text=self.translate("translator_frame"),
+                                          padding=5)
+        translator_frame.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
         translator_frame.grid_columnconfigure(0, weight=0, minsize=160)
         translator_frame.grid_columnconfigure(1, weight=1)
-
+        self.widgets_to_translate.append((translator_frame, "translator_frame", "text"))
         row = 0
-        ttk.Label(translator_frame, text="Determinant Mode").grid(row=row, column=0, sticky="w", pady=2)
-        self.determinant_mode_combobox = ttk.Combobox(translator_frame, values=DETERMINANT_MODE_LIST, state="readonly")
+        determinant_mode_label = ttk.Label(translator_frame,
+                                           text=self.translate("determinant_mode_label"))
+        determinant_mode_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((determinant_mode_label, "determinant_mode_label", "text"))
+        self.determinant_mode_combobox = ttk.Combobox(translator_frame,
+                                                      values=DETERMINANT_MODE_LIST,
+                                                      state="readonly")
         self.determinant_mode_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(translator_frame, text="Accurate Translation").grid(row=row, column=0, sticky="w", pady=2)
+        accurate_translation_label = ttk.Label(translator_frame,
+                                               text=self.translate("accurate_translation_label"))
+        accurate_translation_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((accurate_translation_label, "accurate_translation_label", "text"))
         self.accurate_translation_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(translator_frame, variable=self.accurate_translation_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(translator_frame, variable=self.accurate_translation_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(translator_frame, text="API KEY DeepL").grid(row=row, column=0, sticky="w", pady=2)
+        deepl_key_label = ttk.Label(translator_frame, text=self.translate("deepl_key_label"))
+        deepl_key_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((deepl_key_label, "deepl_key_label", "text"))
         self.deepl_key_entry = ttk.Entry(translator_frame)
         self.deepl_key_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(translator_frame, text="Request Language").grid(row=row, column=0, sticky="w", pady=2)
+        request_language_label = ttk.Label(translator_frame,
+                                           text=self.translate("request_language_label"))
+        request_language_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((request_language_label,
+                                          "request_language_label", "text"))
         self.request_language_entry = ttk.Entry(translator_frame)
         self.request_language_entry.insert(0, "en")
         self.request_language_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ocr_frame = ttk.LabelFrame(settings_frame, text="OCR", padding=5)
-        ocr_frame.grid(row=5, column=0, sticky="ew", padx=5, pady=5)
+        ocr_frame = ttk.LabelFrame(settings_frame, text=self.translate("ocr_frame"), padding=5)
+        ocr_frame.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
         ocr_frame.grid_columnconfigure(0, weight=0, minsize=160)
         ocr_frame.grid_columnconfigure(1, weight=1)
-
+        self.widgets_to_translate.append((ocr_frame, "ocr_frame", "text"))
         row = 0
-        ttk.Label(ocr_frame, text="Languages List").grid(row=row, column=0, sticky="nw", pady=2)
-        self.lang_lst_text = tk.Text(ocr_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
-                                     relief="flat", borderwidth=1, highlightthickness=1,
-                                     highlightbackground=BORDER, highlightcolor=BORDER, wrap="word")
+        languages_list_label = ttk.Label(ocr_frame, text=self.translate("languages_list_label"))
+        languages_list_label.grid(row=row, column=0, sticky="nw", pady=2)
+        self.widgets_to_translate.append((languages_list_label, "languages_list_label", "text"))
+        self.lang_lst_text = tk.Text(ocr_frame,
+                                     height=3,
+                                     bg=BG_ENTRY,
+                                     fg=FG_TEXT,
+                                     insertbackground=FG_TEXT,
+                                     relief="flat",
+                                     borderwidth=1,
+                                     highlightthickness=1,
+                                     highlightbackground=BORDER,
+                                     highlightcolor=BORDER,
+                                     wrap="word")
         self.lang_lst_text.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(ocr_frame, text="Use GPU").grid(row=row, column=0, sticky="w", pady=2)
+        use_gpu_label = ttk.Label(ocr_frame, text=self.translate("use_gpu_label"))
+        use_gpu_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((use_gpu_label, "use_gpu_label", "text"))
         self.use_gpu_ocr_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(ocr_frame, variable=self.use_gpu_ocr_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(ocr_frame, variable=self.use_gpu_ocr_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(ocr_frame, text="With OCR").grid(row=row, column=0, sticky="w", pady=2)
+        with_ocr_label = ttk.Label(ocr_frame, text=self.translate("with_ocr_label"))
+        with_ocr_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((with_ocr_label, "with_ocr_label", "text"))
         self.with_ocr_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(ocr_frame, variable=self.with_ocr_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(ocr_frame, variable=self.with_ocr_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(ocr_frame, text="Cloud Version").grid(row=row, column=0, sticky="w", pady=2)
+        cloud_version_label = ttk.Label(ocr_frame, text=self.translate("cloud_version_label"))
+        cloud_version_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((cloud_version_label, "cloud_version_label", "text"))
         self.cloud_version_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(ocr_frame, variable=self.cloud_version_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(ocr_frame, variable=self.cloud_version_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(ocr_frame, text="With DeepSeek").grid(row=row, column=0, sticky="w", pady=2)
+        with_deepseek_label = ttk.Label(ocr_frame, text=self.translate("with_deepseek_label"))
+        with_deepseek_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((with_deepseek_label, "with_deepseek_label", "text"))
         self.with_deepseek_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(ocr_frame, variable=self.with_deepseek_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(ocr_frame, variable=self.with_deepseek_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(ocr_frame, text="Model Size").grid(row=row, column=0, sticky="w", pady=2)
-        self.model_size_combobox = ttk.Combobox(ocr_frame, values=["tiny", "small", "base", "large", "gundam"], state="readonly")
+        model_size_label = ttk.Label(ocr_frame, text=self.translate("model_size_label"))
+        model_size_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((model_size_label, "model_size_label", "text"))
+        self.model_size_combobox = ttk.Combobox(ocr_frame,
+                                                values=["tiny", "small", "base", "large", "gundam"],
+                                                state="readonly")
         self.model_size_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(ocr_frame, text="Crop Mode").grid(row=row, column=0, sticky="w", pady=2)
+        crop_mode_label = ttk.Label(ocr_frame, text=self.translate("crop_mode_label"))
+        crop_mode_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((crop_mode_label, "crop_mode_label", "text"))
         self.crop_mode_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(ocr_frame, variable=self.crop_mode_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(ocr_frame, variable=self.crop_mode_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(ocr_frame, text="Base URL").grid(row=row, column=0, sticky="w", pady=2)
+        base_url_label = ttk.Label(ocr_frame, text=self.translate("base_url_label"))
+        base_url_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((base_url_label, "base_url_label", "text"))
         self.base_url_entry = ttk.Entry(ocr_frame)
         self.base_url_entry.insert(0, "https://api.siliconflow.cn/v1/chat/completions")
         self.base_url_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(ocr_frame, text="API Key DeepSeek OCR").grid(row=row, column=0, sticky="w", pady=2)
+        api_key_deepseek_label = ttk.Label(ocr_frame, text=self.translate("api_key_deepseek_label"))
+        api_key_deepseek_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((api_key_deepseek_label, "api_key_deepseek_label", "text"))
         self.deepseek_api_entry = ttk.Entry(ocr_frame)
         self.deepseek_api_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(ocr_frame, text="Timeout DeepSeek OCR").grid(row=row, column=0, sticky="w", pady=2)
+        timeout_deepseek_label = ttk.Label(ocr_frame, text=self.translate("timeout_deepseek_label"))
+        timeout_deepseek_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((timeout_deepseek_label, "timeout_deepseek_label", "text"))
         self.deepseek_timeout_entry = SpinEntry(ocr_frame, step=1, default=30)
         self.deepseek_timeout_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(ocr_frame, text="Max Rate Limit Retries").grid(row=row, column=0, sticky="w", pady=2)
+        max_rate_limit_retries_label = ttk.Label(ocr_frame,
+                                                 text=self.translate("max_rate_limit_retries_label"))
+        max_rate_limit_retries_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((max_rate_limit_retries_label,
+                                          "max_rate_limit_retries_label", "text"))
         self.max_rate_limit_retries_entry = SpinEntry(ocr_frame, step=1, default=3)
         self.max_rate_limit_retries_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        other_frame = ttk.LabelFrame(settings_frame, text="Other", padding=5)
-        other_frame.grid(row=6, column=0, sticky="ew", padx=5, pady=5)
+        other_frame = ttk.LabelFrame(settings_frame,
+                                     text=self.translate("other_frame"), padding=5)
+        other_frame.grid(row=5, column=0, sticky="ew", padx=5, pady=5)
         other_frame.grid_columnconfigure(0, weight=0, minsize=160)
         other_frame.grid_columnconfigure(1, weight=1)
-
+        self.widgets_to_translate.append((other_frame, "other_frame", "text"))
         row = 0
-        ttk.Label(other_frame, text="Filter For Swearing").grid(row=row, column=0, sticky="w", pady=2)
+        filter_swearing_label = ttk.Label(other_frame,
+                                          text=self.translate("filter_swearing_label"))
+        filter_swearing_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((filter_swearing_label, "filter_swearing_label", "text"))
         self.filter_swearing_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(other_frame, variable=self.filter_swearing_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(other_frame, variable=self.filter_swearing_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(other_frame, text="Verbose").grid(row=row, column=0, sticky="w", pady=2)
+        verbose_label = ttk.Label(other_frame, text=self.translate("verbose_label"))
+        verbose_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((verbose_label, "verbose_label", "text"))
         self.verbose_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(other_frame, variable=self.verbose_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(other_frame, variable=self.verbose_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(other_frame, text="Echo").grid(row=row, column=0, sticky="w", pady=2)
+        echo_label = ttk.Label(other_frame, text=self.translate("echo_label"))
+        echo_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((echo_label, "echo_label", "text"))
         self.echo_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(other_frame, variable=self.echo_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(other_frame, variable=self.echo_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(other_frame, text="Type Computer").grid(row=row, column=0, sticky="w", pady=2)
-        self.type_computer_combobox = ttk.Combobox(other_frame, values=["auto"] + TYPES_POWER, state="readonly")
+        type_computer_label = ttk.Label(other_frame, text=self.translate("type_computer_label"))
+        type_computer_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((type_computer_label, "type_computer_label", "text"))
+        self.type_computer_combobox = ttk.Combobox(other_frame, values=["auto"] +
+                                                                       TYPES_POWER, state="readonly")
         self.type_computer_combobox.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
-
-        ttk.Label(other_frame, text="Proprietary Algorithms").grid(row=row, column=0, sticky="w", pady=2)
+        proprietary_algorithms_label = ttk.Label(other_frame,
+                                                 text=self.translate("proprietary_algorithms_label"))
+        proprietary_algorithms_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((proprietary_algorithms_label,
+                                          "proprietary_algorithms_label", "text"))
         self.proprietary_algorithms_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(other_frame, variable=self.proprietary_algorithms_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(other_frame, variable=self.proprietary_algorithms_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(other_frame, text="Writing Response To File").grid(row=row, column=0, sticky="w", pady=2)
+        writing_response_label = ttk.Label(other_frame, text=self.translate("writing_response_label"))
+        writing_response_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((writing_response_label, "writing_response_label", "text"))
         self.writing_response_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(other_frame, variable=self.writing_response_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(other_frame, variable=self.writing_response_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
-
-        ttk.Label(other_frame, text="Editing Files").grid(row=row, column=0, sticky="w", pady=2)
+        editing_files_label = ttk.Label(other_frame, text=self.translate("editing_files_label"))
+        editing_files_label.grid(row=row, column=0, sticky="w", pady=2)
+        self.widgets_to_translate.append((editing_files_label, "editing_files_label", "text"))
         self.editing_files_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(other_frame, variable=self.editing_files_var).grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0))
+        (ttk.Checkbutton(other_frame, variable=self.editing_files_var).
+         grid(row=row, column=1, sticky="w", pady=2, padx=(5, 0)))
         row += 1
 
     def create_chat_panel(self):
@@ -930,55 +1181,75 @@ class BiNeuronGUI:
         chat_frame.grid(row=0, column=1, sticky="nsew", padx=8, pady=8)
         chat_frame.grid_rowconfigure(1, weight=1)
         chat_frame.grid_columnconfigure(0, weight=1)
-
-        ttk.Label(chat_frame, text="Chat With AI", font=FONT_TITLE).grid(row=0, column=0, pady=(10, 5))
-
-        self.resume_button = ttk.Button(chat_frame, text="Resume pending request", command=self.resume_request)
+        chat_title = ttk.Label(chat_frame,
+                               text=self.translate("chat_title"),
+                               font=FONT_TITLE)
+        chat_title.grid(row=0, column=0, pady=(10, 5))
+        self.widgets_to_translate.append((chat_title, "chat_title", "text"))
+        self.resume_button = ttk.Button(chat_frame,
+                                        text=self.translate("resume_button_text"),
+                                        command=self.resume_request)
         self.resume_button.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 5))
         self.resume_button.grid_remove()
-
+        self.widgets_to_translate.append((self.resume_button, "resume_button_text", "text"))
         messages_container = tk.Frame(chat_frame, bg=BG_FRAME)
         messages_container.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
         messages_container.grid_rowconfigure(0, weight=1)
         messages_container.grid_columnconfigure(0, weight=1)
-
         self.messages_canvas = tk.Canvas(messages_container, bg=BG_FRAME, highlightthickness=0)
-        self.messages_scrollbar = ttk.Scrollbar(messages_container, orient="vertical", command=self.messages_canvas.yview)
+        self.messages_scrollbar = ttk.Scrollbar(messages_container,
+                                                orient="vertical",
+                                                command=self.messages_canvas.yview)
         self.messages_frame = tk.Frame(self.messages_canvas, bg=BG_FRAME)
-        self.messages_frame.bind("<Configure>", lambda e: self.messages_canvas.configure(scrollregion=self.messages_canvas.bbox("all")))
+        self.messages_frame.bind("<Configure>", lambda e: self.messages_canvas.
+                                 configure(scrollregion=self.messages_canvas.bbox("all")))
         self.messages_canvas.create_window((0, 0), window=self.messages_frame, anchor="nw")
         self.messages_canvas.configure(yscrollcommand=self.messages_scrollbar.set)
         self.messages_canvas.pack(side="left", fill="both", expand=True)
         self.messages_scrollbar.pack(side="right", fill="y")
-
         self.messages_canvas.bind("<Enter>", self._bind_mousewheel_messages)
         self.messages_canvas.bind("<Leave>", self._unbind_mousewheel_messages)
-
         self.messages_canvas.bind("<Configure>", self._on_messages_canvas_configure)
-
-        attached_frame = ttk.LabelFrame(chat_frame, text="Attached files", padding=5)
-        attached_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=5)
-        attached_frame.grid_columnconfigure(0, weight=1)
-        self.attached_textbox = tk.Text(attached_frame, height=3, bg=BG_ENTRY, fg=FG_TEXT, insertbackground=FG_TEXT,
-                                        relief="flat", borderwidth=1, highlightthickness=1,
-                                        highlightbackground=BORDER, highlightcolor=BORDER, state="disabled", wrap="word")
+        self.attached_frame = ttk.LabelFrame(chat_frame,
+                                             text=self.translate("attached_files_label"),
+                                             padding=5)
+        self.attached_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=5)
+        self.attached_frame.grid_columnconfigure(0, weight=1)
+        self.widgets_to_translate.append((self.attached_frame, "attached_files_label", "text"))
+        self.attached_textbox = tk.Text(self.attached_frame,
+                                        height=3,
+                                        bg=BG_ENTRY,
+                                        fg=FG_TEXT,
+                                        insertbackground=FG_TEXT,
+                                        relief="flat",
+                                        borderwidth=1,
+                                        highlightthickness=1,
+                                        highlightbackground=BORDER,
+                                        highlightcolor=BORDER,
+                                        state="disabled",
+                                        wrap="word")
         self.attached_textbox.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-
         input_frame = ttk.Frame(chat_frame)
         input_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=5)
         input_frame.grid_columnconfigure(0, weight=1)
         self.request_entry = ttk.Entry(input_frame)
         self.request_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
         self.request_entry.bind("<Return>", lambda event: self.send_message())
-        ttk.Button(input_frame, text="Upload", command=self.upload_files).grid(row=0, column=1, padx=2)
-        ttk.Button(input_frame, text="Send", command=self.send_message).grid(row=0, column=2, padx=2)
-
-        button_frame = ttk.Frame(chat_frame)
-        button_frame.grid(row=5, column=0, sticky="ew", padx=10, pady=(0,5))
-        button_frame.grid_columnconfigure(0, weight=1)
-        button_frame.grid_columnconfigure(1, weight=1)
-        ttk.Button(button_frame, text="Copy Chat", command=self.copy_chat).grid(row=0, column=0, sticky="ew", padx=2)
-        ttk.Button(button_frame, text="Download Chat", command=self.download_chat).grid(row=0, column=1, sticky="ew", padx=2)
+        upload_btn = ttk.Button(input_frame,
+                                text=self.translate("upload_btn"),
+                                command=self.upload_files)
+        upload_btn.grid(row=0, column=1, padx=2)
+        self.widgets_to_translate.append((upload_btn, "upload_btn", "text"))
+        send_btn = ttk.Button(input_frame,
+                              text=self.translate("send_btn"),
+                              command=self.send_message)
+        send_btn.grid(row=0, column=2, padx=2)
+        self.widgets_to_translate.append((send_btn, "send_btn", "text"))
+        copy_btn = ttk.Button(input_frame,
+                              text=self.translate("copy_chat_btn"),
+                              command=self.copy_chat)
+        copy_btn.grid(row=0, column=3, padx=2)
+        self.widgets_to_translate.append((copy_btn, "copy_chat_btn", "text"))
 
     def _on_messages_canvas_configure(self, event):
         self.messages_canvas.itemconfig(self.messages_canvas.find_withtag("all")[0], width=event.width)
@@ -992,67 +1263,92 @@ class BiNeuronGUI:
     def _on_mousewheel_messages(self, event):
         self.messages_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
+    def _is_scrolled_to_bottom(self):
+        if not hasattr(self, 'messages_canvas'):
+            return True
+        top, bottom = self.messages_canvas.yview()
+        return bottom >= 0.99
+
     def create_history_panel(self):
         history_outer = tk.Frame(self.root, bg=BG_MAIN)
         history_outer.grid(row=0, column=2, sticky="nsew", padx=8, pady=8)
         history_outer.grid_rowconfigure(2, weight=1)
         history_outer.grid_columnconfigure(0, weight=1)
-
         title_frame = ttk.Frame(history_outer)
         title_frame.grid(row=0, column=0, sticky="ew", pady=(10, 5), padx=5)
         title_frame.grid_columnconfigure(0, weight=1)
-
-        self.history_title = ttk.Label(title_frame, text="History", font=FONT_TITLE)
+        self.history_title = ttk.Label(title_frame,
+                                       text=self.translate("history_title"),
+                                       font=FONT_TITLE)
         self.history_title.grid(row=0, column=0, sticky="w")
-
+        self.widgets_to_translate.append((self.history_title, "history_title", "text"))
         self.virtual_storage_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(title_frame, text="Virtual Storage", variable=self.virtual_storage_var,
-                        command=self.switch_mode).grid(row=0, column=1, sticky="e", padx=10)
-
+        vs_check = ttk.Checkbutton(title_frame,
+                                   text=self.translate("virtual_storage_switch"),
+                                   variable=self.virtual_storage_var,
+                                   command=self.switch_mode)
+        vs_check.grid(row=0, column=1, sticky="e", padx=10)
+        self.widgets_to_translate.append((vs_check, "virtual_storage_switch", "text"))
         self.history_controls = ttk.Frame(history_outer)
         self.history_controls.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
         self.history_controls.grid_columnconfigure(0, weight=1)
         self.history_controls.grid_columnconfigure(1, weight=1)
         self.history_controls.grid_columnconfigure(2, weight=1)
-
         self.find_story_entry = ttk.Entry(self.history_controls)
         self.find_story_entry.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0, 5))
         self.find_story_entry.bind("<KeyRelease>", lambda e: self.filter_history())
-
-        ttk.Button(self.history_controls, text="Add", width=6, command=self.add_new_chat).grid(row=1, column=0, sticky="ew", padx=2)
-        ttk.Button(self.history_controls, text="Delete", width=6, command=self.delete_current_chat).grid(row=1, column=1, sticky="ew", padx=2)
-        ttk.Button(self.history_controls, text="Download", width=6, command=self.download_chat).grid(row=1, column=2, sticky="ew", padx=2)
-
+        add_btn = ttk.Button(self.history_controls,
+                             text=self.translate("add_btn"),
+                             width=6,
+                             command=self.add_new_chat)
+        add_btn.grid(row=1, column=0, sticky="ew", padx=2)
+        self.widgets_to_translate.append((add_btn, "add_btn", "text"))
+        delete_btn = ttk.Button(self.history_controls,
+                                text=self.translate("delete_btn"),
+                                width=6,
+                                command=self.delete_current_chat)
+        delete_btn.grid(row=1, column=1, sticky="ew", padx=2)
+        self.widgets_to_translate.append((delete_btn, "delete_btn", "text"))
+        download_btn = ttk.Button(self.history_controls,
+                                  text=self.translate("download_btn"),
+                                  width=6,
+                                  command=self.download_chat)
+        download_btn.grid(row=1, column=2, sticky="ew", padx=2)
+        self.widgets_to_translate.append((download_btn, "download_btn", "text"))
         self.storage_controls = ttk.Frame(history_outer)
         self.storage_controls.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
         self.storage_controls.grid_columnconfigure(0, weight=1)
         self.storage_controls.grid_columnconfigure(1, weight=1)
-
         self.storage_path_entry = ttk.Entry(self.storage_controls)
         self.storage_path_entry.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 5))
-
-        ttk.Button(self.storage_controls, text="Browse", width=6, command=self.browse_storage).grid(row=1, column=0, sticky="ew", padx=2)
-        ttk.Button(self.storage_controls, text="Refresh", width=6, command=self.refresh_storage).grid(row=1, column=1, sticky="ew", padx=2)
-
+        browse_btn = ttk.Button(self.storage_controls,
+                                text=self.translate("browse_btn"),
+                                width=6,
+                                command=self.browse_storage)
+        browse_btn.grid(row=1, column=0, sticky="ew", padx=2)
+        self.widgets_to_translate.append((browse_btn, "browse_btn", "text"))
+        refresh_btn = ttk.Button(self.storage_controls,
+                                 text=self.translate("refresh_btn"),
+                                 width=6,
+                                 command=self.refresh_storage)
+        refresh_btn.grid(row=1, column=1, sticky="ew", padx=2)
+        self.widgets_to_translate.append((refresh_btn, "refresh_btn", "text"))
         self.storage_controls.grid_remove()
-
         self.history_normal_frame = ScrollableFrame(history_outer)
         self.history_normal_frame.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
         self.history_tree_frame = tk.Frame(history_outer, bg=BG_FRAME)
         self.history_tree_frame.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
         self.history_tree_frame.grid_remove()
-
         self.current_chat_id = None
         self.chats = {}
         self.update_history_list()
-
         self.tree = None
 
     def show_welcome_placeholder(self):
         self.hide_welcome_placeholder()
+
         if not self.messages_frame.winfo_children():
-            self.welcome_label = tk.Label(self.messages_frame, text="Welcome to BiNeuron! How can I help?\n"
-                                                                   "(The GUI was created using the CLI version of the app)",
+            self.welcome_label = tk.Label(self.messages_frame, text=self.translate("welcome_text"),
                                          font=("Segoe UI", 12), fg=FG_DARK, bg=BG_FRAME,
                                          justify="center")
             self.welcome_label.pack(expand=True, fill="both")
@@ -1070,25 +1366,27 @@ class BiNeuronGUI:
     def update_attached_text(self):
         self.attached_textbox.config(state="normal")
         self.attached_textbox.delete("1.0", "end")
+
         if self.virtual_storage_var.get():
-            self.attached_textbox.insert("1.0", "All files in virtual storage")
+            self.attached_textbox.insert("1.0", self.translate("all_files_in_virtual_storage"))
         else:
             if self.attached_files:
                 self.attached_textbox.insert("1.0", "\n".join(self.attached_files))
+
         self.attached_textbox.config(state="disabled")
 
     def switch_mode(self):
         if self.virtual_storage_var.get():
             self.history_controls.grid_remove()
             self.storage_controls.grid()
-            self.history_title.config(text="Virtual Storage")
+            self.history_title.config(text=self.translate("history_title_virtual"))
             self.history_normal_frame.grid_remove()
             self.history_tree_frame.grid()
             self.build_tree()
         else:
             self.storage_controls.grid_remove()
             self.history_controls.grid()
-            self.history_title.config(text="History")
+            self.history_title.config(text=self.translate("history_title"))
             self.history_tree_frame.grid_remove()
             self.history_normal_frame.grid()
             self.update_history_list()
@@ -1108,19 +1406,24 @@ class BiNeuronGUI:
     def _build_tree_ui(self):
         for widget in self.history_tree_frame.winfo_children():
             widget.destroy()
+
         if not self.storage_path or not os.path.isdir(self.storage_path):
-            ttk.Label(self.history_tree_frame, text="No storage path selected").pack(pady=10)
+            ttk.Label(self.history_tree_frame, text=self.translate("no_storage_path")).pack(pady=10)
             return
+
         tree_container = tk.Frame(self.history_tree_frame, bg=BG_FRAME)
         tree_container.pack(fill="both", expand=True)
         scrollbar = ttk.Scrollbar(tree_container, orient="vertical")
         scrollbar.pack(side="right", fill="y")
-        self.tree = ttk.Treeview(tree_container, yscrollcommand=scrollbar.set, selectmode="browse")
+        self.tree = ttk.Treeview(tree_container,
+                                 yscrollcommand=scrollbar.set,
+                                 selectmode="browse")
         self.tree.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=self.tree.yview)
-
         self.virtual_tree_data = {}
-        root_node = self.tree.insert("", "end", text=os.path.basename(self.storage_path), open=True)
+        root_node = self.tree.insert("", "end",
+                                     text=os.path.basename(self.storage_path),
+                                     open=True)
         self.virtual_tree_data[root_node] = self.storage_path
         self._populate_tree(root_node, self.storage_path)
         self.tree.bind("<Double-1>", self.on_tree_double_click)
@@ -1132,6 +1435,7 @@ class BiNeuronGUI:
             return
         for item in items:
             full = os.path.join(path, item)
+
             if os.path.isdir(full):
                 node = self.tree.insert(parent, "end", text=item, open=True)
                 self.virtual_tree_data[node] = full
@@ -1144,6 +1448,7 @@ class BiNeuronGUI:
         item = self.tree.selection()[0] if self.tree.selection() else None
         if item and item in self.virtual_tree_data:
             path = self.virtual_tree_data[item]
+
             if os.path.isfile(path):
                 try:
                     if os.name == 'nt':
@@ -1155,6 +1460,7 @@ class BiNeuronGUI:
 
     def browse_storage(self):
         path = filedialog.askdirectory(title="Select Virtual Storage Folder")
+
         if path:
             self.storage_path = path
             self.storage_path_entry.delete(0, "end")
@@ -1173,7 +1479,8 @@ class BiNeuronGUI:
         for chat_id, chat_data in self.chats.items():
             messages = chat_data.get("messages", [])
             first_user_msg = next((m["content"] for m in messages if m.get("role") == "user"), "")
-            title = first_user_msg[:30] + ("..." if len(first_user_msg) > 30 else "") if first_user_msg else "Empty chat"
+            title = first_user_msg[:30] + ("..." if len(first_user_msg) > 30 else "") \
+                if first_user_msg else "Empty chat"
             created_at = chat_data.get("created_at", "Unknown date")
             btn_text = f"{created_at} - {title}"
             btn = tk.Button(self.history_normal_frame.get_frame(), text=btn_text,
@@ -1182,7 +1489,8 @@ class BiNeuronGUI:
                             relief='flat', activebackground=ACCENT_HOVER, activeforeground='white',
                             font=FONT_MAIN, padx=5, pady=2)
             btn.pack(fill="x", padx=5, pady=2)
-        self.history_normal_frame.canvas.configure(scrollregion=self.history_normal_frame.canvas.bbox("all"))
+        (self.history_normal_frame.canvas.
+         configure(scrollregion=self.history_normal_frame.canvas.bbox("all")))
         self.history_normal_frame.canvas.yview_moveto(0.0)
 
     def filter_history(self):
@@ -1192,16 +1500,21 @@ class BiNeuronGUI:
         for chat_id, chat_data in self.chats.items():
             messages = chat_data.get("messages", [])
             first_user_msg = next((m["content"] for m in messages if m.get("role") == "user"), "")
-            title = first_user_msg[:30] + ("..." if len(first_user_msg) > 30 else "") if first_user_msg else "Empty chat"
+            title = first_user_msg[:30] + ("..." if len(first_user_msg) > 30 else "") \
+                if first_user_msg else "Empty chat"
             created_at = chat_data.get("created_at", "Unknown date")
+
             if query in f"{created_at} {title}".lower():
                 btn = tk.Button(self.history_normal_frame.get_frame(), text=f"{created_at} - {title}",
                                 command=lambda cid=chat_id: self.load_chat(cid),
                                 anchor='w', justify='left', bg=BG_FRAME, fg=FG_TEXT,
-                                relief='flat', activebackground=ACCENT_HOVER, activeforeground='white',
+                                relief='flat',
+                                activebackground=ACCENT_HOVER,
+                                activeforeground='white',
                                 font=FONT_MAIN, padx=5, pady=2)
                 btn.pack(fill="x", padx=5, pady=2)
-        self.history_normal_frame.canvas.configure(scrollregion=self.history_normal_frame.canvas.bbox("all"))
+        (self.history_normal_frame.canvas.
+         configure(scrollregion=self.history_normal_frame.canvas.bbox("all")))
         self.history_normal_frame.canvas.yview_moveto(0.0)
 
     def add_new_chat(self):
@@ -1231,6 +1544,7 @@ class BiNeuronGUI:
         self.current_chat_id = chat_id
         self.clear_messages()
         messages = self.chats[chat_id].get("messages", [])
+
         if not messages:
             self.show_welcome_placeholder()
         else:
@@ -1239,7 +1553,6 @@ class BiNeuronGUI:
                 if role in ("user", "assistant"):
                     self.display_message(role, msg["content"], msg.get("timestamp", ""))
                 elif role == "system":
-                    # Do not save again; only display
                     self.display_log_message(msg["content"], save=False)
         self.check_pending_message()
         self.messages_canvas.yview_moveto(1.0)
@@ -1247,6 +1560,7 @@ class BiNeuronGUI:
     def display_message(self, role, content, timestamp=None):
         if role not in ("user", "assistant"):
             return
+
         if timestamp is None:
             timestamp = datetime.now().strftime("%H:%M")
         self.hide_welcome_placeholder()
@@ -1255,23 +1569,30 @@ class BiNeuronGUI:
             bg = "#3a3a3a"
         else:
             bg = "#2d2d2d"
+
+        was_at_bottom = self._is_scrolled_to_bottom()
+
         bubble = tk.Frame(self.messages_frame, bg=bg, bd=0)
         bubble.pack(fill="x", padx=10, pady=5, anchor="e" if role == "user" else "w")
-
         canvas_width = self.messages_canvas.winfo_width()
         wrap_length = max(200, canvas_width - 50)
-
-        label = tk.Label(bubble, text=content, wraplength=wrap_length, justify="left",
+        label = tk.Label(bubble,
+                         text=content,
+                         wraplength=wrap_length,
+                         justify="left",
                          fg=FG_TEXT, bg=bg, font=FONT_MAIN)
         label.pack(padx=10, pady=(10, 5), anchor="w")
-
         bottom = tk.Frame(bubble, bg=bg)
         bottom.pack(fill="x", padx=10, pady=(0, 5))
-
-        time_label = tk.Label(bottom, text=timestamp, font=FONT_SMALL, fg=FG_DARK, bg=bg)
+        time_label = tk.Label(bottom,
+                              text=timestamp,
+                              font=FONT_SMALL,
+                              fg=FG_DARK,
+                              bg=bg)
         time_label.pack(side="left")
 
-        self.messages_canvas.yview_moveto(1.0)
+        if was_at_bottom:
+            self.messages_canvas.yview_moveto(1.0)
 
     def copy_to_clipboard(self, text):
         self.root.clipboard_clear()
@@ -1282,26 +1603,33 @@ class BiNeuronGUI:
         if self.current_chat_id is None or self.current_chat_id not in self.chats:
             return
         messages = self.chats[self.current_chat_id].get("messages", [])
+
         if not messages:
             return
+
         lines = []
         for msg in messages:
             role = msg.get("role")
             content = msg.get("content", "")
+
             if role == "system":
                 prefix = "LOG"
             else:
                 prefix = role.capitalize()
+
             lines.append(f"{prefix}: {content}")
         text = "\n".join(lines)
         self.copy_to_clipboard(text)
-        messagebox.showinfo("Info", "Chat copied to clipboard.")
+        messagebox.showinfo(self.translate("success_info"),
+                            self.translate("chat_saved"))
 
     def send_message(self):
         if self.is_busy:
-            messagebox.showinfo("Info", "AI is busy. Please wait.")
+            messagebox.showinfo(self.translate("success_info"),
+                                self.translate("info_ai_busy"))
             return
         user_text = self.request_entry.get().strip()
+
         if not user_text:
             return
 
@@ -1319,7 +1647,8 @@ class BiNeuronGUI:
                     "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "messages": []
                 }
-            self.chats[self.current_chat_id]["messages"].append({"role": "user", "content": user_text, "timestamp": now})
+            (self.chats[self.current_chat_id]["messages"].
+             append({"role": "user", "content": user_text, "timestamp": now}))
             self.save_chats_to_file()
             self.update_history_list()
 
@@ -1332,14 +1661,15 @@ class BiNeuronGUI:
     def collect_parameters(self):
         def parse_textbox_list(widget):
             text = widget.get("1.0", "end-1c").strip()
+
             if not text:
                 return []
             return [line.strip() for line in text.splitlines() if line.strip()]
 
         virtual_storage = self.virtual_storage_var.get()
         virtual_storage_path = self.storage_path if virtual_storage else None
-
         additional = []
+
         if virtual_storage and self.storage_path and os.path.isdir(self.storage_path):
             for root, dirs, files in os.walk(self.storage_path):
                 for f in files:
@@ -1365,7 +1695,8 @@ class BiNeuronGUI:
             "protocol": self.protocol_combobox.get(),
             "max_timeout": self.max_timeout_entry.get_int(default=30),
             "is_working": self.is_working_var.get(),
-            "type_computer": self.type_computer_combobox.get() if self.type_computer_combobox.get() != "auto" else None,
+            "type_computer": self.type_computer_combobox.get()
+            if self.type_computer_combobox.get() != "auto" else None,
             "auto_proxies": self.auto_proxies_var.get(),
             "writing_response_to_file": self.writing_response_var.get(),
             "editing_files": self.editing_files_var.get(),
@@ -1421,59 +1752,73 @@ class BiNeuronGUI:
         try:
             while True:
                 msg_type, data = self.message_queue.get_nowait()
+
                 if msg_type == "response":
                     now = datetime.now().strftime("%H:%M")
                     self.display_message("assistant", data, now)
+
                     if self.current_chat_id is not None:
                         if self.current_chat_id in self.chats:
-                            self.chats[self.current_chat_id]["messages"].append({"role": "assistant", "content": data, "timestamp": now})
+                            (self.chats[self.current_chat_id]["messages"].
+                             append({"role": "assistant", "content": data, "timestamp": now}))
                             self.save_chats_to_file()
                             self.update_history_list()
                             self.resume_button.grid_remove()
                 elif msg_type == "error":
-                    messagebox.showerror("Error", data)
+                    messagebox.showerror(self.translate("error_occurred"), data)
                 elif msg_type == "done":
                     self.is_busy = False
+
         except queue.Empty:
             pass
         self.root.after(100, self.poll_queue)
 
     def check_pending_message(self):
         self.resume_button.grid_remove()
+
         if self.current_chat_id is None or self.current_chat_id not in self.chats:
             return
         messages = self.chats[self.current_chat_id].get("messages", [])
+
         if not messages:
             return
+
         last_user_idx = -1
         for i, msg in enumerate(messages):
             if msg.get("role") == "user":
                 last_user_idx = i
+
         if last_user_idx == -1:
             return
+
         if last_user_idx == len(messages) - 1:
             self.resume_button.grid()
-            self.resume_button.config(text="Resume pending request")
+            self.resume_button.config(text=self.translate("resume_button_text"))
         else:
             self.resume_button.grid_remove()
 
     def resume_request(self):
         if self.is_busy:
             return
+
         if self.current_chat_id is None:
             return
+
         messages = self.chats[self.current_chat_id].get("messages", [])
         last_user_msg = None
         for msg in reversed(messages):
             if msg.get("role") == "user":
                 last_user_msg = msg["content"]
                 break
+
         if last_user_msg is None:
             return
+
         if messages and messages[-1].get("role") == "assistant":
             messages.pop()
             self.save_chats_to_file()
             self.load_chat(self.current_chat_id)
+
         self.resume_button.grid_remove()
         self.is_busy = True
         thread = threading.Thread(target=self.process_request, args=(last_user_msg,))
@@ -1482,20 +1827,27 @@ class BiNeuronGUI:
 
     def export_all_chats(self):
         if not self.chats:
-            messagebox.showinfo("Info", "No chats to export.")
+            messagebox.showinfo(self.translate("success_info"), self.translate("no_chats"))
             return
+
         folder = filedialog.askdirectory(title="Select folder to export all chats")
+
         if not folder:
             return
+
         count = 0
         for chat_id, chat_data in self.chats.items():
             messages = chat_data.get("messages", [])
+
             if not messages:
                 continue
+
             first_user = next((m["content"] for m in messages if m.get("role") == "user"), "empty")
             safe_title = "".join(c for c in first_user[:30] if c.isalnum() or c in (' ', '_')).strip()
+
             if not safe_title:
                 safe_title = "chat"
+
             timestamp = chat_data.get("created_at", "unknown").replace(":", "-").replace(" ", "_")
             filename = f"{timestamp}_{safe_title}.txt"
             filepath = os.path.join(folder, filename)
@@ -1503,13 +1855,18 @@ class BiNeuronGUI:
                 for msg in messages:
                     f.write(f"{msg['role'].capitalize()}: {msg['content']}\n")
             count += 1
-        messagebox.showinfo("Export", f"Exported {count} chat(s) to {folder}")
+        messagebox.showinfo(self.translate("export_success"),
+                            self.translate("export_all_success",
+                                           count=count, folder=folder))
 
     def delete_all_chats(self):
         if not self.chats:
             return
-        if not messagebox.askyesno("Delete All", "Are you sure you want to delete ALL chats?"):
+
+        if not messagebox.askyesno(self.translate("delete_all_title"),
+                                   self.translate("delete_all_confirm")):
             return
+
         self.chats.clear()
         self.add_new_chat()
         self.save_chats_to_file()
@@ -1518,21 +1875,26 @@ class BiNeuronGUI:
 
     def download_chat(self):
         if self.current_chat_id is None:
-            messagebox.showwarning("Warning", "No chat selected.")
+            messagebox.showwarning(self.translate("warning_info"),
+                                   self.translate("no_chat_selected"))
             return
+
         file_path = filedialog.asksaveasfilename(defaultextension=".txt",
                                                  filetypes=[("Text files", "*.txt")])
         if file_path:
             with open(file_path, "w", encoding="utf-8") as f:
                 for msg in self.chats[self.current_chat_id]["messages"]:
                     f.write(f"{msg['role'].capitalize()}: {msg['content']}\n")
-            messagebox.showinfo("Success", "Chat saved.")
+            messagebox.showinfo(self.translate("success_info"), self.translate("chat_saved"))
 
     def upload_files(self):
         if self.virtual_storage_var.get():
-            messagebox.showinfo("Info", "Virtual storage is active. Use the virtual storage path.")
+            messagebox.showinfo(self.translate("success_info"),
+                                self.translate("info_virtual_storage_active"))
             return
+
         files = filedialog.askopenfilenames()
+
         if files:
             self.attached_files = list(files)
             self.update_attached_text()

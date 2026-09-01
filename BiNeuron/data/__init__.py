@@ -15,3 +15,5 @@ from .prompt_for_ocr import PROMPT
 from .model_repo_map import MODEL_REPO_MAP
 from .prompt_for_json_formatter import PROMPT_FOR_JSON_FORMATTER
 from .supported_formats_and_writemode import *
+from .translated_ui import TRANSLATED_UI
+from .fonts_and_colors import *

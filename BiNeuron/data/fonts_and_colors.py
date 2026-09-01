@@ -1,0 +1,20 @@
+BG_MAIN = "#1e1e1e"
+BG_FRAME = "#252526"
+BG_ENTRY = "#3c3c3c"
+BG_TEXT = "#1e1e1e"
+FG_TEXT = "#d4d4d4"
+FG_DARK = "#808080"
+ACCENT = "#007acc"
+ACCENT_HOVER = "#1a8cff"
+BORDER = "#3f3f46"
+SELECT_BG = "#094771"
+TREE_BG = "#252526"
+TREE_FG = "#d4d4d4"
+TREE_SELECT_BG = "#094771"
+TREE_SELECT_FG = "#ffffff"
+
+FONT_MAIN = ("Segoe UI", 10)
+FONT_BOLD = ("Segoe UI", 11, "bold")
+FONT_TITLE = ("Segoe UI", 14, "bold")
+FONT_SECTION = ("Segoe UI", 12, "bold")
+FONT_SMALL = ("Segoe UI", 9)

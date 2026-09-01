@@ -349,6 +349,10 @@ def main(request: str,
     except Exception as e:
         click.echo(f"Error - {e}")
         raise click.Abort()
+    finally:
+        import sys
+        if len(sys.argv) == 1 or ('--help' in sys.argv) or ('-h' in sys.argv):
+            input("\nPress Enter to exit...")
 
 
 if __name__ == "__main__":
