@@ -1,4 +1,5 @@
 NATURAL_LANGUAGES = {
     "English": "en",
-    "Русский": "ru"
+    "Русский": "ru",
+    "中文": "zh",
 }

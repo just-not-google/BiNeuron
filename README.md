@@ -62,7 +62,7 @@ BiNeuron is engineered with a modular, separation‑of‑concerns design:
 - **File Editing Module** – applies JSON‑based file changes (whole-file replacements) with error handling and retry logic.  
 - **Translation Service** – provides language detection and translation utilities, with optional DeepL integration.  
 - **Network Layer** – implements proxy rotation, availability checks, and GitHub proxy fetching for circumventing restrictions.  
-- **User Interfaces** – a feature‑rich graphical interface built with CustomTkinter, and a comprehensive command‑line interface powered by Click.  
+- **Graphical User Interface** – a feature‑rich desktop application built with Tkinter for seamless interaction.  
 
 The architecture emphasises reusability, fault tolerance, and performance, allowing each component to operate independently while seamlessly integrating with the others.  
 
@@ -73,8 +73,7 @@ The architecture emphasises reusability, fault tolerance, and performance, allow
 - **EasyOCR, DeepSeek OCR** – optical character recognition  
 - **deep‑translator, DeepL** – translation services  
 - **PyMuPDF, docx2txt, python‑pptx, odfpy** – document parsing  
-- **Tkinter** – modern, themeable GUI  
-- **Click** – command‑line interface  
+- **Tkinter** – modern, themeable graphical interface  
 - **requests, httpx** – network communication  
 - **psutil, multiprocessing** – system resource monitoring and benchmarking  
 - **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** – lightweight JSON formatter for file editing
@@ -83,10 +82,9 @@ The architecture emphasises reusability, fault tolerance, and performance, allow
 
 BiNeuron leverages a hand‑picked collection of open‑source code generation models, each fine‑tuned for specific programming languages. The repository includes models from DeepSeek, Qwen, MiniMax, CodeLlama, Mellum, and Wizard, among others. The system automatically fetches the appropriate model based on the detected language and the user’s hardware profile, ensuring optimal performance for every session.  
 
-## User Interfaces  
+## Graphical Interface  
 
-### Graphical Interface  
-A desktop application built with CustomTkinter, offering:  
+A desktop application built with Tkinter, offering:  
 - **Intuitive Chat Interface** – message history, file attachments, and real‑time log display.  
 - **Virtual Storage Explorer** – scan and navigate directories in a tree view.  
 - **Comprehensive Settings Panel** – fine‑tune every aspect of the platform: network, model selection, OCR, translation, and more.  
@@ -94,8 +92,7 @@ A desktop application built with CustomTkinter, offering:
 - **Live Logging** – see what the AI is doing in real time.  
 - **Dark Theme** – optimized for long coding sessions.  
 
-### Command‑Line Interface  
-A Click‑based CLI that exposes the full functionality of BiNeuron through terminal arguments, making it suitable for automation, scripting, and integration into CI/CD pipelines.  
+The application is designed to be user‑friendly, allowing developers to focus on coding while the AI handles the heavy lifting of language detection, file processing, and model orchestration.
 
 > BiNeuron represents a fusion of cutting‑edge AI, robust software engineering, and practical usability—empowering developers to focus on creativity and problem‑solving while the platform handles the complexities of language detection, file processing, and model orchestration.
 
@@ -156,7 +153,7 @@ BiNeuron спроектирован по модульному принципу �
 - **Модуль редактирования файлов** – применяет изменения на основе JSON (полная замена файлов) с обработкой ошибок и повторными попытками.  
 - **Сервис перевода** – предоставляет функции определения языка и перевода, с опциональной интеграцией DeepL.  
 - **Сетевой уровень** – реализует ротацию прокси, проверку доступности и получение прокси из GitHub для обхода ограничений.  
-- **Пользовательские интерфейсы** – насыщенный графический интерфейс на CustomTkinter и полнофункциональный интерфейс командной строки на Click.  
+- **Графический интерфейс** – насыщенное десктопное приложение на Tkinter для удобного взаимодействия.  
 
 Архитектура делает упор на переиспользуемость, отказоустойчивость и производительность, позволяя каждому компоненту работать независимо, но при этом бесшовно интегрироваться с другими.  
 
@@ -167,8 +164,7 @@ BiNeuron спроектирован по модульному принципу �
 - **EasyOCR, DeepSeek OCR** – оптическое распознавание символов  
 - **deep‑translator, DeepL** – сервисы перевода  
 - **PyMuPDF, docx2txt, python‑pptx, odfpy** – парсинг документов  
-- **Tkinter** – современный, настраиваемый GUI  
-- **Click** – интерфейс командной строки  
+- **Tkinter** – современный, настраиваемый графический интерфейс  
 - **requests, httpx** – сетевое взаимодействие  
 - **psutil, multiprocessing** – мониторинг системных ресурсов и бенчмаркинг  
 - **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** – лёгкий форматтер JSON для редактирования файлов
@@ -177,10 +173,9 @@ BiNeuron спроектирован по модульному принципу �
 
 BiNeuron использует тщательно подобранную коллекцию открытых моделей генерации кода, каждая из которых дообучена для конкретных языков программирования. В репозиторий входят модели от DeepSeek, Qwen, MiniMax, CodeLlama, Mellum, Wizard и других. Система автоматически загружает подходящую модель на основе определённого языка и аппаратного профиля пользователя, обеспечивая оптимальную производительность в каждом сеансе.  
 
-## Пользовательские интерфейсы  
+## Графический интерфейс  
 
-### Графический интерфейс  
-Десктопное приложение на CustomTkinter, предлагающее:  
+Десктопное приложение на Tkinter, предлагающее:  
 - **Интуитивный чат** – история сообщений, прикрепление файлов и отображение логов в реальном времени.  
 - **Обозреватель виртуального хранилища** – сканирование и навигация по директориям в виде дерева.  
 - **Всеобъемлющая панель настроек** – тонкая настройка каждого аспекта платформы: сеть, выбор модели, OCR, перевод и многое другое.  
@@ -188,8 +183,7 @@ BiNeuron использует тщательно подобранную колл
 - **Live‑логи** – просмотр действий ИИ в реальном времени.  
 - **Тёмная тема** – оптимизирована для длительных сессий разработки.  
 
-### Интерфейс командной строки  
-CLI на базе Click, открывающий всю функциональность BiNeuron через аргументы терминала, что делает его пригодным для автоматизации, скриптов и интеграции в CI/CD пайплайны.  
+Приложение разработано с упором на удобство, позволяя разработчикам сосредоточиться на коде, пока ИИ берёт на себя сложности определения языка, обработки файлов и оркестрации моделей.
 
 > BiNeuron представляет собой синтез передового ИИ, надёжной инженерии и практической полезности, позволяя разработчикам сосредоточиться на творчестве и решении задач, пока платформа берёт на себя сложности определения языка, обработки файлов и оркестрации моделей.
 

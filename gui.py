@@ -7,6 +7,7 @@ import traceback
 import json
 import os
 import sys
+import time
 from datetime import datetime
 from BiNeuron import BiNeuron
 from BiNeuron.data.constants_for_functions import (HTTP_PROTOCOL, HTTPS_PROTOCOL,
@@ -141,7 +142,9 @@ class ScrollableFrame(ttk.Frame):
 class BiNeuronGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("BiNeuron")
+        self.translations = TRANSLATED_UI
+        self.current_lang = "en"
+
         self.root.geometry("1500x900")
         self.root.minsize(1500, 900)
         self.root.iconbitmap(resource_path("img_files/logo.ico"))
@@ -149,6 +152,7 @@ class BiNeuronGUI:
         self.style = ttk.Style()
         self.style.theme_use("clam")
         self._setup_styles()
+
         self.alex_instance = None
         self.is_busy = False
         self.is_scanning = False
@@ -160,16 +164,31 @@ class BiNeuronGUI:
         self.storage_path_file = "storage_path.json"
         self.settings_file = "settings.json"
         self.storage_path = self.load_storage_path()
-        self.translations = TRANSLATED_UI
+
+        for lang in self.translations:
+            if 'copy_message' not in self.translations[lang]:
+                self.translations[lang]['copy_message'] = 'Copy' if lang == 'en' else 'Копировать'
+
         self.widgets_to_translate = []
         self.select_language()
+        self.root.title(self.translate("title"))
+
+        self.status_phrases = self.translations[self.current_lang].get("status_phrases", [
+            "Processing request...", "Thinking...", "Analyzing data...",
+            "Generating response...", "Working on it...", "Almost there...",
+            "Consulting the AI...", "Crunching numbers...", "Reading files...",
+            "Optimizing answer..."
+        ])
+
         self.root.grid_columnconfigure(0, weight=1, uniform="main", minsize=320)
         self.root.grid_columnconfigure(1, weight=4, uniform="main")
         self.root.grid_columnconfigure(2, weight=1, uniform="main", minsize=200)
         self.root.grid_rowconfigure(0, weight=1)
+
         self.create_settings_panel()
         self.create_chat_panel()
         self.create_history_panel()
+
         self.setup_logging()
         self.load_chats_from_file()
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -179,6 +198,9 @@ class BiNeuronGUI:
         self.check_pending_message()
         self.load_settings()
         self.apply_language()
+
+        self.request_start_time = None
+        self.request_timer_id = None
 
     def _setup_styles(self):
         self.style.configure(".",
@@ -344,6 +366,12 @@ class BiNeuronGUI:
         if self.welcome_label is not None:
             self.welcome_label.config(text=self.translate("welcome_text"))
 
+        self.status_phrases = self.translations[self.current_lang].get("status_phrases", [
+            "Processing request...", "Thinking...", "Analyzing data...",
+            "Generating response...", "Working on it...", "Almost there...",
+            "Consulting the AI...", "Crunching numbers...", "Reading files...",
+            "Optimizing answer..."
+        ])
         self.update_attached_text()
 
     def setup_logging(self):
@@ -680,6 +708,11 @@ class BiNeuronGUI:
         self.save_settings()
         messagebox.showinfo(self.translate("success_info"), self.translate("settings_reset"))
 
+    def apply_settings(self):
+        self.save_settings()
+        messagebox.showinfo(self.translate("success_info"),
+                            self.translate("settings_applied"))
+
     def load_chats_from_file(self):
         if os.path.exists(self.chats_file):
             try:
@@ -740,6 +773,7 @@ class BiNeuronGUI:
         btn_frame.grid_columnconfigure(0, weight=1)
         btn_frame.grid_columnconfigure(1, weight=1)
         btn_frame.grid_columnconfigure(2, weight=1)
+        btn_frame.grid_columnconfigure(3, weight=1)
         reset_btn = ttk.Button(btn_frame,
                                text=self.translate("reset_btn"),
                                width=10,
@@ -758,6 +792,13 @@ class BiNeuronGUI:
                                 command=self.delete_all_chats)
         delete_btn.grid(row=0, column=2, sticky="ew", padx=2)
         self.widgets_to_translate.append((delete_btn, "delete_all_btn", "text"))
+        apply_btn = ttk.Button(btn_frame,
+                               text=self.translate("apply_settings_btn"),
+                               width=10,
+                               command=self.apply_settings)
+        apply_btn.grid(row=0, column=3, sticky="ew", padx=2)
+        self.widgets_to_translate.append((apply_btn, "apply_settings_btn", "text"))
+
         network_frame = ttk.LabelFrame(settings_frame,
                                        text=self.translate("network_frame"),
                                        padding=5)
@@ -875,6 +916,7 @@ class BiNeuronGUI:
         self.main_retries_entry = SpinEntry(network_frame, step=1, default=3)
         self.main_retries_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
+
         model_frame = ttk.LabelFrame(settings_frame, text=self.translate("model_frame"), padding=5)
         model_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
         model_frame.grid_columnconfigure(0, weight=0, minsize=160)
@@ -984,6 +1026,7 @@ class BiNeuronGUI:
         self.temperature_entry = SpinEntry(model_frame, step=0.1, default=0.1)
         self.temperature_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
+
         translator_frame = ttk.LabelFrame(settings_frame,
                                           text=self.translate("translator_frame"),
                                           padding=5)
@@ -1024,6 +1067,7 @@ class BiNeuronGUI:
         self.request_language_entry.insert(0, "en")
         self.request_language_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
+
         ocr_frame = ttk.LabelFrame(settings_frame, text=self.translate("ocr_frame"), padding=5)
         ocr_frame.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
         ocr_frame.grid_columnconfigure(0, weight=0, minsize=160)
@@ -1116,6 +1160,7 @@ class BiNeuronGUI:
         self.max_rate_limit_retries_entry = SpinEntry(ocr_frame, step=1, default=3)
         self.max_rate_limit_retries_entry.grid(row=row, column=1, sticky="ew", pady=2, padx=(5, 0))
         row += 1
+
         other_frame = ttk.LabelFrame(settings_frame,
                                      text=self.translate("other_frame"), padding=5)
         other_frame.grid(row=5, column=0, sticky="ew", padx=5, pady=5)
@@ -1179,13 +1224,18 @@ class BiNeuronGUI:
     def create_chat_panel(self):
         chat_frame = tk.Frame(self.root, bg=BG_MAIN)
         chat_frame.grid(row=0, column=1, sticky="nsew", padx=8, pady=8)
-        chat_frame.grid_rowconfigure(1, weight=1)
+        chat_frame.grid_rowconfigure(3, weight=1)
         chat_frame.grid_columnconfigure(0, weight=1)
         chat_title = ttk.Label(chat_frame,
                                text=self.translate("chat_title"),
                                font=FONT_TITLE)
         chat_title.grid(row=0, column=0, pady=(10, 5))
         self.widgets_to_translate.append((chat_title, "chat_title", "text"))
+        self.status_frame = ttk.Frame(chat_frame)
+        self.status_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 5))
+        self.status_frame.grid_columnconfigure(0, weight=1)
+        self.status_label = ttk.Label(self.status_frame, text="", font=FONT_SMALL)
+        self.status_label.grid(row=0, column=0, sticky="w")
         self.resume_button = ttk.Button(chat_frame,
                                         text=self.translate("resume_button_text"),
                                         command=self.resume_request)
@@ -1193,7 +1243,7 @@ class BiNeuronGUI:
         self.resume_button.grid_remove()
         self.widgets_to_translate.append((self.resume_button, "resume_button_text", "text"))
         messages_container = tk.Frame(chat_frame, bg=BG_FRAME)
-        messages_container.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
+        messages_container.grid(row=3, column=0, sticky="nsew", padx=10, pady=5)
         messages_container.grid_rowconfigure(0, weight=1)
         messages_container.grid_columnconfigure(0, weight=1)
         self.messages_canvas = tk.Canvas(messages_container, bg=BG_FRAME, highlightthickness=0)
@@ -1213,7 +1263,7 @@ class BiNeuronGUI:
         self.attached_frame = ttk.LabelFrame(chat_frame,
                                              text=self.translate("attached_files_label"),
                                              padding=5)
-        self.attached_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=5)
+        self.attached_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=5)
         self.attached_frame.grid_columnconfigure(0, weight=1)
         self.widgets_to_translate.append((self.attached_frame, "attached_files_label", "text"))
         self.attached_textbox = tk.Text(self.attached_frame,
@@ -1230,7 +1280,7 @@ class BiNeuronGUI:
                                         wrap="word")
         self.attached_textbox.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
         input_frame = ttk.Frame(chat_frame)
-        input_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=5)
+        input_frame.grid(row=5, column=0, sticky="ew", padx=10, pady=5)
         input_frame.grid_columnconfigure(0, weight=1)
         self.request_entry = ttk.Entry(input_frame)
         self.request_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
@@ -1339,10 +1389,55 @@ class BiNeuronGUI:
         self.history_tree_frame = tk.Frame(history_outer, bg=BG_FRAME)
         self.history_tree_frame.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
         self.history_tree_frame.grid_remove()
+        self.models_frame = ttk.LabelFrame(history_outer,
+                                           text=self.translate("gguf_models_frame"),
+                                           padding=5)
+        self.models_frame.grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
+        self.models_frame.grid_rowconfigure(1, weight=1)
+        self.models_frame.grid_columnconfigure(0, weight=1)
+        self.widgets_to_translate.append((self.models_frame, "gguf_models_frame", "text"))
+        self.models_buttons_frame = ttk.Frame(self.models_frame)
+        self.models_buttons_frame.grid(row=0, column=0, sticky="ew", pady=(0, 5))
+        self.models_buttons_frame.grid_columnconfigure(0, weight=1)
+        self.refresh_models_btn = ttk.Button(self.models_buttons_frame,
+                                             text=self.translate("refresh_models_btn"),
+                                             command=self.refresh_gguf_models)
+        self.refresh_models_btn.grid(row=0, column=0, sticky="ew")
+        self.widgets_to_translate.append((self.refresh_models_btn, "refresh_models_btn", "text"))
+        self.models_listbox = tk.Listbox(self.models_frame,
+                                         bg=BG_ENTRY,
+                                         fg=FG_TEXT,
+                                         selectbackground=TREE_SELECT_BG,
+                                         selectforeground=TREE_SELECT_FG,
+                                         relief="flat",
+                                         borderwidth=1,
+                                         highlightthickness=1,
+                                         highlightbackground=BORDER,
+                                         highlightcolor=BORDER)
+        self.models_listbox.grid(row=1, column=0, sticky="nsew")
         self.current_chat_id = None
         self.chats = {}
         self.update_history_list()
         self.tree = None
+
+    def refresh_gguf_models(self):
+        models_dir = self.models_dir_entry.get().strip()
+        if not models_dir or not os.path.isdir(models_dir):
+            self.models_listbox.delete(0, tk.END)
+            self.models_listbox.insert(tk.END, self.translate("no_models_dir"))
+            return
+        gguf_files = []
+        for root, dirs, files in os.walk(models_dir):
+            for f in files:
+                if f.lower().endswith(".gguf"):
+                    rel_path = os.path.relpath(os.path.join(root, f), models_dir)
+                    gguf_files.append(rel_path)
+        self.models_listbox.delete(0, tk.END)
+        if not gguf_files:
+            self.models_listbox.insert(tk.END, self.translate("no_gguf_models"))
+        else:
+            for f in sorted(gguf_files):
+                self.models_listbox.insert(tk.END, f)
 
     def show_welcome_placeholder(self):
         self.hide_welcome_placeholder()
@@ -1590,6 +1685,11 @@ class BiNeuronGUI:
                               fg=FG_DARK,
                               bg=bg)
         time_label.pack(side="left")
+        copy_btn = ttk.Button(bottom,
+                              text=self.translate("copy_message"),
+                              width=8,
+                              command=lambda: self.copy_to_clipboard(content))
+        copy_btn.pack(side="right")
 
         if was_at_bottom:
             self.messages_canvas.yview_moveto(1.0)
@@ -1654,6 +1754,7 @@ class BiNeuronGUI:
 
         self.resume_button.grid_remove()
         self.is_busy = True
+        self.start_request_timer()
         thread = threading.Thread(target=self.process_request, args=(user_text,))
         thread.daemon = True
         thread.start()
@@ -1766,12 +1867,36 @@ class BiNeuronGUI:
                             self.resume_button.grid_remove()
                 elif msg_type == "error":
                     messagebox.showerror(self.translate("error_occurred"), data)
+                    self.stop_request_timer()
                 elif msg_type == "done":
                     self.is_busy = False
+                    self.stop_request_timer()
 
         except queue.Empty:
             pass
         self.root.after(100, self.poll_queue)
+
+    def start_request_timer(self):
+        self.request_start_time = time.time()
+        self.update_status_label()
+
+    def update_status_label(self):
+        if self.request_start_time is None:
+            return
+        elapsed = time.time() - self.request_start_time
+        minutes, seconds = divmod(int(elapsed), 60)
+        timer_str = f"{minutes:02d}:{seconds:02d}"
+        phrase_idx = int(elapsed // 5) % len(self.status_phrases)
+        phrase = self.status_phrases[phrase_idx]
+        self.status_label.config(text=f"{phrase} {timer_str}")
+        self.request_timer_id = self.root.after(1000, self.update_status_label)
+
+    def stop_request_timer(self):
+        if self.request_timer_id:
+            self.root.after_cancel(self.request_timer_id)
+            self.request_timer_id = None
+        self.request_start_time = None
+        self.status_label.config(text="")
 
     def check_pending_message(self):
         self.resume_button.grid_remove()
@@ -1791,7 +1916,13 @@ class BiNeuronGUI:
         if last_user_idx == -1:
             return
 
-        if last_user_idx == len(messages) - 1:
+        has_assistant_after = False
+        for i in range(last_user_idx + 1, len(messages)):
+            if messages[i].get("role") == "assistant":
+                has_assistant_after = True
+                break
+
+        if not has_assistant_after:
             self.resume_button.grid()
             self.resume_button.config(text=self.translate("resume_button_text"))
         else:
@@ -1805,23 +1936,28 @@ class BiNeuronGUI:
             return
 
         messages = self.chats[self.current_chat_id].get("messages", [])
-        last_user_msg = None
-        for msg in reversed(messages):
-            if msg.get("role") == "user":
-                last_user_msg = msg["content"]
-                break
-
-        if last_user_msg is None:
+        if not messages:
             return
 
-        if messages and messages[-1].get("role") == "assistant":
-            messages.pop()
+        last_user_idx = -1
+        for i, msg in enumerate(messages):
+            if msg.get("role") == "user":
+                last_user_idx = i
+
+        if last_user_idx == -1:
+            return
+
+        user_msg = messages[last_user_idx]["content"]
+
+        if last_user_idx < len(messages) - 1:
+            del messages[last_user_idx + 1:]
             self.save_chats_to_file()
             self.load_chat(self.current_chat_id)
 
         self.resume_button.grid_remove()
         self.is_busy = True
-        thread = threading.Thread(target=self.process_request, args=(last_user_msg,))
+        self.start_request_timer()
+        thread = threading.Thread(target=self.process_request, args=(user_msg,))
         thread.daemon = True
         thread.start()
 
