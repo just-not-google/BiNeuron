@@ -19,10 +19,16 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install system dependencies (Tkinter)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-tk
+        run: sudo apt-get update && sudo apt-get install -y python3-tk
 
       - name: Install Python dependencies
         run: |
@@ -39,11 +45,25 @@ jobs:
                       --add-data "BiNeuron:BiNeuron" \
                       gui.py
 
+      - name: Create .desktop file for Linux
+        run: |
+          cat > BiNeuron.desktop <<EOF
+          [Desktop Entry]
+          Name=BiNeuron
+          Exec=$PWD/dist/BiNeuron-Linux
+          Icon=$PWD/img_files/logo.ico
+          Type=Application
+          Categories=Utility;
+          EOF
+
       - name: Upload artifact (Linux)
         uses: actions/upload-artifact@v4
         with:
           name: BiNeuron-Linux
-          path: dist/BiNeuron-Linux
+          path: |
+            dist/BiNeuron-Linux
+            BiNeuron.desktop
+            img_files/logo.ico
 
   build-macos:
     runs-on: macos-latest
@@ -56,6 +76,14 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/Library/Caches/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install system dependencies (Tkinter)
         run: |
           brew install tcl-tk
@@ -63,6 +91,23 @@ jobs:
           echo "export LDFLAGS=-L/usr/local/opt/tcl-tk/lib" >> ~/.zshrc
           echo "export CPPFLAGS=-I/usr/local/opt/tcl-tk/include" >> ~/.zshrc
           source ~/.zshrc
+
+      - name: Convert .ico to .icns for macOS
+        run: |
+          brew install imagemagick
+          convert img_files/logo.ico img_files/logo.png
+          mkdir logo.iconset
+          sips -z 16 16     img_files/logo.png --out logo.iconset/icon_16x16.png
+          sips -z 32 32     img_files/logo.png --out logo.iconset/icon_16x16@2x.png
+          sips -z 32 32     img_files/logo.png --out logo.iconset/icon_32x32.png
+          sips -z 64 64     img_files/logo.png --out logo.iconset/icon_32x32@2x.png
+          sips -z 128 128   img_files/logo.png --out logo.iconset/icon_128x128.png
+          sips -z 256 256   img_files/logo.png --out logo.iconset/icon_128x128@2x.png
+          sips -z 256 256   img_files/logo.png --out logo.iconset/icon_256x256.png
+          sips -z 512 512   img_files/logo.png --out logo.iconset/icon_256x256@2x.png
+          sips -z 512 512   img_files/logo.png --out logo.iconset/icon_512x512.png
+          sips -z 1024 1024 img_files/logo.png --out logo.iconset/icon_512x512@2x.png
+          iconutil -c icns logo.iconset -o img_files/logo.icns
 
       - name: Install Python dependencies
         run: |
@@ -75,6 +120,7 @@ jobs:
           pyinstaller --onefile \
                       --windowed \
                       --name BiNeuron-MacOS \
+                      --icon img_files/logo.icns \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
                       gui.py
