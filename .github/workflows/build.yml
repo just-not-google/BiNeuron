@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:          # позволяет запускать вручную
+  workflow_dispatch:
 
 jobs:
   build-linux:
@@ -59,7 +59,6 @@ jobs:
       - name: Install system dependencies (Tkinter)
         run: |
           brew install tcl-tk
-          # Убедимся, что Python использует правильную версию Tk
           echo "export PATH=/usr/local/opt/tcl-tk/bin:$PATH" >> ~/.zshrc
           echo "export LDFLAGS=-L/usr/local/opt/tcl-tk/lib" >> ~/.zshrc
           echo "export CPPFLAGS=-I/usr/local/opt/tcl-tk/include" >> ~/.zshrc
