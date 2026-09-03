@@ -1,39 +1,13 @@
-name: Build and Release
+name: Build BiNeuron (Linux & macOS)
 
 on:
   push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:          # позволяет запускать вручную
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
-
-      - name: Build with PyInstaller
-        run: |
-          pyinstaller --onefile --windowed --name BiNeuron --add-data "img_files;img_files" gui.py
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: BiNeuron-windows
-          path: dist/BiNeuron.exe
-
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -45,26 +19,31 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install system dependencies
+      - name: Install system dependencies (Tkinter)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake libgl1-mesa-glx libsm6 libxrender1 libxext6 fontconfig
+          sudo apt-get install -y python3-tk
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip
+          pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build with PyInstaller
+      - name: Build with PyInstaller (onefile)
         run: |
-          pyinstaller --onefile --windowed --name BiNeuron --add-data "img_files:img_files" gui.py
+          pyinstaller --onefile \
+                      --windowed \
+                      --name BiNeuron-Linux \
+                      --add-data "img_files:img_files" \
+                      --add-data "BiNeuron:BiNeuron" \
+                      gui.py
 
-      - name: Upload artifact
+      - name: Upload artifact (Linux)
         uses: actions/upload-artifact@v4
         with:
-          name: BiNeuron-linux
-          path: dist/BiNeuron
+          name: BiNeuron-Linux
+          path: dist/BiNeuron-Linux
 
   build-macos:
     runs-on: macos-latest
@@ -77,38 +56,32 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install system dependencies (Tkinter)
         run: |
-          python -m pip install --upgrade pip
+          brew install tcl-tk
+          # Убедимся, что Python использует правильную версию Tk
+          echo "export PATH=/usr/local/opt/tcl-tk/bin:$PATH" >> ~/.zshrc
+          echo "export LDFLAGS=-L/usr/local/opt/tcl-tk/lib" >> ~/.zshrc
+          echo "export CPPFLAGS=-I/usr/local/opt/tcl-tk/include" >> ~/.zshrc
+          source ~/.zshrc
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build with PyInstaller
+      - name: Build with PyInstaller (onefile)
         run: |
-          pyinstaller --onefile --windowed --name BiNeuron --add-data "img_files:img_files" gui.py
+          pyinstaller --onefile \
+                      --windowed \
+                      --name BiNeuron-MacOS \
+                      --add-data "img_files:img_files" \
+                      --add-data "BiNeuron:BiNeuron" \
+                      gui.py
 
-      - name: Upload artifact
+      - name: Upload artifact (macOS)
         uses: actions/upload-artifact@v4
         with:
-          name: BiNeuron-macos
-          path: dist/BiNeuron.app
-
-  release:
-    needs: [build-windows, build-linux, build-macos]
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            artifacts/BiNeuron-windows/BiNeuron.exe
-            artifacts/BiNeuron-linux/BiNeuron
-            artifacts/BiNeuron-macos/BiNeuron.app
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: BiNeuron-MacOS
+          path: dist/BiNeuron-MacOS

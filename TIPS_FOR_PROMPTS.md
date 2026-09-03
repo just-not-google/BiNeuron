@@ -269,3 +269,139 @@ By following these guidelines, you will harness the full potential of AI assista
 Следуя этим рекомендациям, вы полностью раскроете потенциал ИИ-помощников, сэкономите время и получите высококачественные, адаптированные решения.
 
 </details>
+
+<details>
+<summary>🇨🇳 中文</summary>
+
+# 为AI编写有效提示词的指南
+
+为了从AI模型中获得最准确和相关的回答，精心构建您的提示词至关重要。本指南概述了行之有效的实践方法，并列出了AI系统可以接受的所有文件格式，帮助您获得最佳效果。
+
+---
+
+## 核心原则
+
+### 1. 尽可能使用英语
+大多数先进的AI模型主要基于英语数据进行训练。用英语编写提示词可以显著提高识别、理解和回答质量。如果英语不是您的母语，简单清晰的英语在大多数情况下仍然优于其他语言。
+
+### 2. 明确指定编程语言
+如果您的任务涉及代码，请始终明确指出所需的确切编程语言。例如，说明“Python 3.11”或“JavaScript (ES2022)”，而不仅仅是“代码”。这样可以激活针对这些语言调整的专用AI子系统，从而产生语法更正确、更地道的解决方案。
+
+### 3. 提供详细的任务描述
+模糊的请求会导致模糊的答案。请包括：
+- 输入和输出规范（数据类型、格式、示例）
+- 边缘情况或约束（例如性能、内存限制）
+- 错误情况下的预期行为
+- 任何相关的业务逻辑或领域背景
+
+**不应这样写：**  
+> *“编写一个排序数组的函数。”*
+
+**应该这样写：**  
+> *“编写一个Python函数，接受一个整数列表，使用快速排序算法返回一个按升序排列的新列表。包括类型提示、文档字符串，并优雅地处理空列表。”*
+
+### 4. 列出您的技术栈
+如果您知道将要使用的框架、库或工具，请说明其完整名称和版本。例如：
+- “使用 Django 4.2 和 PostgreSQL 15”
+- “使用 React 18 和 TypeScript 5 实现”
+- “在 Node.js 20 和 Express 4 上运行”
+
+这使AI能够根据您的生态系统定制代码，避免不兼容的API或过时的模式。
+
+---
+
+## 支持处理的文件格式
+
+AI可以接受并处理以下格式的文件。为清晰起见，它们分为三类。
+
+### 编程语言文件
+
+| 扩展名 | 语言 / 用途 |
+|--------|------------|
+| `.py`, `.pyw`, `.pyi`, `.pyx` | Python |
+| `.java` | Java |
+| `.c`, `.h` | C |
+| `.cpp`, `.cc`, `.cxx`, `.c++`, `.hpp`, `.hh`, `.hxx`, `.ipp` | C++ |
+| `.cs` | C# |
+| `.js`, `.mjs`, `.cjs` | JavaScript |
+| `.ts`, `.tsx` | TypeScript |
+| `.go` | Go |
+| `.rs` | Rust |
+| `.swift` | Swift |
+| `.kt`, `.kts` | Kotlin |
+| `.php`, `.php3`, `.php4`, `.php5`, `.phtml` | PHP |
+| `.rb`, `.rbw`, `.rake`, `.gemspec` | Ruby |
+| `.dart` | Dart |
+| `.r`, `.R`, `.Rmd` | R |
+| `.jl` | Julia |
+| `.lua` | Lua |
+| `.sql` | SQL |
+| `.scala`, `.sc` | Scala |
+| `.pl`, `.pm`, `.t` | Perl |
+| `.hs`, `.lhs` | Haskell |
+| `.erl`, `.hrl` | Erlang |
+| `.ex`, `.exs` | Elixir |
+| `.clj`, `.cljs`, `.cljc` | Clojure |
+| `.groovy`, `.gvy` | Groovy |
+| `.vb`, `.vbs` | Visual Basic |
+| `.sh`, `.bash`, `.zsh`, `.ksh`, `.csh`, `.fish` | Shell脚本 |
+| `.ps1`, `.psm1`, `.psd1` | PowerShell |
+| `.bat`, `.cmd` | Windows批处理文件 |
+
+### 文本、配置和标记格式
+
+| 扩展名 | 用途 |
+|--------|------|
+| `.txt`, `.log` | 纯文本和日志文件 |
+| `.md`, `.markdown`, `.rst` | 文档（Markdown、reStructuredText） |
+| `.tex`, `.ltx`, `.bib` | TeX / LaTeX 文档和参考文献 |
+| `.csv`, `.tsv` | 表格数据（逗号/制表符分隔） |
+| `.json`, `.jsonl` | JSON 和 JSON Lines |
+| `.xml`, `.xsd`, `.xsl`, `.xslt` | XML 及相关模式/转换 |
+| `.yaml`, `.yml` | YAML |
+| `.toml` | TOML |
+| `.ini`, `.cfg`, `.conf`, `.properties` | 配置文件 |
+| `.env` | 环境变量文件 |
+| `.editorconfig` | 编辑器配置 |
+| `.gitignore` | Git忽略列表 |
+| `.dockerfile` | Dockerfile |
+| `.makefile` | Makefile |
+| `.cmake`, `.cmakelists.txt` | CMake构建文件 |
+| `.html`, `.htm`, `.xhtml` | HTML / XHTML |
+| `.css`, `.scss`, `.sass`, `.less` | 样式表 |
+| `.rss`, `.atom` | Web订阅源 |
+
+### 二进制和文档格式（较新支持）
+
+| 扩展名 | 类型 |
+|--------|------|
+| `.pdf` | 便携式文档格式 |
+| `.docx`（或 `.word`） | Microsoft Word文档 |
+| `.odf` | OpenDocument格式 |
+| `.pptx` | PowerPoint演示文稿 |
+| `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.webp`, `.tiff`, `.tif` | 栅格图像 |
+
+---
+
+## 结构良好的提示词示例
+
+**弱提示词：**  
+> *“为网页爬虫编写代码。”*
+
+**强提示词：**  
+> *“开发一个 Python 3.11 脚本，使用 BeautifulSoup 4 和 Requests 2.31，从 https://example.com/products 抓取产品名称和价格。脚本应接受 URL 作为命令行参数，将结果输出为包含 ‘name’ 和 ‘price’ 列的 CSV 文件，并通过跟随 ‘Next’ 链接处理分页。包括对网络超时和缺失元素的错误处理。”*
+
+这个提示词具体、可操作，并包含所有必要的上下文。
+
+---
+
+## 最后建议
+
+- **简洁而完整** – 避免无关背景，但不要遗漏关键细节。
+- **对复杂要求使用项目符号** – 这可以提高可读性。
+- **指定输出格式** – 告诉AI您是需要纯代码、带注释的代码，还是完整的解释。
+- **提及约束条件** – 例如，“必须在Windows上运行”、“必须兼容Python 3.8+”、“不得使用外部库”。
+
+遵循这些指南，您将充分利用AI助手的潜力，节省时间并获得高质量、量身定制的解决方案。
+
+</details>
