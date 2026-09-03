@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BiNeuron · 智能代码分析</title>
+
+    <!-- Google Fonts (纯文字，无图标) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ===== RESET ===== */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ===== PHOTOSHOP-INSPIRED DARK THEME ===== */
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-card: #2c2c2c;
+            --bg-card-hover: #333333;
+            --bg-input: #2a2a2a;
+            --bg-code: #1e1e1e;
+            --border-color: #3a3a3a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #aaaaaa;
+            --text-muted: #777777;
+            --text-heading: #f0f0f0;
+            --accent: #888888;
+            --accent-dim: #666666;
+            --radius: 6px;
+            --radius-sm: 4px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --max-width: 1200px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding: 0 20px;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            border-bottom: 1px solid transparent;
+        }
+        a:hover {
+            color: var(--text-primary);
+            border-bottom-color: var(--text-muted);
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 8px;
+        }
+
+        /* ===== HEADER ===== */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            padding: 20px 0 16px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 36px;
+            gap: 12px 24px;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            color: var(--text-heading);
+            text-transform: uppercase;
+        }
+        .logo span {
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        /* Language Switcher — 纯黑白 */
+        .lang-switch {
+            display: flex;
+            gap: 2px;
+            background: var(--bg-card);
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 4px 14px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .lang-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-card-hover);
+        }
+        .lang-btn.active {
+            background: var(--accent);
+            color: #000;
+        }
+        .lang-btn.active:hover {
+            background: var(--accent-dim);
+        }
+
+        /* 纯文字链接，无图标 */
+        .nav-link {
+            display: inline-block;
+            background: var(--bg-card);
+            padding: 6px 16px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-family: var(--font);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .nav-link:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+            background: var(--bg-card-hover);
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            padding: 28px 0 36px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 44px;
+        }
+        .hero h1 {
+            font-size: clamp(2.4rem, 6vw, 4rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            color: var(--text-heading);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        .hero h1 .light {
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+        .hero p {
+            font-size: clamp(1rem, 1.4vw, 1.2rem);
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 18px;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .hero-badge span {
+            background: var(--bg-card);
+            padding: 4px 18px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* ===== SECTION ===== */
+        section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text-heading);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        .section-title .badge {
+            font-size: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: var(--accent);
+            color: #000;
+            padding: 2px 12px;
+            border-radius: 3px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            margin-bottom: 22px;
+            font-size: 0.95rem;
+            max-width: 820px;
+        }
+
+        /* ===== CARDS ===== */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+        }
+        .card-grid.cols-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        .card-grid.cols-3 {
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px 22px 22px;
+            transition: all 0.2s ease;
+        }
+        .card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        .card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+        .card .tag {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--accent);
+            background: var(--bg-primary);
+            padding: 2px 14px;
+            border-radius: 3px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            margin-top: 6px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            min-width: 580px;
+        }
+        thead {
+            background: var(--bg-secondary);
+        }
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: var(--text-heading);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        td:first-child {
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+        td code {
+            background: var(--bg-code);
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            border: 1px solid var(--border-color);
+        }
+        .table-wrap .note {
+            padding: 14px 18px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        /* ===== FILE FORMAT GRID ===== */
+        .fmt-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+        }
+        .fmt-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .fmt-item code {
+            background: var(--bg-code);
+            padding: 1px 8px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid var(--border-color);
+        }
+        .fmt-item .label {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* ===== PROMPT BOX ===== */
+        .prompt-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 18px 22px;
+            margin: 10px 0 6px;
+        }
+        .prompt-box.weak {
+            border-left: 4px solid var(--text-muted);
+        }
+        .prompt-box.strong {
+            border-left: 4px solid var(--text-primary);
+        }
+        .prompt-box .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .prompt-box .text {
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        /* ===== TIPS LIST ===== */
+        .tips-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 24px;
+        }
+        .tips-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tips-list li:last-child {
+            border-bottom: none;
+        }
+        .tips-list li .marker {
+            color: var(--accent);
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+        .tips-list li strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        @media (max-width: 700px) {
+            .tips-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 24px 0 18px;
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        footer .links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        footer .links a {
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+            border-bottom: none;
+        }
+        footer .links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 820px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            .nav-actions {
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+            .hero {
+                padding: 14px 0 24px;
+            }
+            .card-grid.cols-2 {
+                grid-template-columns: 1fr;
+            }
+            .card-grid.cols-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .card-grid.cols-3 {
+                grid-template-columns: 1fr;
+            }
+            .lang-btn {
+                padding: 3px 10px;
+                font-size: 0.6rem;
+            }
+            .nav-link {
+                padding: 4px 12px;
+                font-size: 0.7rem;
+            }
+            .table-wrap table {
+                font-size: 0.72rem;
+                min-width: 440px;
+            }
+            th,
+            td {
+                padding: 6px 10px;
+            }
+            .fmt-grid {
+                grid-template-columns: 1fr 1fr;
+                padding: 10px 14px;
+            }
+            footer {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* ===== UTILITY ===== */
+        .mt-8 { margin-top: 8px; }
+        .mt-16 { margin-top: 16px; }
+        .mt-24 { margin-top: 24px; }
+        .mb-8 { margin-bottom: 8px; }
+        .mb-16 { margin-bottom: 16px; }
+        .text-muted { color: var(--text-muted); }
+        .text-secondary { color: var(--text-secondary); }
+
+        /* ===== I18N ===== */
+        .lang-content {
+            display: none;
+        }
+        .lang-content.active {
+            display: block;
+        }
+
+        /* ===== INLINE BADGE ===== */
+        .inline-badge {
+            display: inline-block;
+            background: var(--bg-primary);
+            color: var(--accent);
+            font-size: 0.55rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 0 10px;
+            border-radius: 3px;
+            line-height: 1.8;
+            margin-left: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* ===== CODE BLOCK ===== */
+        .code-block {
+            background: var(--bg-code);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 6px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- ===== HEADER ===== -->
+        <header class="navbar">
+            <div class="logo">BiNeuron <span>// code intelligence</span></div>
+            <div class="nav-actions">
+                <div class="lang-switch" id="langSwitch">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="ru">RU</button>
+                    <button class="lang-btn" data-lang="zh">中文</button>
+                </div>
+                <a href="https://github.com/just-not-google/BiNeuron" target="_blank" rel="noopener" class="nav-link">GitHub</a>
+                <a href="https://www.youtube.com/@bineuron" target="_blank" rel="noopener" class="nav-link">YouTube</a>
+            </div>
+        </header>
+
+        <!-- ===== HERO ===== -->
+        <section class="hero">
+            <h1>BiNeuron <span class="light">//</span></h1>
+            <p>
+                Intelligent Code Analysis &amp; Generation Platform — bridging human intent and machine code.
+            </p>
+            <div class="hero-badge">
+                <span>Python 3.10+</span>
+                <span>LLM &amp; OCR</span>
+                <span>EN · RU · 中文</span>
+            </div>
+        </section>
+
+        <!-- =============================== -->
+        <!-- ENGLISH                        -->
+        <!-- =============================== -->
+        <div class="lang-content active" data-lang="en">
+
+            <!-- OVERVIEW -->
+            <section>
+                <div class="section-title">Overview</div>
+                <p class="section-desc">
+                    <strong>BiNeuron</strong> is the main class of the <strong>biNeuron</strong> package.
+                    It orchestrates the entire workflow: language detection, model selection,
+                    download &amp; caching, prompt engineering, AI inference, file editing,
+                    and interactive chat.
+                </p>
+                <div class="card-grid cols-3">
+                    <div class="card">
+                        <h3>Language Detection</h3>
+                        <p>Detects programming language(s) from requests and attached files using heuristics or AI.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Adaptive Model Selection</h3>
+                        <p>Automatically picks the best GGUF model based on language and your hardware.</p>
+                    </div>
+                    <div class="card">
+                        <h3>File Editing</h3>
+                        <p>Optional two-stage pipeline: AI generates code, then a lightweight model applies whole-file replacements.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KEY CAPABILITIES -->
+            <section>
+                <div class="section-title">Key Capabilities</div>
+                <div class="card-grid cols-2">
+                    <div class="card">
+                        <h3>25+ Programming Languages</h3>
+                        <p>Python, Java, C/C++, C#, JavaScript, TypeScript, Go, Rust, Swift, Kotlin, Ruby, Dart, Julia, Lua, SQL, MATLAB, R, Pascal, Assembly, Fortran, F#, Ada, Zig, PHP, Shell, Scala, and more.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Comprehensive File Handling</h3>
+                        <p>Extracts text from PDF, DOCX, ODF, PPTX, source code, configs, and images via OCR (DeepSeek / EasyOCR).</p>
+                    </div>
+                    <div class="card">
+                        <h3>Robust Networking</h3>
+                        <p>Multi‑layer access to Hugging Face models with mirror fallback, dynamic proxies, and custom lists.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Virtual Storage Mode</h3>
+                        <p>Scan and process entire folders or mounted virtual directories — perfect for large codebases.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONSTRUCTOR PARAMETERS -->
+            <section>
+                <div class="section-title">Constructor Parameters <span class="badge">key</span></div>
+                <p class="section-desc">
+                    The <code>BiNeuron</code> constructor accepts a wide range of parameters to fine‑tune every aspect.
+                    Below are the most important ones.
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>request</code></td><td><code>str</code></td><td><em>required</em></td><td>User input text (question, code description, or task).</td></tr>
+                            <tr><td><code>preferences_in_ai</code></td><td><code>PreferenceInAI</code></td><td><code>DEEPSEEK</code></td><td>Preferred AI model family: DEEPSEEK, QWEN, MINIMAX, CODE_LLAMA, MELLUM, WIZARD.</td></tr>
+                            <tr><td><code>models_dir</code></td><td><code>str</code></td><td><code>"./models"</code></td><td>Directory to cache downloaded GGUF models.</td></tr>
+                            <tr><td><code>n_gpu_layers</code></td><td><code>int</code></td><td><code>0</code></td><td>Number of layers to offload to GPU (0 = CPU only).</td></tr>
+                            <tr><td><code>max_tokens</code></td><td><code>int</code></td><td><code>8192</code></td><td>Maximum tokens to generate in the response.</td></tr>
+                            <tr><td><code>temperature</code></td><td><code>float</code></td><td><code>0.1</code></td><td>Sampling temperature (0.0–1.0).</td></tr>
+                            <tr><td><code>main_prompt_mode</code></td><td><code>Literal</code></td><td><code>"default"</code></td><td>Predefined scenario: testing, explanation, refactor, debug, code_review, documentation, etc.</td></tr>
+                            <tr><td><code>editing_files</code></td><td><code>bool</code></td><td><code>False</code></td><td>Enable automatic file editing via JSON generation and disk write.</td></tr>
+                            <tr><td><code>virtual_storage</code></td><td><code>bool</code></td><td><code>False</code></td><td>Enable virtual storage mode — scan the folder at <code>virtual_storage_path</code>.</td></tr>
+                            <tr><td><code>with_ocr</code></td><td><code>bool</code></td><td><code>False</code></td><td>Enable OCR for images when scanning virtual storage.</td></tr>
+                            <tr><td><code>prefer_mirror</code></td><td><code>bool</code></td><td><code>True</code></td><td>Use Hugging Face mirror (<code>hf-mirror.com</code>) for downloads.</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="note">
+                        All constants are defined in <code>BiNeuron.data.constants_for_functions</code>.
+                        Language‑specific and multilingual model mappings are in <code>BiNeuron.data.models_for_programming_languages</code>.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SUPPORTED FILE FORMATS -->
+            <section>
+                <div class="section-title">Supported File Formats</div>
+                <p class="section-desc">
+                    BiNeuron can process a wide variety of file types — from source code to images and documents.
+                </p>
+                <div class="fmt-grid">
+                    <span class="fmt-item"><code>.py .pyw .pyi</code> <span class="label">Python</span></span>
+                    <span class="fmt-item"><code>.java</code> <span class="label">Java</span></span>
+                    <span class="fmt-item"><code>.c .h</code> <span class="label">C</span></span>
+                    <span class="fmt-item"><code>.cpp .hpp</code> <span class="label">C++</span></span>
+                    <span class="fmt-item"><code>.cs</code> <span class="label">C#</span></span>
+                    <span class="fmt-item"><code>.js .mjs</code> <span class="label">JavaScript</span></span>
+                    <span class="fmt-item"><code>.ts .tsx</code> <span class="label">TypeScript</span></span>
+                    <span class="fmt-item"><code>.go</code> <span class="label">Go</span></span>
+                    <span class="fmt-item"><code>.rs</code> <span class="label">Rust</span></span>
+                    <span class="fmt-item"><code>.swift</code> <span class="label">Swift</span></span>
+                    <span class="fmt-item"><code>.kt .kts</code> <span class="label">Kotlin</span></span>
+                    <span class="fmt-item"><code>.rb</code> <span class="label">Ruby</span></span>
+                    <span class="fmt-item"><code>.dart</code> <span class="label">Dart</span></span>
+                    <span class="fmt-item"><code>.jl</code> <span class="label">Julia</span></span>
+                    <span class="fmt-item"><code>.lua</code> <span class="label">Lua</span></span>
+                    <span class="fmt-item"><code>.sql</code> <span class="label">SQL</span></span>
+                    <span class="fmt-item"><code>.sh .bash</code> <span class="label">Shell</span></span>
+                    <span class="fmt-item"><code>.ps1</code> <span class="label">PowerShell</span></span>
+                    <span class="fmt-item"><code>.md .markdown</code> <span class="label">Docs</span></span>
+                    <span class="fmt-item"><code>.json .yaml .toml</code> <span class="label">Config</span></span>
+                    <span class="fmt-item"><code>.pdf .docx .odf .pptx</code> <span class="label">Documents</span></span>
+                    <span class="fmt-item"><code>.jpg .png .webp .tiff</code> <span class="label">Images</span></span>
+                </div>
+                <p class="text-muted mt-8" style="font-size:0.8rem;">
+                    Also supports: XML, HTML, CSS, SCSS, CSV, TSV, TOML, INI, ENV, Dockerfile, Makefile, and many more.
+                </p>
+            </section>
+
+            <!-- PROMPT TIPS -->
+            <section>
+                <div class="section-title">Prompt Guidelines</div>
+                <p class="section-desc">
+                    To get the best results from the AI, follow these core principles.
+                </p>
+
+                <ul class="tips-list">
+                    <li><span class="marker">—</span> <div><strong>Use English when possible</strong> — most models are trained primarily on English data.</div></li>
+                    <li><span class="marker">—</span> <div><strong>Specify programming languages explicitly</strong> — e.g. “Python 3.11” not just “code”.</div></li>
+                    <li><span class="marker">—</span> <div><strong>Provide detailed task descriptions</strong> — include inputs, outputs, edge cases, and constraints.</div></li>
+                    <li><span class="marker">—</span> <div><strong>List your technology stack</strong> — frameworks, libraries, and versions.</div></li>
+                </ul>
+
+                <div class="prompt-box weak">
+                    <div class="label">Weak prompt</div>
+                    <div class="text">“Write code for a web scraper.”</div>
+                </div>
+                <div class="prompt-box strong">
+                    <div class="label">Strong prompt</div>
+                    <div class="text">“Develop a Python 3.11 script using BeautifulSoup 4 and Requests 2.31 that scrapes product names and prices from https://example.com/products. The script should accept a URL as a command‑line argument, output results as a CSV file with columns ‘name’ and ‘price’, and handle pagination by following ‘Next’ links. Include error handling for network timeouts and missing elements.”</div>
+                </div>
+
+                <div style="margin-top:16px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius); padding:14px 18px;">
+                    <p style="color:var(--text-secondary); font-size:0.88rem;">
+                        <strong>Final tips:</strong> Be concise but complete, use bullet points for complex requirements,
+                        specify output format, and mention constraints (e.g., “must run on Windows”).
+                    </p>
+                </div>
+            </section>
+
+            <!-- TECH STACK -->
+            <section>
+                <div class="section-title">Technology Stack</div>
+                <div class="card-grid cols-3">
+                    <div class="card">
+                        <h3>Python 3.10+</h3>
+                        <p>Primary development language.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Hugging Face / llama.cpp</h3>
+                        <p>Loading and running local AI models.</p>
+                    </div>
+                    <div class="card">
+                        <h3>EasyOCR · DeepSeek OCR</h3>
+                        <p>Optical character recognition with GPU support.</p>
+                    </div>
+                    <div class="card">
+                        <h3>deep‑translator · DeepL</h3>
+                        <p>Translation services with automatic fallback.</p>
+                    </div>
+                    <div class="card">
+                        <h3>PyMuPDF · docx2txt · odfpy</h3>
+                        <p>Document parsing (PDF, DOCX, ODF, PPTX).</p>
+                    </div>
+                    <div class="card">
+                        <h3>Tkinter · Dark Theme</h3>
+                        <p>Feature‑rich graphical interface for desktop.</p>
+                    </div>
+                </div>
+            </section>
+
+        </div><!-- /EN -->
+
+
+        <!-- =============================== -->
+        <!-- RUSSIAN                        -->
+        <!-- =============================== -->
+        <div class="lang-content" data-lang="ru">
+
+            <section>
+                <div class="section-title">Обзор</div>
+                <p class="section-desc">
+                    <strong>BiNeuron</strong> — главный класс пакета <strong>biNeuron</strong>.
+                    Он управляет всем процессом: определение языка, выбор модели,
+                    загрузка и кэширование, формирование промпта, инференс ИИ,
+                    редактирование файлов и интерактивный чат.
+                </p>
+                <div class="card-grid cols-3">
+                    <div class="card">
+                        <h3>Определение языка</h3>
+                        <p>Определяет язык(и) программирования из запроса и прикреплённых файлов с помощью эвристик или ИИ.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Адаптивный выбор модели</h3>
+                        <p>Автоматически подбирает лучшую GGUF-модель на основе языка и вашего оборудования.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Редактирование файлов</h3>
+                        <p>Опциональный двухэтапный пайплайн: ИИ генерирует код, затем лёгкая модель применяет замены целых файлов.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-title">Ключевые возможности</div>
+                <div class="card-grid cols-2">
+                    <div class="card">
+                        <h3>25+ языков программирования</h3>
+                        <p>Python, Java, C/C++, C#, JavaScript, TypeScript, Go, Rust, Swift, Kotlin, Ruby, Dart, Julia, Lua, SQL, MATLAB, R, Pascal, Assembly, Fortran, F#, Ada, Zig, PHP, Shell, Scala и другие.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Всесторонняя обработка файлов</h3>
+                        <p>Извлекает текст из PDF, DOCX, ODF, PPTX, исходного кода, конфигов и изображений через OCR (DeepSeek / EasyOCR).</p>
+                    </div>
+                    <div class="card">
+                        <h3>Надёжные сетевые возможности</h3>
+                        <p>Многоуровневый доступ к моделям Hugging Face с зеркалом, динамическими прокси и пользовательскими списками.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Режим виртуального хранилища</h3>
+                        <p>Сканирование и обработка целых папок или смонтированных виртуальных директорий — идеально для больших кодовых баз.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-title">Параметры конструктора <span class="badge">ключевые</span></div>
+                <p class="section-desc">
+                    Конструктор <code>BiNeuron</code> принимает широкий набор параметров для тонкой настройки.
+                    Ниже приведены наиболее важные.
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Параметр</th><th>Тип</th><th>По умолчанию</th><th>Описание</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>request</code></td><td><code>str</code></td><td><em>обязательный</em></td><td>Входной текст пользователя (вопрос, описание кода или задача).</td></tr>
+                            <tr><td><code>preferences_in_ai</code></td><td><code>PreferenceInAI</code></td><td><code>DEEPSEEK</code></td><td>Предпочитаемое семейство моделей: DEEPSEEK, QWEN, MINIMAX, CODE_LLAMA, MELLUM, WIZARD.</td></tr>
+                            <tr><td><code>models_dir</code></td><td><code>str</code></td><td><code>"./models"</code></td><td>Директория для кэширования скачанных GGUF-моделей.</td></tr>
+                            <tr><td><code>n_gpu_layers</code></td><td><code>int</code></td><td><code>0</code></td><td>Количество слоёв на GPU (0 = только CPU).</td></tr>
+                            <tr><td><code>max_tokens</code></td><td><code>int</code></td><td><code>8192</code></td><td>Максимальное количество токенов в ответе.</td></tr>
+                            <tr><td><code>temperature</code></td><td><code>float</code></td><td><code>0.1</code></td><td>Температура выборки (0.0–1.0).</td></tr>
+                            <tr><td><code>main_prompt_mode</code></td><td><code>Literal</code></td><td><code>"default"</code></td><td>Предустановленный сценарий: testing, explanation, refactor, debug, code_review, documentation и др.</td></tr>
+                            <tr><td><code>editing_files</code></td><td><code>bool</code></td><td><code>False</code></td><td>Включить автоматическое редактирование файлов через JSON и запись на диск.</td></tr>
+                            <tr><td><code>virtual_storage</code></td><td><code>bool</code></td><td><code>False</code></td><td>Включить режим виртуального хранилища — сканировать папку <code>virtual_storage_path</code>.</td></tr>
+                            <tr><td><code>with_ocr</code></td><td><code>bool</code></td><td><code>False</code></td><td>Включить OCR для изображений при сканировании виртуального хранилища.</td></tr>
+                            <tr><td><code>prefer_mirror</code></td><td><code>bool</code></td><td><code>True</code></td><td>Использовать зеркало Hugging Face (<code>hf-mirror.com</code>) для загрузки.</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="note">
+                        Все константы определены в <code>BiNeuron.data.constants_for_functions</code>.
+                        Списки моделей для языков и уровней производительности заданы в <code>BiNeuron.data.models_for_programming_languages</code>.
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-title">Поддерживаемые форматы</div>
+                <p class="section-desc">
+                    BiNeuron обрабатывает множество типов файлов — от исходного кода до изображений и документов.
+                </p>
+                <div class="fmt-grid">
+                    <span class="fmt-item"><code>.py .pyw .pyi</code> <span class="label">Python</span></span>
+                    <span class="fmt-item"><code>.java</code> <span class="label">Java</span></span>
+                    <span class="fmt-item"><code>.c .h</code> <span class="label">C</span></span>
+                    <span class="fmt-item"><code>.cpp .hpp</code> <span class="label">C++</span></span>
+                    <span class="fmt-item"><code>.cs</code> <span class="label">C#</span></span>
+                    <span class="fmt-item"><code>.js .mjs</code> <span class="label">JavaScript</span></span>
+                    <span class="fmt-item"><code>.ts .tsx</code> <span class="label">TypeScript</span></span>
+                    <span class="fmt-item"><code>.go</code> <span class="label">Go</span></span>
+                    <span class="fmt-item"><code>.rs</code> <span class="label">Rust</span></span>
+                    <span class="fmt-item"><code>.swift</code> <span class="label">Swift</span></span>
+                    <span class="fmt-item"><code>.kt .kts</code> <span class="label">Kotlin</span></span>
+                    <span class="fmt-item"><code>.rb</code> <span class="label">Ruby</span></span>
+                    <span class="fmt-item"><code>.dart</code> <span class="label">Dart</span></span>
+                    <span class="fmt-item"><code>.jl</code> <span class="label">Julia</span></span>
+                    <span class="fmt-item"><code>.lua</code> <span class="label">Lua</span></span>
+                    <span class="fmt-item"><code>.sql</code> <span class="label">SQL</span></span>
+                    <span class="fmt-item"><code>.sh .bash</code> <span class="label">Shell</span></span>
+                    <span class="fmt-item"><code>.ps1</code> <span class="label">PowerShell</span></span>
+                    <span class="fmt-item"><code>.md .markdown</code> <span class="label">Документация</span></span>
+                    <span class="fmt-item"><code>.json .yaml .toml</code> <span class="label">Конфиги</span></span>
+                    <span class="fmt-item"><code>.pdf .docx .odf .pptx</code> <span class="label">Документы</span></span>
+                    <span class="fmt-item"><code>.jpg .png .webp .tiff</code> <span class="label">Изображения</span></span>
+                </div>
+                <p class="text-muted mt-8" style="font-size:0.8rem;">
+                    Также поддерживаются: XML, HTML, CSS, SCSS, CSV, TSV, TOML, INI, ENV, Dockerfile, Makefile и многие другие.
+                </p>
+            </section>
+
+            <section>
+                <div class="section-title">Рекомендации по промптам</div>
+                <p class="section-desc">
+                    Чтобы получить наилучшие результаты от ИИ, следуйте этим основным принципам.
+                </p>
+
+                <ul class="tips-list">
+                    <li><span class="marker">—</span> <div><strong>По возможности используйте английский</strong> — большинство моделей обучены преимущественно на английских данных.</div></li>
+                    <li><span class="marker">—</span> <div><strong>Чётко указывайте языки программирования</strong> — например, «Python 3.11», а не просто «код».</div></li>
+                    <li><span class="marker">—</span> <div><strong>Давайте подробное описание задачи</strong> — включайте входы, выходы, краевые случаи и ограничения.</div></li>
+                    <li><span class="marker">—</span> <div><strong>Перечисляйте технологический стек</strong> — фреймворки, библиотеки и версии.</div></li>
+                </ul>
+
+                <div class="prompt-box weak">
+                    <div class="label">Слабый запрос</div>
+                    <div class="text">«Напишите код для веб-скрапера.»</div>
+                </div>
+                <div class="prompt-box strong">
+                    <div class="label">Сильный запрос</div>
+                    <div class="text">«Разработайте скрипт на Python 3.11 с использованием BeautifulSoup 4 и Requests 2.31, который собирает названия товаров и цены с https://example.com/products. Скрипт должен принимать URL как аргумент командной строки, выводить результаты в CSV-файл с колонками "name" и "price" и обрабатывать пагинацию, переходя по ссылкам "Next". Включите обработку ошибок для сетевых тайм-аутов и отсутствующих элементов.»</div>
+                </div>
+
+                <div style="margin-top:16px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius); padding:14px 18px;">
+                    <p style="color:var(--text-secondary); font-size:0.88rem;">
+                        <strong>Заключительные советы:</strong> Будьте кратки, но полны, используйте маркированные списки для сложных требований, указывайте формат вывода и упоминайте ограничения (например, «должен работать в Windows»).
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-title">Технологический стек</div>
+                <div class="card-grid cols-3">
+                    <div class="card">
+                        <h3>Python 3.10+</h3>
+                        <p>Основной язык разработки.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Hugging Face / llama.cpp</h3>
+                        <p>Загрузка и запуск локальных ИИ-моделей.</p>
+                    </div>
+                    <div class="card">
+                        <h3>EasyOCR · DeepSeek OCR</h3>
+                        <p>Оптическое распознавание символов с поддержкой GPU.</p>
+                    </div>
+                    <div class="card">
+                        <h3>deep‑translator · DeepL</h3>
+                        <p>Сервисы перевода с автоматическим переключением.</p>
+                    </div>
+                    <div class="card">
+                        <h3>PyMuPDF · docx2txt · odfpy</h3>
+                        <p>Парсинг документов (PDF, DOCX, ODF, PPTX).</p>
+                    </div>
+                    <div class="card">
+                        <h3>Tkinter · Тёмная тема</h3>
+                        <p>Насыщенный графический интерфейс для рабочего стола.</p>
+                    </div>
+                </div>
+            </section>
+
+        </div><!-- /RU -->
+
+
+        <!-- =============================== -->
+        <!-- CHINESE                       -->
+        <!-- =============================== -->
+        <div class="lang-content" data-lang="zh">
+
+            <section>
+                <div class="section-title">概述</div>
+                <p class="section-desc">
+                    <strong>BiNeuron</strong> 是 <strong>biNeuron</strong> 包的主类。
+                    它协调整个工作流程：语言检测、模型选择、下载与缓存、提示词工程、
+                    AI 推理、文件编辑和交互式聊天。
+                </p>
+                <div class="card-grid cols-3">
+                    <div class="card">
+                        <h3>语言检测</h3>
+                        <p>从用户请求和附加文件中确定编程语言，使用启发式或 AI。</p>
+                    </div>
+                    <div class="card">
+                        <h3>自适应模型选择</h3>
+                        <p>根据检测到的语言和硬件自动选择最合适的 GGUF 模型。</p>
+                    </div>
+                    <div class="card">
+                        <h3>文件编辑</h3>
+                        <p>可选的两阶段流水线：AI 生成代码，轻量级模型应用整文件替换。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-title">主要功能</div>
+                <div class="card-grid cols-2">
+                    <div class="card">
+                        <h3>25+ 种编程语言</h3>
+                        <p>Python、Java、C/C++、C#、JavaScript、TypeScript、Go、Rust、Swift、Kotlin、Ruby、Dart、Julia、Lua、SQL、MATLAB、R、Pascal、Assembly、Fortran、F#、Ada、Zig、PHP、Shell、Scala 等。</p>
+                    </div>
+                    <div class="card">
+                        <h3>全面的文件处理</h3>
+                        <p>从 PDF、DOCX、ODF、PPTX、源代码、配置文件和图像中提取文本，支持 OCR（DeepSeek / EasyOCR）。</p>
+                    </div>
+                    <div class="card">
+                        <h3>强大的网络功能</h3>
+                        <p>对 Hugging Face 模型的多层访问，支持镜像回退、动态代理和自定义列表。</p>
+                    </div>
+                    <div class="card">
+                        <h3>虚拟存储模式</h3>
+                        <p>扫描和处理整个文件夹或挂载的虚拟目录 — 非常适合大型代码库。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-title">构造函数参数 <span class="badge">关键</span></div>
+                <p class="section-desc">
+                    <code>BiNeuron</code> 构造函数接受多种参数进行微调。以下是主要参数。
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>参数</th><th>类型</th><th>默认值</th><th>描述</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>request</code></td><td><code>str</code></td><td><em>必需</em></td><td>用户输入文本（问题、代码描述或任务）。</td></tr>
+                            <tr><td><code>preferences_in_ai</code></td><td><code>PreferenceInAI</code></td><td><code>DEEPSEEK</code></td><td>首选 AI 模型系列：DEEPSEEK、QWEN、MINIMAX、CODE_LLAMA、MELLUM、WIZARD。</td></tr>
+                            <tr><td><code>models_dir</code></td><td><code>str</code></td><td><code>"./models"</code></td><td>缓存已下载 GGUF 模型的目录。</td></tr>
+                            <tr><td><code>n_gpu_layers</code></td><td><code>int</code></td><td><code>0</code></td><td>卸载到 GPU 的层数（0 = 仅 CPU）。</td></tr>
+                            <tr><td><code>max_tokens</code></td><td><code>int</code></td><td><code>8192</code></td><td>响应中生成的最大 token 数。</td></tr>
+                            <tr><td><code>temperature</code></td><td><code>float</code></td><td><code>0.1</code></td><td>采样温度（0.0–1.0）。</td></tr>
+                            <tr><td><code>main_prompt_mode</code></td><td><code>Literal</code></td><td><code>"default"</code></td><td>预定义场景：testing、explanation、refactor、debug、code_review、documentation 等。</td></tr>
+                            <tr><td><code>editing_files</code></td><td><code>bool</code></td><td><code>False</code></td><td>启用通过 JSON 生成和磁盘写入的自动文件编辑。</td></tr>
+                            <tr><td><code>virtual_storage</code></td><td><code>bool</code></td><td><code>False</code></td><td>启用虚拟存储模式 — 扫描 <code>virtual_storage_path</code> 中的文件夹。</td></tr>
+                            <tr><td><code>with_ocr</code></td><td><code>bool</code></td><td><code>False</code></td><td>扫描虚拟存储时为图像启用 OCR。</td></tr>
+                            <tr><td><code>prefer_mirror</code></td><td><code>bool</code></td><td><code>True</code></td><td>下载时使用 Hugging Face 镜像（<code>hf-mirror.com</code>）。</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="note">
+                        所有常量均在 <code>BiNeuron.data.constants_for_functions</code> 中定义。
+                        特定语言和多语言模型的映射存储在 <code>BiNeuron.data.models_for_programming_languages</code> 中。
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-title">支持的文件格式</div>
+                <p class="section-desc">
+                    BiNeuron 可以处理多种文件类型 — 从源代码到图像和文档。
+                </p>
+                <div class="fmt-grid">
+                    <span class="fmt-item"><code>.py .pyw .pyi</code> <span class="label">Python</span></span>
+                    <span class="fmt-item"><code>.java</code> <span class="label">Java</span></span>
+                    <span class="fmt-item"><code>.c .h</code> <span class="label">C</span></span>
+                    <span class="fmt-item"><code>.cpp .hpp</code> <span class="label">C++</span></span>
+                    <span class="fmt-item"><code>.cs</code> <span class="label">C#</span></span>
+                    <span class="fmt-item"><code>.js .mjs</code> <span class="label">JavaScript</span></span>
+                    <span class="fmt-item"><code>.ts .tsx</code> <span class="label">TypeScript</span></span>
+                    <span class="fmt-item"><code>.go</code> <span class="label">Go</span></span>
+                    <span class="fmt-item"><code>.rs</code> <span class="label">Rust</span></span>
+                    <span class="fmt-item"><code>.swift</code> <span class="label">Swift</span></span>
+                    <span class="fmt-item"><code>.kt .kts</code> <span class="label">Kotlin</span></span>
+                    <span class="fmt-item"><code>.rb</code> <span class="label">Ruby</span></span>
+                    <span class="fmt-item"><code>.dart</code> <span class="label">Dart</span></span>
+                    <span class="fmt-item"><code>.jl</code> <span class="label">Julia</span></span>
+                    <span class="fmt-item"><code>.lua</code> <span class="label">Lua</span></span>
+                    <span class="fmt-item"><code>.sql</code> <span class="label">SQL</span></span>
+                    <span class="fmt-item"><code>.sh .bash</code> <span class="label">Shell</span></span>
+                    <span class="fmt-item"><code>.ps1</code> <span class="label">PowerShell</span></span>
+                    <span class="fmt-item"><code>.md .markdown</code> <span class="label">文档</span></span>
+                    <span class="fmt-item"><code>.json .yaml .toml</code> <span class="label">配置</span></span>
+                    <span class="fmt-item"><code>.pdf .docx .odf .pptx</code> <span class="label">文档</span></span>
+                    <span class="fmt-item"><code>.jpg .png .webp .tiff</code> <span class="label">图像</span></span>
+                </div>
+                <p class="text-muted mt-8" style="font-size:0.8rem;">
+                    还支持：XML、HTML、CSS、SCSS、CSV、TSV、TOML、INI、ENV、Dockerfile、Makefile 等。
+                </p>
+            </section>
+
+            <section>
+                <div class="section-title">提示词指南</div>
+                <p class="section-desc">
+                    要获得最佳 AI 响应，请遵循以下核心原则。
+                </p>
+
+                <ul class="tips-list">
+                    <li><span class="marker">—</span> <div><strong>尽可能使用英语</strong> — 大多数模型主要基于英语数据训练。</div></li>
+                    <li><span class="marker">—</span> <div><strong>明确指定编程语言</strong> — 例如“Python 3.11”，而不仅仅是“代码”。</div></li>
+                    <li><span class="marker">—</span> <div><strong>提供详细的任务描述</strong> — 包括输入、输出、边缘情况和约束。</div></li>
+                    <li><span class="marker">—</span> <div><strong>列出技术栈</strong> — 框架、库和版本。</div></li>
+                </ul>
+
+                <div class="prompt-box weak">
+                    <div class="label">弱提示词</div>
+                    <div class="text">“为网页爬虫编写代码。”</div>
+                </div>
+                <div class="prompt-box strong">
+                    <div class="label">强提示词</div>
+                    <div class="text">“开发一个 Python 3.11 脚本，使用 BeautifulSoup 4 和 Requests 2.31，从 https://example.com/products 抓取产品名称和价格。脚本应接受 URL 作为命令行参数，将结果输出为包含 ‘name’ 和 ‘price’ 列的 CSV 文件，并通过跟随 ‘Next’ 链接处理分页。包括对网络超时和缺失元素的错误处理。”</div>
+                </div>
+
+                <div style="margin-top:16px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius); padding:14px 18px;">
+                    <p style="color:var(--text-secondary); font-size:0.88rem;">
+                        <strong>最后建议：</strong> 简洁而完整，对复杂要求使用项目符号，指定输出格式，并提及约束（例如“必须在 Windows 上运行”）。
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-title">技术栈</div>
+                <div class="card-grid cols-3">
+                    <div class="card">
+                        <h3>Python 3.10+</h3>
+                        <p>主要开发语言。</p>
+                    </div>
+                    <div class="card">
+                        <h3>Hugging Face / llama.cpp</h3>
+                        <p>加载和运行本地 AI 模型。</p>
+                    </div>
+                    <div class="card">
+                        <h3>EasyOCR · DeepSeek OCR</h3>
+                        <p>光学字符识别，支持 GPU。</p>
+                    </div>
+                    <div class="card">
+                        <h3>deep‑translator · DeepL</h3>
+                        <p>翻译服务，自动回退。</p>
+                    </div>
+                    <div class="card">
+                        <h3>PyMuPDF · docx2txt · odfpy</h3>
+                        <p>文档解析（PDF、DOCX、ODF、PPTX）。</p>
+                    </div>
+                    <div class="card">
+                        <h3>Tkinter · 深色主题</h3>
+                        <p>功能丰富的桌面图形界面。</p>
+                    </div>
+                </div>
+            </section>
+
+        </div><!-- /ZH -->
+
+
+        <!-- ===== FOOTER ===== -->
+        <footer>
+            <div>BiNeuron &bull; MIT License</div>
+            <div class="links">
+                <a href="https://github.com/just-not-google/BiNeuron" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://www.youtube.com/@bineuron" target="_blank" rel="noopener">YouTube</a>
+                <a href="#">Docs</a>
+                <a href="#">Contact</a>
+            </div>
+        </footer>
+
+    </div><!-- /container -->
+
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        (function() {
+            const langSwitch = document.getElementById('langSwitch');
+            const langBtns = langSwitch.querySelectorAll('.lang-btn');
+            const contents = document.querySelectorAll('.lang-content');
+
+            function setActiveLanguage(lang) {
+                langBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.lang === lang);
+                });
+                contents.forEach(el => {
+                    el.classList.toggle('active', el.dataset.lang === lang);
+                });
+                document.documentElement.lang = lang;
+                try {
+                    localStorage.setItem('bineuron-lang', lang);
+                } catch (_) {}
+            }
+
+            langBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    setActiveLanguage(this.dataset.lang);
+                });
+            });
+
+            let saved = null;
+            try {
+                saved = localStorage.getItem('bineuron-lang');
+            } catch (_) {}
+            if (saved && ['en', 'ru', 'zh'].includes(saved)) {
+                setActiveLanguage(saved);
+            }
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+        })();
+    </script>
+
+</body>
+</html>

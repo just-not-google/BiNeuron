@@ -79,11 +79,17 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build with PyInstaller (onefile)
+      - name: Build with PyInstaller (onefile) - optimized
         run: |
           pyinstaller --onefile \
                       --windowed \
+                      --strip \
                       --name BiNeuron-Linux \
+                      --exclude-module torch.cuda \
+                      --exclude-module triton \
+                      --exclude-module nvidia \
+                      --exclude-module torch.distributed \
+                      --exclude-module torch.testing \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
                       gui.py
