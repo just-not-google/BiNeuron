@@ -5,7 +5,7 @@ import os
 import logging
 from BiNeuron.additional_functions.proxy_for_circumventing_restrictions import working_with_proxy
 from BiNeuron.additional_functions.text_translation import TranslatorText
-from BiNeuron.data.preferences_in_ai import PreferenceInAI
+from BiNeuron.data.preferences_in_ai import PREFERENCES_IN_AI_LIST
 from BiNeuron.data.models_for_programming_languages import MODELS_DICT
 from BiNeuron.additional_functions.defining_programming_language import DefiningProgrammingLanguage
 from BiNeuron.data.models_and_file_names import MODELS_AND_FILE_NAMES
@@ -27,6 +27,8 @@ from BiNeuron.additional_functions.checking_site_access import checking_site_acc
 from BiNeuron.additional_functions.logic_virtual_storage import logic_virtual_storage
 from BiNeuron.data.prompt_for_json_formatter import PROMPT_FOR_JSON_FORMATTER
 from BiNeuron.additional_functions.logic_editing_files import logic_editing_files
+from BiNeuron.data.prompt_json_deleting import PROMPT_JSON_DELETING
+from BiNeuron.additional_functions.deleting_files_thanks_to_ai import deleting_files_thanks_to_ai
 from BiNeuron import main_logger
 
 
@@ -35,7 +37,7 @@ logger = logging.getLogger(__name__)
 class BiNeuron:
     def __init__(self,
                  request: str,
-                 preferences_in_ai: PreferenceInAI = PreferenceInAI.DEEPSEEK,
+                 preferences_in_ai: str = PREFERENCES_IN_AI_LIST[0],
                  filter_for_swearing: bool = False,
                  additional_files: Optional[List[str]] = None,
                  models_dir: str = "./models",
@@ -88,7 +90,10 @@ class BiNeuron:
                  timeout_for_deepseek_ocr: Optional[int] = None,
                  max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS,
                  prefer_mirror: bool = True,
-                 editing_files: bool = False) -> None:
+                 editing_files: bool = False,
+                 local_trans: bool = False,
+                 from_code_lang: str = "",
+                 deleting_files: bool = False) -> None:
         """
         Initialize an BiNeuron instance with all necessary configuration.
         :param request: User's input text (question or code description).
@@ -144,6 +149,9 @@ class BiNeuron:
         :param max_rate_limit_retries: Number of retry attempts on rate limit errors.
         :param prefer_mirror: If True, forces using the mirror endpoint (hf-mirror.com).
         :param editing_files: If True, the files are automatically created and modified.
+        :param local_trans: If True, use ArgosTranslate for fully offline translation.
+        :param from_code_lang: Source language code for local translation (e.g., 'en', 'ru').
+        :param deleting_files: Automatic file deletion via AI.
         """
         logger.info("Initializing BiNeuron")
         self.request = request
@@ -199,6 +207,9 @@ class BiNeuron:
         self.max_rate_limit_retries = max_rate_limit_retries
         self.prefer_mirror = prefer_mirror
         self.editing_files = editing_files
+        self.local_trans = local_trans
+        self.from_code_lang = from_code_lang
+        self.deleting_files = deleting_files
         self.translated_text = None
         self.programmer_langs = None
         self.proxies_lst = None
@@ -253,7 +264,9 @@ class BiNeuron:
             "proxies": self.proxies_lst,
             "accurate_translation": self.accurate_translation,
             "your_key_for_deepl": self.your_key_for_deepl,
-            "request_language": self.request_language
+            "request_language": self.request_language,
+            "local_trans": self.local_trans,
+            "from_code_lang": self.from_code_lang
         }
 
     def __different_translation(self) -> None:
@@ -279,8 +292,7 @@ class BiNeuron:
         logger.info("Challenge _virtual_storage_operation")
         answer = logic_virtual_storage(
             path=self.virtual_storage_path,
-            with_ocr=self.with_ocr,
-            **self.__settings_for_translator()
+            with_ocr=self.with_ocr
         )
         logger.info("Additional files were overwritten to the files contained in the virtual storage.")
         self.additional_files = answer[TYPE_FORMATS[0]]
@@ -347,24 +359,16 @@ class BiNeuron:
         :return: The repository ID of the selected multilingual model.
         """
         logger.info(f"Challenge __special_defining_type_ai_model with preference {self.preferences_in_ai}")
-        if self.preferences_in_ai == PreferenceInAI.QWEN:
-            logger.info("Qwen is selected for the default language.")
-            return models_dict[PreferenceInAI.QWEN.value]
-        elif self.preferences_in_ai == PreferenceInAI.MINIMAX:
-            logger.info("MiniMax is selected for the default language.")
-            return models_dict[PreferenceInAI.MINIMAX.value]
-        elif self.preferences_in_ai == PreferenceInAI.CODE_LLAMA:
-            logger.info("CodeLlama is selected for the default language.")
-            return models_dict[PreferenceInAI.CODE_LLAMA.value]
-        elif self.preferences_in_ai == PreferenceInAI.MELLUM:
-            logger.info("Mellum is selected for the default language.")
-            return models_dict[PreferenceInAI.MELLUM.value]
-        elif self.preferences_in_ai == PreferenceInAI.WIZARD:
-            logger.info("Wizard is selected for the default language.")
-            return models_dict[PreferenceInAI.WIZARD.value]
+        ai_value = None
+
+        if self.preferences_in_ai in PREFERENCES_IN_AI_LIST:
+            ai_value = self.preferences_in_ai
         else:
-            logger.info("DeepSeek is selected for the default language.")
-            return models_dict[PreferenceInAI.DEEPSEEK.value]
+            logger.warning(f"{ai_value} - this model was not found in the prepared list.")
+            ai_value = PREFERENCES_IN_AI_LIST[0]
+
+        logger.info(f"{ai_value.capitalize()} is selected as the default model.")
+        return models_dict[ai_value]
 
     def _defining_type_ai_model(self) -> str:
         """
@@ -633,11 +637,18 @@ class BiNeuron:
 
             for attempt in range(NUMBER_ATTEMPTS):
                 logger.info(f"Attempt number {attempt} to change files automatically.")
+                template_prompt = None
+
+                if self.deleting_files:
+                    template_prompt = PROMPT_JSON_DELETING
+                else:
+                    template_prompt = PROMPT_FOR_JSON_FORMATTER
+
                 json_answer = launching_ai_model_and_requesting(
                     messages=final_messages,
                     repo_id=MAIN_REPO_ID,
                     filename=MAIN_FILENAME,
-                    template_prompt=PROMPT_FOR_JSON_FORMATTER,
+                    template_prompt=template_prompt,
                     **self.__settings_for_launching_ai_model()
                 )
                 file_answer = logic_editing_files(str_json=json_answer)
@@ -645,6 +656,10 @@ class BiNeuron:
                 if file_answer is False:
                     continue
                 else:
+                    if self.deleting_files:
+                        logger.info("The deletion of the file from the list has begun.")
+                        deleting_files_thanks_to_ai(answer_json=file_answer)
+
                     is_json = True
                     break
 

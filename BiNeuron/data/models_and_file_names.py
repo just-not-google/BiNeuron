@@ -143,6 +143,12 @@ MODELS_AND_FILE_NAMES = {
         "hard": "zignet-qwen-7b-q4km.gguf",
         "very_hard": "zignet-qwen-7b-q4km.gguf"
     },
+    "seanpoyner/smolcode-coder-powershell-1.5b-tools": {
+        "easy": "smolcode-coder-powershell-1.5b-q4_k_m.gguf",
+        "middle": "smolcode-coder-powershell-1.5b-q4_k_m.gguf",
+        "hard": "smolcode-coder-powershell-1.5b-q4_k_m.gguf",
+        "very_hard": "smolcode-coder-powershell-1.5b-q4_k_m.gguf"
+    },
     "bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF": {
         "easy": "DeepSeek-Coder-V2-Lite-Instruct-IQ2_XS.gguf",
         "middle": "DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf",
@@ -178,5 +184,71 @@ MODELS_AND_FILE_NAMES = {
         "middle": "wizardcoder-33b-v1.1.Q4_0.gguf",
         "hard": "wizardcoder-33b-v1.1.Q6_K.gguf",
         "very_hard": "wizardcoder-33b-v1.1.Q8_0.gguf"
+    },
+    "second-state/StarCoder2-7B-GGUF": {
+        "easy": "starcoder2-7b-Q2_K.gguf",
+        "middle": "starcoder2-7b-Q4_0.gguf",
+        "hard": "starcoder2-7b-Q6_K.gguf",
+        "very_hard": "starcoder2-7b-Q8_0.gguf"
+    },
+    "QuantFactory/Yi-Coder-1.5B-GGUF": {
+        "easy": "Yi-Coder-1.5B.Q2_K.gguf",
+        "middle": "Yi-Coder-1.5B.Q4_0.gguf",
+        "hard": "Yi-Coder-1.5B.Q6_K.gguf",
+        "very_hard": "Yi-Coder-1.5B.Q8_0.gguf"
+    },
+    "MaziyarPanahi/codegemma-2b-GGUF": {
+        "easy": "codegemma-2b.Q2_K.gguf",
+        "middle": "codegemma-2b.Q4_K_M.gguf",
+        "hard": "codegemma-2b.Q8_0.gguf",
+        "very_hard": "codegemma-2b.fp16.gguf"
+    },
+    "unsloth/Devstral-Small-2505-GGUF": {
+        "easy": "Devstral-Small-2505-Q2_K.gguf",
+        "middle": "Devstral-Small-2505-Q4_K_M.gguf",
+        "hard": "Devstral-Small-2505-UD-Q6_K_XL.gguf",
+        "very_hard": "Devstral-Small-2505-UD-Q8_K_XL.gguf"
+    },
+    "SanctumAI/granite-3b-code-instruct-GGUF": {
+        "easy": "granite-3b-code-instruct.Q2_K.gguf",
+        "middle": "granite-3b-code-instruct.Q4_K_S.gguf",
+        "hard": "granite-3b-code-instruct.Q8_0.gguf",
+        "very_hard": "granite-3b-code-instruct.f16.gguf"
+    },
+    "bartowski/Codestral-22B-v0.1-GGUF": {
+        "easy": "Codestral-22B-v0.1-IQ2_XS.gguf",
+        "middle": "Codestral-22B-v0.1-IQ4_XS.gguf",
+        "hard": "Codestral-22B-v0.1-Q5_K_M.gguf",
+        "very_hard": "Codestral-22B-v0.1-Q8_0.gguf"
+    },
+    "bartowski/codegeex4-all-9b-GGUF": {
+        "easy": "codegeex4-all-9b-IQ2_XS.gguf",
+        "middle": "codegeex4-all-9b-Q3_K_XL.gguf",
+        "hard": "codegeex4-all-9b-Q6_K.gguf",
+        "very_hard": "codegeex4-all-9b-Q8_0.gguf"
+    },
+    "LoneStriker/OpenCodeInterpreter-CL-7B-GGUF": {
+        "easy": "OpenCodeInterpreter-CL-7B-Q3_K_L.gguf",
+        "middle": "OpenCodeInterpreter-CL-7B-Q4_K_M.gguf",
+        "hard": "OpenCodeInterpreter-CL-7B-Q6_K.gguf",
+        "very_hard": "OpenCodeInterpreter-CL-7B-Q8_0.gguf"
+    },
+    "ornith-ai/Ornith-1.0-35B-GGUF": {
+        "easy": "ornith-1.0-35b-Q4_K_M.gguf",
+        "middle": "ornith-1.0-35b-Q5_K_M.gguf",
+        "hard": "ornith-1.0-35b-Q6_K.gguf",
+        "very_hard": "ornith-1.0-35b-Q8_0.gguf"
+    },
+    "bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF": {
+        "easy": "Kwaipilot_KAT-Dev-72B-Exp-IQ1_M.gguf",
+        "middle": "Kwaipilot_KAT-Dev-72B-Exp-Q2_K_L.gguf",
+        "hard": "Kwaipilot_KAT-Dev-72B-Exp-Q3_K_M.gguf",
+        "very_hard": "Kwaipilot_KAT-Dev-72B-Exp-Q4_K_L.gguf"
+    },
+    "unsloth/Magistral-Small-2506-GGUF": {
+        "easy": "Magistral-Small-2506-UD-IQ2_XXS.gguf",
+        "middle": "Magistral-Small-2506-Q4_K_M.gguf",
+        "hard": "Magistral-Small-2506-UD-Q6_K_XL.gguf",
+        "very_hard": "Magistral-Small-2506-UD-Q8_K_XL.gguf"
     }
 }

@@ -2,7 +2,7 @@ from .abbreviations_full_names_programming_languages import LANG_SHORTCUT_TO_FUL
 from .hint_words_for_defining_programming_languages import HINT_WORDS
 from .models_and_file_names import MODELS_AND_FILE_NAMES
 from .models_for_programming_languages import MODELS_DICT
-from .preferences_in_ai import PreferenceInAI
+from .preferences_in_ai import PREFERENCES_IN_AI_LIST
 from .prompt_for_orchestrator_ai_models import PROMPT
 from .constants_for_functions import *
 from .answer_against_profanity import ANSWER_AGAINST_PROFANITY
@@ -17,3 +17,4 @@ from .prompt_for_json_formatter import PROMPT_FOR_JSON_FORMATTER
 from .supported_formats_and_writemode import *
 from .translated_ui import TRANSLATED_UI
 from .fonts_and_colors import *
+from .prompt_json_deleting import PROMPT_JSON_DELETING

@@ -1,10 +1,19 @@
-from enum import Enum
-
-
-class PreferenceInAI(Enum):
-    DEEPSEEK = "deepseek"
-    QWEN = "qwen"
-    MINIMAX = "minimax"
-    CODE_LLAMA = "code_llama"
-    MELLUM = "mellum"
-    WIZARD = "wizard"
+PREFERENCES_IN_AI_LIST = [
+    "deepseek",
+    "qwen",
+    "minimax",
+    "code_llama",
+    "mellum",
+    "wizard",
+    "starcoder",
+    "yi_coder",
+    "codegemma",
+    "devstral",
+    "granite",
+    "codestral",
+    "codegeex4",
+    "opencode_interpreter",
+    "ornith_1_0",
+    "kat_dev",
+    "magistral_small"
+]

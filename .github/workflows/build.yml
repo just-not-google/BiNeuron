@@ -1,4 +1,4 @@
-name: Build BiNeuron (Windows, Linux, macOS)
+name: Build BiNeuron Web (Windows, Linux, macOS)
 
 on:
   push:
@@ -33,23 +33,25 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller
+          pip install flask pyinstaller
 
       - name: Build with PyInstaller (onefile)
         run: |
           pyinstaller --onefile `
-                      --windowed `
-                      --name BiNeuron-Windows `
+                      --console `
+                      --name BiNeuron-Web-Windows `
                       --icon img_files/logo.ico `
                       --add-data "img_files;img_files" `
                       --add-data "BiNeuron;BiNeuron" `
-                      gui.py
+                      --add-data "templates;templates" `
+                      --add-data "static;static" `
+                      app.py
 
       - name: Upload artifact (Windows)
         uses: actions/upload-artifact@v4
         with:
-          name: BiNeuron-Windows
-          path: dist/BiNeuron-Windows.exe
+          name: BiNeuron-Web-Windows
+          path: dist/BiNeuron-Web-Windows.exe
 
   build-linux:
     runs-on: ubuntu-latest
@@ -73,19 +75,18 @@ jobs:
       - name: Install system dependencies (Tkinter)
         run: sudo apt-get update && sudo apt-get install -y python3-tk
 
-      - name: Install Python dependencies (CPU-only PyTorch for Linux)
+      - name: Install Python dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall
-          pip install pyinstaller
+          pip install flask pyinstaller
 
       - name: Build with PyInstaller (onefile) - optimized
         run: |
           pyinstaller --onefile \
-                      --windowed \
+                      --console \
                       --strip \
-                      --name BiNeuron-Linux \
+                      --name BiNeuron-Web-Linux \
                       --exclude-module torch.cuda \
                       --exclude-module triton \
                       --exclude-module nvidia \
@@ -93,26 +94,29 @@ jobs:
                       --exclude-module torch.testing \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
-                      gui.py
+                      --add-data "templates:templates" \
+                      --add-data "static:static" \
+                      app.py
 
       - name: Create .desktop file for Linux
         run: |
-          cat > BiNeuron.desktop <<EOF
+          cat > BiNeuron-Web.desktop <<EOF
           [Desktop Entry]
-          Name=BiNeuron
-          Exec=$PWD/dist/BiNeuron-Linux
+          Name=BiNeuron Web
+          Exec=$PWD/dist/BiNeuron-Web-Linux
           Icon=$PWD/img_files/logo.ico
           Type=Application
           Categories=Utility;
+          Terminal=true;
           EOF
 
       - name: Upload artifact (Linux)
         uses: actions/upload-artifact@v4
         with:
-          name: BiNeuron-Linux
+          name: BiNeuron-Web-Linux
           path: |
-            dist/BiNeuron-Linux
-            BiNeuron.desktop
+            dist/BiNeuron-Web-Linux
+            BiNeuron-Web.desktop
             img_files/logo.ico
 
   build-macos:
@@ -159,23 +163,25 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller
+          pip install flask pyinstaller
 
       - name: Build with PyInstaller (onefile)
         run: |
           pyinstaller --onefile \
-                      --windowed \
-                      --name BiNeuron-MacOS \
+                      --console \
+                      --name BiNeuron-Web-MacOS \
                       --icon img_files/logo.icns \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
-                      gui.py
+                      --add-data "templates:templates" \
+                      --add-data "static:static" \
+                      app.py
 
       - name: Upload artifact (macOS)
         uses: actions/upload-artifact@v4
         with:
-          name: BiNeuron-MacOS
-          path: dist/BiNeuron-MacOS
+          name: BiNeuron-Web-MacOS
+          path: dist/BiNeuron-Web-MacOS
 
   release:
     runs-on: ubuntu-latest
@@ -192,9 +198,9 @@ jobs:
       - name: Create ZIP archives for each platform
         run: |
           cd artifacts
-          zip -r BiNeuron-Windows.zip BiNeuron-Windows/
-          zip -r BiNeuron-Linux.zip BiNeuron-Linux/
-          zip -r BiNeuron-MacOS.zip BiNeuron-MacOS/
+          zip -r BiNeuron-Web-Windows.zip BiNeuron-Web-Windows/
+          zip -r BiNeuron-Web-Linux.zip BiNeuron-Web-Linux/
+          zip -r BiNeuron-Web-MacOS.zip BiNeuron-Web-MacOS/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -205,8 +211,8 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            artifacts/BiNeuron-Windows.zip
-            artifacts/BiNeuron-Linux.zip
-            artifacts/BiNeuron-MacOS.zip
+            artifacts/BiNeuron-Web-Windows.zip
+            artifacts/BiNeuron-Web-Linux.zip
+            artifacts/BiNeuron-Web-MacOS.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

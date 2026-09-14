@@ -104,9 +104,11 @@ AI can accept and process files in the following formats. They are grouped into 
 | Extension(s) | Type |
 |--------------|------|
 | `.pdf` | Portable Document Format |
+| `.epub` | EPUB e-book |
 | `.docx` (or `.word`) | Microsoft Word document |
 | `.odf` | OpenDocument Format |
 | `.pptx` | PowerPoint presentation |
+| `.xlsx`, `.xls` | Microsoft Excel spreadsheets |
 | `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.webp`, `.tiff`, `.tif` | Raster images |
 
 ---
@@ -240,9 +242,11 @@ By following these guidelines, you will harness the full potential of AI assista
 | Расширение(я) | Тип |
 |--------------|------|
 | `.pdf` | Переносимый формат документов |
+| `.epub` | Электронная книга EPUB |
 | `.docx` (или `.word`) | Документ Microsoft Word |
 | `.odf` | OpenDocument Format |
 | `.pptx` | Презентация PowerPoint |
+| `.xlsx`, `.xls` | Электронные таблицы Microsoft Excel |
 | `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.webp`, `.tiff`, `.tif` | Растровые изображения |
 
 ---
@@ -376,9 +380,11 @@ AI可以接受并处理以下格式的文件。为清晰起见，它们分为三
 | 扩展名 | 类型 |
 |--------|------|
 | `.pdf` | 便携式文档格式 |
+| `.epub` | EPUB 电子书 |
 | `.docx`（或 `.word`） | Microsoft Word文档 |
 | `.odf` | OpenDocument格式 |
 | `.pptx` | PowerPoint演示文稿 |
+| `.xlsx`, `.xls` | Microsoft Excel 电子表格 |
 | `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.webp`, `.tiff`, `.tif` | 栅格图像 |
 
 ---

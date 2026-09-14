@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BiNeuron</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="modal-overlay" id="langModal">
+  <div class="modal">
+    <h3>BiNeuron</h3>
+    <select class="select" id="langSelect">
+      <option value="en">English</option>
+      <option value="ru">Русский</option>
+      <option value="zh">中文</option>
+    </select>
+    <button class="btn" id="langOk">OK</button>
+  </div>
+</div>
+
+<div class="import-warning" id="importWarning" style="display:none"></div>
+
+<div class="app">
+
+  <aside class="panel settings-panel">
+    <div class="panel-title" data-i18n="settings_title">Settings</div>
+
+    <div class="settings-scroll">
+      <div class="top-buttons">
+        <button class="btn small" id="btnReset"  data-i18n="reset_btn">Reset</button>
+        <button class="btn small" id="btnExport" data-i18n="export_all_btn">Export</button>
+        <button class="btn small" id="btnDelete" data-i18n="delete_all_btn">Delete</button>
+        <button class="btn small" id="btnApply"  data-i18n="apply_settings_btn">Apply</button>
+      </div>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="network_frame">Network</legend>
+        <div class="row"><label data-i18n="country_label">Country</label>
+          <input class="input" type="text" data-setting="country"></div>
+        <div class="row"><label data-i18n="protocol_label">Protocol</label>
+          <select class="select" data-setting="protocol" id="protocolSelect"></select></div>
+        <div class="row"><label data-i18n="max_timeout_label">Max timeout</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="max_timeout" value="30">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row check-row"><label data-i18n="is_working_label">Is working</label>
+          <input class="check" type="checkbox" data-setting="is_working"></div>
+        <div class="row check-row"><label data-i18n="auto_proxies_label">Auto proxies</label>
+          <input class="check" type="checkbox" data-setting="auto_proxies"></div>
+        <div class="row top"><label data-i18n="your_proxies_label">Your proxies</label>
+          <textarea class="textarea" rows="3" data-setting="your_proxies_dict"></textarea></div>
+        <div class="row"><label data-i18n="min_timeout_check_label">Min timeout check</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="min_timeout_for_checking_availability" value="5">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="max_timeout_check_label">Max timeout check</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="max_timeout_for_checking_availability" value="15">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="retries_label">Retries</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="retries" value="3">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row check-row"><label data-i18n="github_proxies_label">Github proxies</label>
+          <input class="check" type="checkbox" data-setting="github_proxies"></div>
+        <div class="row top"><label data-i18n="url_list_label">URL list</label>
+          <textarea class="textarea" rows="3" data-setting="url_lst"></textarea></div>
+        <div class="row"><label data-i18n="proxy_retries_label">Proxy retries</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="proxy_retries" value="3">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="main_retries_label">Main retries</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="main_retries" value="3">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="model_frame">Model</legend>
+        <div class="row"><label data-i18n="preferences_in_ai_label">Preferences in AI</label>
+          <select class="select" data-setting="preferences_in_ai" id="prefsSelect"></select></div>
+        <div class="row"><label data-i18n="models_dir_label">Models dir</label>
+          <input class="input" type="text" data-setting="models_dir" value="./models"></div>
+        <div class="row check-row"><label data-i18n="with_ai_orchestrator_label">AI orchestrator</label>
+          <input class="check" type="checkbox" data-setting="with_ai_orchestrator"></div>
+        <div class="row"><label data-i18n="n_ctx_label">n_ctx</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="n_ctx" value="0">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="n_gpu_layers_label">n_gpu_layers</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="n_gpu_layers" value="0">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="max_tokens_label">Max tokens</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="max_tokens" value="4096">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="token_hf_label">HF token</label>
+          <input class="input" type="text" data-setting="your_token_for_hf"></div>
+        <div class="row"><label data-i18n="subdomain_label">Subdomain</label>
+          <input class="input" type="text" data-setting="subdomain"></div>
+        <div class="row"><label data-i18n="repo_id_label">Repo ID</label>
+          <input class="input" type="text" data-setting="repo_id"></div>
+        <div class="row"><label data-i18n="filename_label">Filename</label>
+          <input class="input" type="text" data-setting="filename"></div>
+        <div class="row check-row"><label data-i18n="prefer_mirror_label">Prefer mirror</label>
+          <input class="check" type="checkbox" data-setting="prefer_mirror"></div>
+        <div class="row"><label data-i18n="main_prompt_mode_label">Main prompt mode</label>
+          <select class="select" data-setting="main_prompt_mode" id="promptModeSelect"></select></div>
+        <div class="row top"><label data-i18n="main_prompt_label">Main prompt</label>
+          <textarea class="textarea" rows="3" data-setting="main_prompt"></textarea></div>
+        <div class="row"><label data-i18n="temperature_label">Temperature</label>
+          <div class="spin">
+            <input class="input" type="number" step="0.1" data-setting="temperature" value="0.1">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="translator_frame">Translator</legend>
+        <div class="row"><label data-i18n="determinant_mode_label">Determinant mode</label>
+          <select class="select" data-setting="determinant_mode" id="detModeSelect"></select></div>
+        <div class="row check-row"><label data-i18n="accurate_translation_label">Accurate translation</label>
+          <input class="check" type="checkbox" data-setting="accurate_translation"></div>
+        <div class="row"><label data-i18n="deepl_key_label">DeepL key</label>
+          <input class="input" type="text" data-setting="your_key_for_deepl"></div>
+        <div class="row"><label data-i18n="request_language_label">Request language</label>
+          <input class="input" type="text" data-setting="request_language" value="en"></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="ocr_frame">OCR</legend>
+        <div class="row top"><label data-i18n="languages_list_label">Languages list</label>
+          <textarea class="textarea" rows="3" data-setting="lang_lst"></textarea></div>
+        <div class="row check-row"><label data-i18n="use_gpu_label">Use GPU for OCR</label>
+          <input class="check" type="checkbox" data-setting="use_gpu_for_ocr"></div>
+        <div class="row check-row"><label data-i18n="with_ocr_label">With OCR</label>
+          <input class="check" type="checkbox" data-setting="with_ocr"></div>
+        <div class="row check-row"><label data-i18n="cloud_version_label">Cloud version</label>
+          <input class="check" type="checkbox" data-setting="cloud_version"></div>
+        <div class="row check-row"><label data-i18n="with_deepseek_label">With DeepSeek</label>
+          <input class="check" type="checkbox" data-setting="with_deepseek"></div>
+        <div class="row"><label data-i18n="model_size_label">Model size</label>
+          <select class="select" data-setting="model_size" id="modelSizeSelect"></select></div>
+        <div class="row check-row"><label data-i18n="crop_mode_label">Crop mode</label>
+          <input class="check" type="checkbox" data-setting="crop_mode"></div>
+        <div class="row"><label data-i18n="base_url_label">Base URL</label>
+          <input class="input" type="text" data-setting="base_url"
+                 value="https://api.siliconflow.cn/v1/chat/completions"></div>
+        <div class="row"><label data-i18n="api_key_deepseek_label">DeepSeek API key</label>
+          <input class="input" type="text" data-setting="api_key_for_deepseek_ocr"></div>
+        <div class="row"><label data-i18n="timeout_deepseek_label">DeepSeek timeout</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="timeout_for_deepseek_ocr" value="30">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="max_rate_limit_retries_label">Rate limit retries</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="max_rate_limit_retries" value="3">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="other_frame">Other</legend>
+        <div class="row check-row"><label data-i18n="filter_swearing_label">Filter swearing</label>
+          <input class="check" type="checkbox" data-setting="filter_for_swearing"></div>
+        <div class="row check-row"><label data-i18n="verbose_label">Verbose</label>
+          <input class="check" type="checkbox" data-setting="verbose"></div>
+        <div class="row check-row"><label data-i18n="echo_label">Echo</label>
+          <input class="check" type="checkbox" data-setting="echo"></div>
+        <div class="row"><label data-i18n="type_computer_label">Type computer</label>
+          <select class="select" data-setting="type_computer" id="typeComputerSelect"></select></div>
+        <div class="row check-row"><label data-i18n="proprietary_algorithms_label">Proprietary algorithms</label>
+          <input class="check" type="checkbox" data-setting="proprietary_algorithms"></div>
+        <div class="row check-row"><label data-i18n="writing_response_label">Writing response to file</label>
+          <input class="check" type="checkbox" data-setting="writing_response_to_file"></div>
+        <div class="row check-row"><label data-i18n="editing_files_label">Editing files</label>
+          <input class="check" type="checkbox" data-setting="editing_files"></div>
+      </fieldset>
+    </div>
+  </aside>
+
+  <main class="panel chat-panel">
+    <div class="chat-title" data-i18n="chat_title">Chat</div>
+    <div class="status-bar" id="statusBar"></div>
+
+    <button class="btn resume-btn" id="resumeBtn" data-i18n="resume_button_text">
+      Resume request
+    </button>
+
+    <section class="logs-panel collapsed" id="logsPanel">
+      <div class="logs-header" id="logsToggle" role="button" tabindex="0">
+        <span class="logs-chevron">▸</span>
+        <span class="logs-title" data-i18n="logs_title">Logs</span>
+        <span class="logs-count" id="logsCount">0</span>
+        <span class="logs-spinner" id="logsSpinner" hidden></span>
+        <button class="logs-copy" id="logsCopy" type="button" title="Copy logs">⧉</button>
+      </div>
+      <div class="logs-body" id="logsBody"></div>
+    </section>
+
+    <div class="messages-wrap" id="messagesWrap">
+      <div class="welcome" data-i18n="welcome_text">
+        Welcome to BiNeuron!<br>Type your request below to begin.
+      </div>
+    </div>
+
+    <fieldset class="fieldset attached-box">
+      <legend data-i18n="attached_files_label">Attached files</legend>
+      <div class="drop-zone" id="dropZone" tabindex="0">
+        <div class="drop-hint" data-i18n="drop_hint">Drag &amp; drop files here or click to browse</div>
+        <div class="file-chips" id="fileChips"></div>
+      </div>
+    </fieldset>
+
+    <div class="input-row">
+      <input class="input" type="text" id="requestInput"
+             placeholder="Type your request..." data-i18n-ph="request_placeholder">
+      <button class="btn" id="uploadBtn" data-i18n="upload_btn">Upload</button>
+      <button class="btn" id="sendBtn"   data-i18n="send_btn">Send</button>
+      <button class="btn" id="copyBtn"   data-i18n="copy_chat_btn">Copy chat</button>
+    </div>
+  </main>
+
+  <aside class="panel history-panel">
+    <div class="history-header">
+      <div class="panel-title" id="historyTitle" data-i18n="history_title">History</div>
+      <label class="vs-label">
+        <input class="check" type="checkbox" data-setting="virtual_storage" id="virtualStorage">
+        <span data-i18n="virtual_storage_switch">Virtual</span>
+      </label>
+    </div>
+
+    <div class="history-controls" id="historyControls">
+      <input class="input search" type="text" id="searchChats"
+             placeholder="Search..." data-i18n-ph="search_placeholder">
+      <button class="btn small" id="btnAddChat"  data-i18n="add_btn">Add</button>
+      <button class="btn small" id="btnDelChat"  data-i18n="delete_btn">Del</button>
+      <button class="btn small" id="btnDlChat"   data-i18n="download_btn">Save</button>
+    </div>
+
+    <div class="storage-controls" id="storageControls">
+      <input class="input" type="text" id="storagePath"
+             data-setting="virtual_storage_path" placeholder="Storage path...">
+      <button class="btn small" id="btnBrowse">Browse</button>
+      <button class="btn small" id="btnRefresh">Refresh</button>
+    </div>
+
+    <div class="history-list" id="historyList"></div>
+    <div class="tree-view" id="treeView"></div>
+
+    <fieldset class="fieldset models-box">
+      <legend data-i18n="gguf_models_frame">GGUF models</legend>
+      <button class="btn small" id="refreshModels"
+              data-i18n="refresh_models_btn" style="margin-bottom:5px;">Refresh models</button>
+      <div class="models-list" id="modelsList">
+        <div style="color:var(--fg-dark);">No models found</div>
+      </div>
+    </fieldset>
+  </aside>
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

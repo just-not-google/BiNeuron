@@ -12,6 +12,8 @@ from BiNeuron.data.constants_for_functions import PHOTO_FORMATS
 from BiNeuron.data.constants_for_functions import (NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
                                                     MAIN_LANGUAGE, LITE_TYPE)
 from BiNeuron.additional_functions.advanced_definition_text_from_image import LaunchDeepSeekOCR
+from markitdown import MarkItDown
+from epub2txt import epub2txt
 
 
 logger = logging.getLogger(__name__)
@@ -39,7 +41,9 @@ def _settings_for_translator(determinant_mode: Optional[Literal["lite", "full", 
                              proxies: Optional[Dict] = None,
                              accurate_translation: bool = False,
                              your_key_for_deepl: str = "",
-                             request_language: str = MAIN_LANGUAGE) -> Dict:
+                             request_language: str = MAIN_LANGUAGE,
+                             local_trans: bool = False,
+                             from_code_lang: str = "") -> Dict:
     """
     Builds a dictionary of parameters for initializing TranslatorText.
     :param determinant_mode: Language detection mode ('lite', 'full', 'auto').
@@ -47,6 +51,8 @@ def _settings_for_translator(determinant_mode: Optional[Literal["lite", "full", 
     :param accurate_translation: If True, attempt to use DeepL first.
     :param your_key_for_deepl: API key for DeepL (required if accurate_translation is True).
     :param request_language: Target language code (default is MAIN_LANGUAGE).
+    :param local_trans: If True, use ArgosTranslate for fully offline translation.
+    :param from_code_lang: Source language code for local translation (e.g., 'en', 'ru').
     :return: Dictionary with translation settings.
     """
     return {
@@ -54,7 +60,9 @@ def _settings_for_translator(determinant_mode: Optional[Literal["lite", "full", 
         "proxies": proxies,
         "accurate_translation": accurate_translation,
         "your_key_for_deepl": your_key_for_deepl,
-        "request_language": request_language
+        "request_language": request_language,
+        "local_trans": local_trans,
+        "from_code_lang": from_code_lang
     }
 
 def _translate_text(text: str, settings: Dict) -> str:
@@ -148,6 +156,41 @@ def get_text_from_pptx(file_name: str,
     translated = _translate_text(answer, translation_settings)
     logger.info("The text was received from the PowerPoint file.")
     return f"<< {translated} >> - {file_name}\n"
+
+@handle_errors
+def get_text_from_xlsx(file_name: str,
+                       translation_settings: Dict,
+                       **kwargs) -> str:
+    """
+    Extracts and translates text from a Excel (.xlsx, .xls) file.
+    :param file_name: file_name: Path to the Excel file.
+    :param translation_settings: Dict with settings for TranslatorText.
+    :param kwargs: Additional unused parameters.
+    :return: Translated text with a marker indicating the file name.
+    """
+    logger.info("Challenge get_text_from_xlsx")
+    md = MarkItDown()
+    result = md.convert(file_name).text_content
+    trans_result = _translate_text(result, translation_settings)
+    logger.info("The text was obtained from an Excel file.")
+    return f"<< {trans_result} >> - {file_name}\n"
+
+@handle_errors
+def get_text_from_epub(file_name: str,
+                       translation_settings: Dict,
+                       **kwargs) -> str:
+    """
+    Extracts and translates text from an e-book file (.epub).
+    :param file_name: The path to the e-book.
+    :param translation_settings: Dict with settings for TranslatorText.
+    :param kwargs: Additional unused parameters.
+    :return: Translated text with a marker indicating the file name.
+    """
+    logger.info("Challenge get_text_from_epub")
+    result = epub2txt(file_name)
+    trans_result = _translate_text(result, translation_settings)
+    logger.info("The text was received from an e-book.")
+    return f"<< {trans_result} >> - {file_name}\n"
 
 @handle_errors
 def getting_text_from_files(file_name: str,
@@ -320,6 +363,12 @@ def main_get_text_from_files(file_name: str,
 
     if suffix == '.pptx':
         return get_text_from_pptx(file_name, translation_settings)
+
+    if suffix == '.xlsx' or suffix == ".xls":
+        return get_text_from_xlsx(file_name, translation_settings)
+
+    if suffix == ".epub":
+        return get_text_from_epub(file_name, translation_settings)
 
     if suffix in PHOTO_FORMATS:
         if suffix in PHOTO_FORMATS:

@@ -24,12 +24,24 @@ MODELS_DICT = {
     "fsharp": "odytrice/kenichi-thinking-GGUF",
     "ada": "the-clanker-lover/steelman-14b-ada-GGUF",
     "zig": "fulgidus/zignet-qwen2.5-coder-7b",
+    "powershell": "seanpoyner/smolcode-coder-powershell-1.5b-tools",
     "default": {
         "deepseek": "bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF",
         "qwen": "Qwen/Qwen3-Coder-Next-GGUF",
         "minimax": "bartowski/MiniMaxAI_MiniMax-M2.7-GGUF",
         "code_llama": "bartowski/CodeLlama-13B-MORepair-GGUF",
         "mellum": "JetBrains/Mellum-4b-sft-all-gguf",
-        "wizard": "TheBloke/WizardCoder-33B-V1.1-GGUF"
+        "wizard": "TheBloke/WizardCoder-33B-V1.1-GGUF",
+        "starcoder": "second-state/StarCoder2-7B-GGUF",
+        "yi_coder": "QuantFactory/Yi-Coder-1.5B-GGUF",
+        "codegemma": "MaziyarPanahi/codegemma-2b-GGUF",
+        "devstral": "unsloth/Devstral-Small-2505-GGUF",
+        "granite": "SanctumAI/granite-3b-code-instruct-GGUF",
+        "codestral": "bartowski/Codestral-22B-v0.1-GGUF",
+        "codegeex4": "bartowski/codegeex4-all-9b-GGUF",
+        "opencode_interpreter": "LoneStriker/OpenCodeInterpreter-CL-7B-GGUF",
+        "ornith_1_0": "ornith-ai/Ornith-1.0-35B-GGUF",
+        "kat_dev": "bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF",
+        "magistral_small": "unsloth/Magistral-Small-2506-GGUF"
     }
 }
