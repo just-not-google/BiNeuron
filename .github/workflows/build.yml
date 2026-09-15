@@ -75,23 +75,41 @@ jobs:
       - name: Install system dependencies (Tkinter)
         run: sudo apt-get update && sudo apt-get install -y python3-tk
 
-      - name: Install Python dependencies
+      - name: Install Python dependencies (CPU-only)
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu --force-reinstall --no-cache-dir
+          CMAKE_ARGS="-DLLAMA_CUDA=off" pip install llama-cpp-python --force-reinstall --no-cache-dir
           pip install flask pyinstaller
 
-      - name: Build with PyInstaller (onefile) - optimized
+      - name: Build with PyInstaller (onefile) - highly optimized
         run: |
           pyinstaller --onefile \
                       --console \
                       --strip \
                       --name BiNeuron-Web-Linux \
                       --exclude-module torch.cuda \
-                      --exclude-module triton \
-                      --exclude-module nvidia \
+                      --exclude-module torch.backends.cudnn \
+                      --exclude-module torch.backends.cuda \
                       --exclude-module torch.distributed \
                       --exclude-module torch.testing \
+                      --exclude-module torchvision.cuda \
+                      --exclude-module triton \
+                      --exclude-module nvidia \
+                      --exclude-module matplotlib \
+                      --exclude-module IPython \
+                      --exclude-module jupyter \
+                      --exclude-module notebook \
+                      --exclude-module pytest \
+                      --exclude-module sphinx \
+                      --exclude-module PyQt5 \
+                      --exclude-module PyQt6 \
+                      --exclude-module PySide2 \
+                      --exclude-module PySide6 \
+                      --exclude-module tensorboard \
+                      --exclude-module pandas \
+                      --exclude-module sqlalchemy \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
                       --add-data "templates:templates" \
