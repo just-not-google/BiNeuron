@@ -6,6 +6,9 @@
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
 
 <details>
 <summary>🇬🇧 English</summary>
@@ -32,7 +35,8 @@ At its core, BiNeuron automatically identifies the programming language of a giv
 - **Two‑Stage Pipeline**: The primary AI model generates the code/response. A secondary, lightweight model (e.g., Qwen2.5-Coder-1.5B) then transforms the response into a strict JSON object containing absolute file paths and full new contents.  
 - **Full Context Awareness**: The JSON formatter receives the complete file context (all read files, unread file names, project root, and the primary AI’s answer) to ensure accurate path generation and content mapping.  
 - **Robust Retry Mechanism**: If the JSON fails validation, the system automatically re‑prompts the formatter up to `retries` times, logging each attempt until a valid JSON is produced or the maximum retries are exhausted.  
-- **Safe, Whole‑File Replacements**: Only whole-file replacements are supported (no partial edits) to maintain consistency and safety. Deletion (`null`) is intentionally not implemented to prevent accidental data loss.
+- **Safe, Whole‑File Replacements**: Only whole-file replacements are supported (no partial edits) to maintain consistency and safety.  
+- **Optional File Deletion**: When `deleting_files=True` is passed to the `BiNeuron` constructor, the JSON formatter may return `null` for a file path, and the system will safely delete that file. This feature is disabled by default to prevent accidental data loss.
 
 ### Adaptive Model Selection  
 - Automatically assesses the user’s hardware capabilities (CPU cores, frequency, RAM) and selects the optimal quantized version of the target model (ranging from IQ2 to F16) to balance speed and accuracy.  
@@ -50,6 +54,7 @@ At its core, BiNeuron automatically identifies the programming language of a giv
 ### Multilingual Translation  
 - Built‑in translation engine normalises user requests to English (or any configured target language) to ensure consistent AI interactions.  
 - Supports both Google Translate and DeepL, with automatic fallback when network restrictions are detected.  
+- **Offline Translation**: Optional ArgosTranslate integration (`local_trans=True`, `from_code_lang='en'`) provides fully offline translation without relying on external APIs.
 
 ## Architecture  
 
@@ -59,20 +64,20 @@ BiNeuron is engineered with a modular, separation‑of‑concerns design:
 - **OCR Module** – handles text extraction from images and scanned documents via DeepSeek OCR or EasyOCR.  
 - **Model Downloader** – manages downloading and caching of Hugging Face models, with built‑in mirror and proxy support.  
 - **JSON Formatter Module** – uses a lightweight model (e.g., Qwen2.5-Coder-1.5B) to convert the primary model’s response into a strict JSON object for file modifications.  
-- **File Editing Module** – applies JSON‑based file changes (whole-file replacements) with error handling and retry logic.  
-- **Translation Service** – provides language detection and translation utilities, with optional DeepL integration.  
+- **File Editing Module** – applies JSON‑based file changes (whole-file replacements) with error handling and retry logic. Supports optional file deletion when `deleting_files=True`.  
+- **Translation Service** – provides language detection and translation utilities, with optional DeepL and ArgosTranslate integration.  
 - **Network Layer** – implements proxy rotation, availability checks, and GitHub proxy fetching for circumventing restrictions.  
-- **Graphical User Interface** – a feature‑rich desktop application built with Tkinter for seamless interaction.  
+- **Web Interface** – a feature‑rich web application built with Flask (HTML/CSS/JS), plus an interactive CLI mode for terminal usage.
 
 The architecture emphasises reusability, fault tolerance, and performance, allowing each component to operate independently while seamlessly integrating with the others.  
 
 ## Graphical Interface  
 
 <p align="center">
-  <img src="img_files/gui_screenshot.png" width="80%" alt="BiNeuron GUI Screenshot" />
+  <img src="img_files/gui_screenshot_2.png" width="80%" alt="BiNeuron GUI Screenshot" />
 </p>
 
-A desktop application built with Tkinter, offering:  
+A modern web application built with Flask (plus an interactive CLI mode), offering:  
 - **Intuitive Chat Interface** – message history, file attachments, and real‑time log display.  
 - **Virtual Storage Explorer** – scan and navigate directories in a tree view.  
 - **Comprehensive Settings Panel** – fine‑tune every aspect of the platform: network, model selection, OCR, translation, and more.  
@@ -87,9 +92,9 @@ The application is designed to be user‑friendly, allowing developers to focus 
 - **Python 3.10+** – primary development language  
 - **Hugging Face Transformers / llama.cpp** – for loading and running AI models locally  
 - **EasyOCR, DeepSeek OCR** – optical character recognition  
-- **deep‑translator, DeepL** – translation services  
+- **deep‑translator, DeepL, argostranslate** – translation services (online and offline)  
 - **PyMuPDF, docx2txt, python‑pptx, odfpy** – document parsing  
-- **Tkinter** – modern, themeable graphical interface  
+- **Flask, HTML/CSS/JavaScript** – web‑based graphical interface  
 - **requests, httpx** – network communication  
 - **psutil, multiprocessing** – system resource monitoring and benchmarking  
 - **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** – lightweight JSON formatter for file editing
@@ -127,7 +132,8 @@ BiNeuron ‑ это сложное программное решение, кот
 - **Двухэтапный пайплайн**: Основная ИИ-модель генерирует код/ответ. Вторичная лёгкая модель (например, Qwen2.5-Coder-1.5B) преобразует этот ответ в строгий JSON-объект, содержащий абсолютные пути к файлам и новое полное содержимое.  
 - **Полный контекст**: Форматтер JSON получает весь контекст файлов (все прочитанные файлы, имена непрочитанных файлов, корень проекта и ответ основной ИИ-модели) для точной генерации путей и содержимого.  
 - **Надёжный механизм повторных попыток**: Если JSON не проходит валидацию, система автоматически перезапрашивает форматтер до `retries` раз, логируя каждую попытку, пока не будет получен валидный JSON или не будут исчерпаны все попытки.  
-- **Безопасная замена целых файлов**: Поддерживается только полная замена файлов (не частичное редактирование) для обеспечения согласованности и безопасности. Удаление (`null`) намеренно не реализовано во избежание случайной потери данных.
+- **Безопасная замена целых файлов**: Поддерживается только полная замена файлов (не частичное редактирование) для обеспечения согласованности и безопасности.  
+- **Опциональное удаление файлов**: При передаче `deleting_files=True` в конструктор `BiNeuron` JSON-форматтер может вернуть `null` для пути к файлу, и система безопасно удалит этот файл. По умолчанию функция отключена во избежание случайной потери данных.
 
 ### Адаптивный выбор модели  
 - Автоматически оценивает аппаратные возможности пользователя (количество ядер CPU, частота, ОЗУ) и выбирает оптимальную квантизованную версию целевой модели (от IQ2 до F16) для баланса скорости и точности.  
@@ -145,14 +151,15 @@ BiNeuron ‑ это сложное программное решение, кот
 ### Многоязычный перевод  
 - Встроенный механизм перевода приводит запросы пользователя к английскому (или любому другому настроенному языку) для единообразного взаимодействия с ИИ.  
 - Поддерживает Google Translate и DeepL с автоматическим переключением при обнаружении сетевых ограничений.  
+- **Офлайн-перевод**: Опциональная интеграция ArgosTranslate (`local_trans=True`, `from_code_lang='en'`) обеспечивает полностью офлайн-перевод без обращения к внешним API.
 
 ## Графический интерфейс  
 
 <p align="center">
-  <img src="img_files/gui_screenshot.png" width="80%" alt="Скриншот GUI BiNeuron" />
+  <img src="img_files/gui_screenshot_2.png" width="80%" alt="Скриншот GUI BiNeuron" />
 </p>
 
-Десктопное приложение на Tkinter, предлагающее:  
+Современное веб-приложение на Flask (плюс интерактивный CLI-режим), предлагающее:  
 - **Интуитивный чат** – история сообщений, прикрепление файлов и отображение логов в реальном времени.  
 - **Обозреватель виртуального хранилища** – сканирование и навигация по директориям в виде дерева.  
 - **Всеобъемлющая панель настроек** – тонкая настройка каждого аспекта платформы: сеть, выбор модели, OCR, перевод и многое другое.  
@@ -170,10 +177,10 @@ BiNeuron спроектирован по модульному принципу �
 - **Модуль OCR** – обрабатывает извлечение текста из изображений и отсканированных документов через DeepSeek OCR или EasyOCR.  
 - **Загрузчик моделей** – управляет загрузкой и кэшированием моделей Hugging Face со встроенной поддержкой зеркал и прокси.  
 - **Модуль JSON-форматтера** – использует лёгкую модель (например, Qwen2.5-Coder-1.5B) для преобразования ответа основной модели в строгий JSON для изменения файлов.  
-- **Модуль редактирования файлов** – применяет изменения на основе JSON (полная замена файлов) с обработкой ошибок и повторными попытками.  
-- **Сервис перевода** – предоставляет функции определения языка и перевода, с опциональной интеграцией DeepL.  
+- **Модуль редактирования файлов** – применяет изменения на основе JSON (полная замена файлов) с обработкой ошибок и повторными попытками. Поддерживает опциональное удаление файлов при `deleting_files=True`.  
+- **Сервис перевода** – предоставляет функции определения языка и перевода, с опциональной интеграцией DeepL и ArgosTranslate.  
 - **Сетевой уровень** – реализует ротацию прокси, проверку доступности и получение прокси из GitHub для обхода ограничений.  
-- **Графический интерфейс** – насыщенное десктопное приложение на Tkinter для удобного взаимодействия.  
+- **Веб-интерфейс** – функциональное веб-приложение на Flask (HTML/CSS/JS), а также интерактивный CLI-режим для работы в терминале.
 
 Архитектура делает упор на переиспользуемость, отказоустойчивость и производительность, позволяя каждому компоненту работать независимо, но при этом бесшовно интегрироваться с другими.  
 
@@ -182,9 +189,9 @@ BiNeuron спроектирован по модульному принципу �
 - **Python 3.10+** – основной язык разработки  
 - **Hugging Face Transformers / llama.cpp** – для локальной загрузки и запуска ИИ‑моделей  
 - **EasyOCR, DeepSeek OCR** – оптическое распознавание символов  
-- **deep‑translator, DeepL** – сервисы перевода  
+- **deep‑translator, DeepL, argostranslate** – сервисы перевода (онлайн и офлайн)  
 - **PyMuPDF, docx2txt, python‑pptx, odfpy** – парсинг документов  
-- **Tkinter** – современный, настраиваемый графический интерфейс  
+- **Flask, HTML/CSS/JavaScript** – веб-интерфейс  
 - **requests, httpx** – сетевое взаимодействие  
 - **psutil, multiprocessing** – мониторинг системных ресурсов и бенчмаркинг  
 - **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** – лёгкий форматтер JSON для редактирования файлов
@@ -222,7 +229,8 @@ BiNeuron 是一个先进的软件解决方案，旨在弥合人类意图与机�
 - **两阶段流水线**：主 AI 模型生成代码/响应。随后，一个轻量级辅助模型（例如 Qwen2.5-Coder-1.5B）将该响应转换为严格的 JSON 对象，其中包含绝对文件路径和完整的新内容。  
 - **完整上下文感知**：JSON 格式化器接收完整的文件上下文（所有已读文件、未读文件名、项目根目录以及主 AI 的回答），以确保准确的路径生成和内容映射。  
 - **强大的重试机制**：如果 JSON 验证失败，系统会自动重新提示格式化器，最多重试 `retries` 次，并记录每次尝试，直到生成有效 JSON 或达到最大重试次数。  
-- **安全的整文件替换**：仅支持整文件替换（不支持部分编辑），以保持一致性和安全性。故意不实现删除（`null`）功能，以防止意外数据丢失。
+- **安全的整文件替换**：仅支持整文件替换（不支持部分编辑），以保持一致性和安全性。  
+- **可选文件删除**：当向 `BiNeuron` 构造函数传递 `deleting_files=True` 时，JSON 格式化器可能为文件路径返回 `null`，系统将安全删除该文件。此功能默认禁用，以防止意外数据丢失。
 
 ### 自适应模型选择  
 - 自动评估用户的硬件能力（CPU 核心数、频率、RAM），并选择目标模型的最佳量化版本（从 IQ2 到 F16），以平衡速度和精度。  
@@ -240,6 +248,7 @@ BiNeuron 是一个先进的软件解决方案，旨在弥合人类意图与机�
 ### 多语言翻译  
 - 内置翻译引擎将用户请求标准化为英语（或任何配置的目标语言），以确保一致的 AI 交互。  
 - 支持 Google Translate 和 DeepL，检测到网络限制时自动回退。  
+- **离线翻译**：可选的 ArgosTranslate 集成（`local_trans=True`，`from_code_lang='en'`）提供完全离线的翻译，无需依赖外部 API。
 
 ## 架构  
 
@@ -249,20 +258,20 @@ BiNeuron 采用模块化、关注点分离的设计：
 - **OCR 模块** – 通过 DeepSeek OCR 或 EasyOCR 处理图像和扫描文档中的文本提取。  
 - **模型下载器** – 管理 Hugging Face 模型的下载和缓存，内置镜像和代理支持。  
 - **JSON 格式化器模块** – 使用轻量级模型（例如 Qwen2.5-Coder-1.5B）将主模型的响应转换为严格的 JSON 对象以用于文件修改。  
-- **文件编辑模块** – 应用基于 JSON 的文件更改（整文件替换），具备错误处理和重试逻辑。  
-- **翻译服务** – 提供语言检测和翻译工具，可选集成 DeepL。  
+- **文件编辑模块** – 应用基于 JSON 的文件更改（整文件替换），具备错误处理和重试逻辑。当 `deleting_files=True` 时支持可选的文件删除。  
+- **翻译服务** – 提供语言检测和翻译工具，可选集成 DeepL 和 ArgosTranslate。  
 - **网络层** – 实现代理轮换、可用性检查以及从 GitHub 获取代理以规避限制。  
-- **图形用户界面** – 使用 Tkinter 构建的功能丰富的桌面应用程序，实现无缝交互。  
+- **Web 界面** – 使用 Flask（HTML/CSS/JS）构建的功能丰富的 Web 应用程序，并支持交互式 CLI 模式。
 
 该架构强调可重用性、容错性和性能，允许每个组件独立运行，同时与其他组件无缝集成。  
 
 ## 图形界面  
 
 <p align="center">
-  <img src="img_files/gui_screenshot.png" width="80%" alt="BiNeuron GUI 截图" />
+  <img src="img_files/gui_screenshot_2.png" width="80%" alt="BiNeuron GUI 截图" />
 </p>
 
-使用 Tkinter 构建的桌面应用程序，提供：  
+使用 Flask 构建的现代 Web 应用程序（外加交互式 CLI 模式），提供：  
 - **直观的聊天界面** – 消息历史、文件附件和实时日志显示。  
 - **虚拟存储浏览器** – 以树形视图扫描和导航目录。  
 - **全面的设置面板** – 微调平台的每个方面：网络、模型选择、OCR、翻译等。  
@@ -277,9 +286,9 @@ BiNeuron 采用模块化、关注点分离的设计：
 - **Python 3.10+** – 主要开发语言  
 - **Hugging Face Transformers / llama.cpp** – 用于本地加载和运行 AI 模型  
 - **EasyOCR, DeepSeek OCR** – 光学字符识别  
-- **deep‑translator, DeepL** – 翻译服务  
+- **deep‑translator, DeepL, argostranslate** – 翻译服务（在线和离线）  
 - **PyMuPDF, docx2txt, python‑pptx, odfpy** – 文档解析  
-- **Tkinter** – 现代化、可定制主题的图形界面  
+- **Flask, HTML/CSS/JavaScript** – Web 图形界面  
 - **requests, httpx** – 网络通信  
 - **psutil, multiprocessing** – 系统资源监控和基准测试  
 - **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** – 用于文件编辑的轻量级 JSON 格式化器

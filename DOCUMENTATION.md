@@ -72,6 +72,9 @@
 | `max_rate_limit_retries` | `Optional[int]` | `NUMBER_ATTEMPTS` | Number of retries on rate‑limit errors from DeepSeek cloud. |
 | `prefer_mirror` | `bool` | `True` | Use the Hugging Face mirror (`hf-mirror.com`) for downloads. |
 | `editing_files` | `bool` | `False` | Enable automatic file editing via JSON generation and disk write. |
+| `local_trans` | `bool` | `False` | If `True`, use ArgosTranslate for fully offline translation (no internet required). |
+| `from_code_lang` | `str` | `""` | Source language code for local translation (e.g., `"en"`, `"ru"`). Used only when `local_trans=True`. |
+| `deleting_files` | `bool` | `False` | Enable automatic file deletion via AI. Works in conjunction with `editing_files=True`. When enabled, files with `null` values in the AI’s JSON response are removed from disk. |
 
 ---
 
@@ -158,6 +161,9 @@
 | `max_rate_limit_retries` | `Optional[int]` | `NUMBER_ATTEMPTS` | Количество повторных попыток при ошибках ограничения частоты запросов (rate limit). |
 | `prefer_mirror` | `bool` | `True` | Использовать зеркало Hugging Face (`hf-mirror.com`) для загрузки. |
 | `editing_files` | `bool` | `False` | Включить автоматическое редактирование файлов через генерацию JSON и запись на диск. |
+| `local_trans` | `bool` | `False` | Если `True`, использовать ArgosTranslate для полностью офлайн-перевода (без интернета). |
+| `from_code_lang` | `str` | `""` | Код исходного языка для локального перевода (например, `"en"`, `"ru"`). Используется только при `local_trans=True`. |
+| `deleting_files` | `bool` | `False` | Включить автоматическое удаление файлов через ИИ. Работает совместно с `editing_files=True`. При включении файлы со значением `null` в JSON-ответе ИИ удаляются с диска. |
 
 ---
 
@@ -244,6 +250,9 @@
 | `max_rate_limit_retries` | `Optional[int]` | `NUMBER_ATTEMPTS` | 遇到 DeepSeek 云速率限制错误时的重试次数。 |
 | `prefer_mirror` | `bool` | `True` | 下载时使用 Hugging Face 镜像（`hf-mirror.com`）。 |
 | `editing_files` | `bool` | `False` | 启用通过 JSON 生成和磁盘写入的自动文件编辑。 |
+| `local_trans` | `bool` | `False` | 如果为 `True`，则使用 ArgosTranslate 进行完全离线翻译（无需互联网）。 |
+| `from_code_lang` | `str` | `""` | 本地翻译的源语言代码（例如 `"en"`、`"ru"`）。仅在 `local_trans=True` 时使用。 |
+| `deleting_files` | `bool` | `False` | 启用通过 AI 自动删除文件。与 `editing_files=True` 一起使用。启用后，AI 的 JSON 响应中值为 `null` 的文件将从磁盘删除。 |
 
 ---
 
