@@ -48,7 +48,7 @@ At its core, BiNeuron automatically identifies the programming language of a giv
 
 ### Virtual Storage Mode  
 - Allows scanning and processing of entire folders or mounted virtual directories.  
-- Recursively identifies supported files, extracts their content, and incorporates it into the analysis context—perfect for large codebases or repositories.  
+- Recursively identifies supported files, extracts their content, and incorporates it into the analysis context - perfect for large codebases or repositories.  
 - **Interactive File Explorer**: In GUI mode, the virtual storage is displayed as a tree view. Double‑click any file to open it in the default system application.  
 
 ### Multilingual Translation  
@@ -60,14 +60,14 @@ At its core, BiNeuron automatically identifies the programming language of a giv
 
 BiNeuron is engineered with a modular, separation‑of‑concerns design:  
 
-- **Core Engine** – orchestrates the entire pipeline: request parsing, language detection, model selection, and response generation.  
-- **OCR Module** – handles text extraction from images and scanned documents via DeepSeek OCR or EasyOCR.  
-- **Model Downloader** – manages downloading and caching of Hugging Face models, with built‑in mirror and proxy support.  
-- **JSON Formatter Module** – uses a lightweight model (e.g., Qwen2.5-Coder-1.5B) to convert the primary model’s response into a strict JSON object for file modifications.  
-- **File Editing Module** – applies JSON‑based file changes (whole-file replacements) with error handling and retry logic. Supports optional file deletion when `deleting_files=True`.  
-- **Translation Service** – provides language detection and translation utilities, with optional DeepL and ArgosTranslate integration.  
-- **Network Layer** – implements proxy rotation, availability checks, and GitHub proxy fetching for circumventing restrictions.  
-- **Web Interface** – a feature‑rich web application built with Flask (HTML/CSS/JS), plus an interactive CLI mode for terminal usage.
+- **Core Engine** - orchestrates the entire pipeline: request parsing, language detection, model selection, and response generation.  
+- **OCR Module** - handles text extraction from images and scanned documents via DeepSeek OCR or EasyOCR.  
+- **Model Downloader** - manages downloading and caching of Hugging Face models, with built‑in mirror and proxy support.  
+- **JSON Formatter Module** - uses a lightweight model (e.g., Qwen2.5-Coder-1.5B) to convert the primary model’s response into a strict JSON object for file modifications.  
+- **File Editing Module** - applies JSON‑based file changes (whole-file replacements) with error handling and retry logic. Supports optional file deletion when `deleting_files=True`.  
+- **Translation Service** - provides language detection and translation utilities, with optional DeepL and ArgosTranslate integration.  
+- **Network Layer** - implements proxy rotation, availability checks, and GitHub proxy fetching for circumventing restrictions.  
+- **Web Interface** - a feature‑rich web application built with Flask (HTML/CSS/JS).
 
 The architecture emphasises reusability, fault tolerance, and performance, allowing each component to operate independently while seamlessly integrating with the others.  
 
@@ -77,33 +77,40 @@ The architecture emphasises reusability, fault tolerance, and performance, allow
   <img src="img_files/gui_screenshot_2.png" width="80%" alt="BiNeuron GUI Screenshot" />
 </p>
 
-A modern web application built with Flask (plus an interactive CLI mode), offering:  
-- **Intuitive Chat Interface** – message history, file attachments, and real‑time log display.  
-- **Virtual Storage Explorer** – scan and navigate directories in a tree view.  
-- **Comprehensive Settings Panel** – fine‑tune every aspect of the platform: network, model selection, OCR, translation, and more.  
-- **Chat Management** – create, delete, download, and filter conversation history.  
-- **Live Logging** – see what the AI is doing in real time.  
-- **Dark Theme** – optimized for long coding sessions.  
+A modern web application built with Flask, offering:  
+- **Intuitive Chat Interface** - message history, file attachments, and real‑time log display.  
+- **Virtual Storage Explorer** - scan and navigate directories in a tree view.  
+- **Comprehensive Settings Panel** - fine‑tune every aspect of the platform: network, model selection, OCR, translation, and more.  
+- **Chat Management** - create, delete, download, and filter conversation history.  
+- **Live Logging** - see what the AI is doing in real time.  
+- **Dark Theme** - optimized for long coding sessions.  
 
 The application is designed to be user‑friendly, allowing developers to focus on coding while the AI handles the heavy lifting of language detection, file processing, and model orchestration.
 
+## Development  
+
+Only the interface and the interaction with the interface were developed with the help of **DeepSeek Coder**. This includes the Flask‑based web UI, the JavaScript front‑end, and the user interaction logic. All other components - the core engine, OCR module, model downloader, JSON formatter, file editing module, translation service, network layer, and overall architecture - were designed and written independently.
+
+- **Model Collection**: [deepseek-ai/deepseek-coder](https://huggingface.co/collections/deepseek-ai/deepseek-coder)  
+- **Example Model**: [deepseek-ai/deepseek-coder-6.7b-instruct](https://huggingface.co/deepseek-ai/deepseek-coder-6.7b-instruct)
+
 ## Technology Stack  
 
-- **Python 3.10+** – primary development language  
-- **Hugging Face Transformers / llama.cpp** – for loading and running AI models locally  
-- **EasyOCR, DeepSeek OCR** – optical character recognition  
-- **deep‑translator, DeepL, argostranslate** – translation services (online and offline)  
-- **PyMuPDF, docx2txt, python‑pptx, odfpy** – document parsing  
-- **Flask, HTML/CSS/JavaScript** – web‑based graphical interface  
-- **requests, httpx** – network communication  
-- **psutil, multiprocessing** – system resource monitoring and benchmarking  
-- **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** – lightweight JSON formatter for file editing
+- **Python 3.10+** - primary development language  
+- **Hugging Face Transformers / llama.cpp** - for loading and running AI models locally  
+- **EasyOCR, DeepSeek OCR** - optical character recognition  
+- **deep‑translator, DeepL, argostranslate** - translation services (online and offline)  
+- **PyMuPDF, docx2txt, python‑pptx, odfpy** - document parsing  
+- **Flask, HTML/CSS/JavaScript** - web‑based graphical interface  
+- **requests, httpx** - network communication  
+- **psutil, multiprocessing** - system resource monitoring and benchmarking  
+- **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** - lightweight JSON formatter for file editing
 
 ## Model Repository  
 
 BiNeuron leverages a hand‑picked collection of open‑source code generation models, each fine‑tuned for specific programming languages. The repository includes models from DeepSeek, Qwen, MiniMax, CodeLlama, Mellum, and Wizard, among others. The system automatically fetches the appropriate model based on the detected language and the user’s hardware profile, ensuring optimal performance for every session.  
 
-> BiNeuron represents a fusion of cutting‑edge AI, robust software engineering, and practical usability—empowering developers to focus on creativity and problem‑solving while the platform handles the complexities of language detection, file processing, and model orchestration.
+> BiNeuron represents a fusion of cutting‑edge AI, robust software engineering, and practical usability - empowering developers to focus on creativity and problem‑solving while the platform handles the complexities of language detection, file processing, and model orchestration.
 
 </details>
 
@@ -112,7 +119,7 @@ BiNeuron leverages a hand‑picked collection of open‑source code generation m
 
 **Интеллектуальная платформа для анализа и генерации кода**  
 
-BiNeuron ‑ это сложное программное решение, которое устраняет разрыв между намерениями человека и машинным кодом. Он объединяет продвинутую обработку естественного языка, оптическое распознавание символов и адаптивный выбор модели в единый мощный инструмент, предназначенный для разработчиков, исследователей и технических групп.  
+BiNeuron - это сложное программное решение, которое устраняет разрыв между намерениями человека и машинным кодом. Он объединяет продвинутую обработку естественного языка, оптическое распознавание символов и адаптивный выбор модели в единый мощный инструмент, предназначенный для разработчиков, исследователей и технических групп.  
 
 По своей сути, BiNeuron автоматически определяет язык программирования для данного запроса, извлекает содержимое из широкого спектра форматов файлов, включая изображения и документы, а затем генерирует контекстно‑зависимый, готовый к работе код, используя лучшие в своем классе локальные или облачные языковые модели.
 
@@ -145,7 +152,7 @@ BiNeuron ‑ это сложное программное решение, кот
 
 ### Режим виртуального хранилища  
 - Позволяет сканировать и обрабатывать целые папки или смонтированные виртуальные директории.  
-- Рекурсивно определяет поддерживаемые файлы, извлекает их содержимое и включает его в контекст анализа — идеально для больших кодовых баз или репозиториев.  
+- Рекурсивно определяет поддерживаемые файлы, извлекает их содержимое и включает его в контекст анализа - идеально для больших кодовых баз или репозиториев.  
 - **Интерактивный файловый менеджер**: В режиме GUI виртуальное хранилище отображается в виде дерева. Двойной клик по файлу открывает его в системном приложении по умолчанию.  
 
 ### Многоязычный перевод  
@@ -159,42 +166,49 @@ BiNeuron ‑ это сложное программное решение, кот
   <img src="img_files/gui_screenshot_2.png" width="80%" alt="Скриншот GUI BiNeuron" />
 </p>
 
-Современное веб-приложение на Flask (плюс интерактивный CLI-режим), предлагающее:  
-- **Интуитивный чат** – история сообщений, прикрепление файлов и отображение логов в реальном времени.  
-- **Обозреватель виртуального хранилища** – сканирование и навигация по директориям в виде дерева.  
-- **Всеобъемлющая панель настроек** – тонкая настройка каждого аспекта платформы: сеть, выбор модели, OCR, перевод и многое другое.  
-- **Управление чатами** – создание, удаление, загрузка и фильтрация истории диалогов.  
-- **Live‑логи** – просмотр действий ИИ в реальном времени.  
-- **Тёмная тема** – оптимизирована для длительных сессий разработки.  
+Современное веб-приложение на Flask, предлагающее:  
+- **Интуитивный чат** - история сообщений, прикрепление файлов и отображение логов в реальном времени.  
+- **Обозреватель виртуального хранилища** - сканирование и навигация по директориям в виде дерева.  
+- **Всеобъемлющая панель настроек** - тонкая настройка каждого аспекта платформы: сеть, выбор модели, OCR, перевод и многое другое.  
+- **Управление чатами** - создание, удаление, загрузка и фильтрация истории диалогов.  
+- **Live‑логи** - просмотр действий ИИ в реальном времени.  
+- **Тёмная тема** - оптимизирована для длительных сессий разработки.  
 
 Приложение разработано с упором на удобство, позволяя разработчикам сосредоточиться на коде, пока ИИ берёт на себя сложности определения языка, обработки файлов и оркестрации моделей.
+
+## Разработка  
+
+Только интерфейс и взаимодействие с интерфейсом были разработаны с помощью **DeepSeek Coder**. Это включает веб-интерфейс на Flask, JavaScript-фронтенд и логику взаимодействия с пользователем. Все остальные компоненты - основной движок, модуль OCR, загрузчик моделей, JSON-форматтер, модуль редактирования файлов, сервис перевода, сетевой уровень и общая архитектура - были спроектированы и написаны самостоятельно.
+
+- **Коллекция моделей**: [deepseek-ai/deepseek-coder](https://huggingface.co/collections/deepseek-ai/deepseek-coder)  
+- **Пример модели**: [deepseek-ai/deepseek-coder-6.7b-instruct](https://huggingface.co/deepseek-ai/deepseek-coder-6.7b-instruct)
 
 ## Архитектура  
 
 BiNeuron спроектирован по модульному принципу с разделением ответственности:  
 
-- **Основной движок** – управляет всем конвейером: разбор запроса, определение языка, выбор модели и генерация ответа.  
-- **Модуль OCR** – обрабатывает извлечение текста из изображений и отсканированных документов через DeepSeek OCR или EasyOCR.  
-- **Загрузчик моделей** – управляет загрузкой и кэшированием моделей Hugging Face со встроенной поддержкой зеркал и прокси.  
-- **Модуль JSON-форматтера** – использует лёгкую модель (например, Qwen2.5-Coder-1.5B) для преобразования ответа основной модели в строгий JSON для изменения файлов.  
-- **Модуль редактирования файлов** – применяет изменения на основе JSON (полная замена файлов) с обработкой ошибок и повторными попытками. Поддерживает опциональное удаление файлов при `deleting_files=True`.  
-- **Сервис перевода** – предоставляет функции определения языка и перевода, с опциональной интеграцией DeepL и ArgosTranslate.  
-- **Сетевой уровень** – реализует ротацию прокси, проверку доступности и получение прокси из GitHub для обхода ограничений.  
-- **Веб-интерфейс** – функциональное веб-приложение на Flask (HTML/CSS/JS), а также интерактивный CLI-режим для работы в терминале.
+- **Основной движок** - управляет всем конвейером: разбор запроса, определение языка, выбор модели и генерация ответа.  
+- **Модуль OCR** - обрабатывает извлечение текста из изображений и отсканированных документов через DeepSeek OCR или EasyOCR.  
+- **Загрузчик моделей** - управляет загрузкой и кэшированием моделей Hugging Face со встроенной поддержкой зеркал и прокси.  
+- **Модуль JSON-форматтера** - использует лёгкую модель (например, Qwen2.5-Coder-1.5B) для преобразования ответа основной модели в строгий JSON для изменения файлов.  
+- **Модуль редактирования файлов** - применяет изменения на основе JSON (полная замена файлов) с обработкой ошибок и повторными попытками. Поддерживает опциональное удаление файлов при `deleting_files=True`.  
+- **Сервис перевода** - предоставляет функции определения языка и перевода, с опциональной интеграцией DeepL и ArgosTranslate.  
+- **Сетевой уровень** - реализует ротацию прокси, проверку доступности и получение прокси из GitHub для обхода ограничений.  
+- **Веб-интерфейс** - функциональное веб-приложение на Flask (HTML/CSS/JS).
 
 Архитектура делает упор на переиспользуемость, отказоустойчивость и производительность, позволяя каждому компоненту работать независимо, но при этом бесшовно интегрироваться с другими.  
 
 ## Технологический стек  
 
-- **Python 3.10+** – основной язык разработки  
-- **Hugging Face Transformers / llama.cpp** – для локальной загрузки и запуска ИИ‑моделей  
-- **EasyOCR, DeepSeek OCR** – оптическое распознавание символов  
-- **deep‑translator, DeepL, argostranslate** – сервисы перевода (онлайн и офлайн)  
-- **PyMuPDF, docx2txt, python‑pptx, odfpy** – парсинг документов  
-- **Flask, HTML/CSS/JavaScript** – веб-интерфейс  
-- **requests, httpx** – сетевое взаимодействие  
-- **psutil, multiprocessing** – мониторинг системных ресурсов и бенчмаркинг  
-- **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** – лёгкий форматтер JSON для редактирования файлов
+- **Python 3.10+** - основной язык разработки  
+- **Hugging Face Transformers / llama.cpp** - для локальной загрузки и запуска ИИ‑моделей  
+- **EasyOCR, DeepSeek OCR** - оптическое распознавание символов  
+- **deep‑translator, DeepL, argostranslate** - сервисы перевода (онлайн и офлайн)  
+- **PyMuPDF, docx2txt, python‑pptx, odfpy** - парсинг документов  
+- **Flask, HTML/CSS/JavaScript** - веб-интерфейс  
+- **requests, httpx** - сетевое взаимодействие  
+- **psutil, multiprocessing** - мониторинг системных ресурсов и бенчмаркинг  
+- **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** - лёгкий форматтер JSON для редактирования файлов
 
 ## Репозиторий моделей  
 
@@ -254,14 +268,14 @@ BiNeuron 是一个先进的软件解决方案，旨在弥合人类意图与机�
 
 BiNeuron 采用模块化、关注点分离的设计：  
 
-- **核心引擎** – 编排整个流水线：请求解析、语言检测、模型选择和响应生成。  
-- **OCR 模块** – 通过 DeepSeek OCR 或 EasyOCR 处理图像和扫描文档中的文本提取。  
-- **模型下载器** – 管理 Hugging Face 模型的下载和缓存，内置镜像和代理支持。  
-- **JSON 格式化器模块** – 使用轻量级模型（例如 Qwen2.5-Coder-1.5B）将主模型的响应转换为严格的 JSON 对象以用于文件修改。  
-- **文件编辑模块** – 应用基于 JSON 的文件更改（整文件替换），具备错误处理和重试逻辑。当 `deleting_files=True` 时支持可选的文件删除。  
-- **翻译服务** – 提供语言检测和翻译工具，可选集成 DeepL 和 ArgosTranslate。  
-- **网络层** – 实现代理轮换、可用性检查以及从 GitHub 获取代理以规避限制。  
-- **Web 界面** – 使用 Flask（HTML/CSS/JS）构建的功能丰富的 Web 应用程序，并支持交互式 CLI 模式。
+- **核心引擎** - 编排整个流水线：请求解析、语言检测、模型选择和响应生成。  
+- **OCR 模块** - 通过 DeepSeek OCR 或 EasyOCR 处理图像和扫描文档中的文本提取。  
+- **模型下载器** - 管理 Hugging Face 模型的下载和缓存，内置镜像和代理支持。  
+- **JSON 格式化器模块** - 使用轻量级模型（例如 Qwen2.5-Coder-1.5B）将主模型的响应转换为严格的 JSON 对象以用于文件修改。  
+- **文件编辑模块** - 应用基于 JSON 的文件更改（整文件替换），具备错误处理和重试逻辑。当 `deleting_files=True` 时支持可选的文件删除。  
+- **翻译服务** - 提供语言检测和翻译工具，可选集成 DeepL 和 ArgosTranslate。  
+- **网络层** - 实现代理轮换、可用性检查以及从 GitHub 获取代理以规避限制。  
+- **Web 界面** - 使用 Flask（HTML/CSS/JS）构建的功能丰富的 Web 应用程序。
 
 该架构强调可重用性、容错性和性能，允许每个组件独立运行，同时与其他组件无缝集成。  
 
@@ -271,27 +285,34 @@ BiNeuron 采用模块化、关注点分离的设计：
   <img src="img_files/gui_screenshot_2.png" width="80%" alt="BiNeuron GUI 截图" />
 </p>
 
-使用 Flask 构建的现代 Web 应用程序（外加交互式 CLI 模式），提供：  
-- **直观的聊天界面** – 消息历史、文件附件和实时日志显示。  
-- **虚拟存储浏览器** – 以树形视图扫描和导航目录。  
-- **全面的设置面板** – 微调平台的每个方面：网络、模型选择、OCR、翻译等。  
-- **聊天管理** – 创建、删除、下载和筛选对话历史。  
-- **实时日志** – 实时查看 AI 的操作。  
-- **深色主题** – 针对长时间编码会话进行优化。  
+使用 Flask 构建的现代 Web 应用程序，提供：  
+- **直观的聊天界面** - 消息历史、文件附件和实时日志显示。  
+- **虚拟存储浏览器** - 以树形视图扫描和导航目录。  
+- **全面的设置面板** - 微调平台的每个方面：网络、模型选择、OCR、翻译等。  
+- **聊天管理** - 创建、删除、下载和筛选对话历史。  
+- **实时日志** - 实时查看 AI 的操作。  
+- **深色主题** - 针对长时间编码会话进行优化。  
 
 该应用程序设计为易于使用，使开发人员可以专注于编码，而 AI 处理语言检测、文件处理和模型编排的繁重工作。
 
+## 开发  
+
+只有界面和与界面的交互是在 **DeepSeek Coder** 的帮助下开发的。这包括基于 Flask 的 Web UI、JavaScript 前端以及用户交互逻辑。所有其他组件——核心引擎、OCR 模块、模型下载器、JSON 格式化器、文件编辑模块、翻译服务、网络层以及整体架构——均为独立设计和编写。
+
+- **模型集合**: [deepseek-ai/deepseek-coder](https://huggingface.co/collections/deepseek-ai/deepseek-coder)  
+- **示例模型**: [deepseek-ai/deepseek-coder-6.7b-instruct](https://huggingface.co/deepseek-ai/deepseek-coder-6.7b-instruct)
+
 ## 技术栈  
 
-- **Python 3.10+** – 主要开发语言  
-- **Hugging Face Transformers / llama.cpp** – 用于本地加载和运行 AI 模型  
-- **EasyOCR, DeepSeek OCR** – 光学字符识别  
-- **deep‑translator, DeepL, argostranslate** – 翻译服务（在线和离线）  
-- **PyMuPDF, docx2txt, python‑pptx, odfpy** – 文档解析  
-- **Flask, HTML/CSS/JavaScript** – Web 图形界面  
-- **requests, httpx** – 网络通信  
-- **psutil, multiprocessing** – 系统资源监控和基准测试  
-- **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** – 用于文件编辑的轻量级 JSON 格式化器
+- **Python 3.10+** - 主要开发语言  
+- **Hugging Face Transformers / llama.cpp** - 用于本地加载和运行 AI 模型  
+- **EasyOCR, DeepSeek OCR** - 光学字符识别  
+- **deep‑translator, DeepL, argostranslate** - 翻译服务（在线和离线）  
+- **PyMuPDF, docx2txt, python‑pptx, odfpy** - 文档解析  
+- **Flask, HTML/CSS/JavaScript** - Web 图形界面  
+- **requests, httpx** - 网络通信  
+- **psutil, multiprocessing** - 系统资源监控和基准测试  
+- **Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF** - 用于文件编辑的轻量级 JSON 格式化器
 
 ## 模型仓库  
 
