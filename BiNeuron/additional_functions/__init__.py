@@ -15,3 +15,4 @@ from .logic_virtual_storage import logic_virtual_storage
 from .advanced_definition_text_from_image import LaunchDeepSeekOCR
 from .logic_editing_files import logic_editing_files
 from .deleting_files_thanks_to_ai import deleting_files_thanks_to_ai
+from .data_and_chat_encryption import data_and_chat_encryption
