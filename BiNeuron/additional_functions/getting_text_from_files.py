@@ -8,12 +8,15 @@ from odfdo import Document
 import pptx2txt2
 from typing import List, Optional, Literal, Dict
 from pathlib import Path
-from BiNeuron.data.constants_for_functions import PHOTO_FORMATS
+from BiNeuron.data.supported_formats import PHOTO_SUPPORTED_FORMATS
 from BiNeuron.data.constants_for_functions import (NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
                                                     MAIN_LANGUAGE, LITE_TYPE)
 from BiNeuron.additional_functions.advanced_definition_text_from_image import LaunchDeepSeekOCR
 from markitdown import MarkItDown
 from epub2txt import epub2txt
+import mobi
+import shutil
+from fb2reader import fb2book
 
 
 logger = logging.getLogger(__name__)
@@ -193,6 +196,49 @@ def get_text_from_epub(file_name: str,
     return f"<< {trans_result} >> - {file_name}\n"
 
 @handle_errors
+def get_text_from_mobi(file_name: str,
+                       translation_settings: Dict,
+                       **kwargs) -> str:
+    """
+    Extracts and translates text from a MOBI (.mobi) file.
+    :param file_name: The path to the MOBI file.
+    :param translation_settings: Dict with settings for TranslatorText.
+    :param kwargs: Additional unused parameters.
+    :return: Translated text with a marker indicating the file name.
+    """
+    logger.info("Challenge get_text_from_mobi")
+    tempdir, filepath = mobi.extract(file_name)
+    with open(filepath, "r") as f:
+        content = f.read()
+        trans_content = _translate_text(content, translation_settings)
+        shutil.rmtree(tempdir)
+        logger.info("The text was obtained from a MOBI file.")
+        return f"<< {trans_content}>> - {file_name}\n"
+
+@handle_errors
+def get_text_from_fb2(file_name: str,
+                      translation_settings: Dict,
+                      **kwargs) -> str:
+    """
+    Extracts and translates text from a FB2 (.fb2) file.
+    :param file_name: The path to the FB2 file.
+    :param translation_settings: Dict with settings for TranslatorText.
+    :param kwargs: Additional unused parameters.
+    :return: Translated text with a marker indicating the file name.
+    """
+    logger.info("Challenge get_text_from_fb2")
+    book = fb2book(file_name)
+    authors = book.get_authors()
+    title = book.get_title()
+    content = book.get_body()
+    all_text = (f"Authors: {authors}\n"
+                f"Title: {title}\n"
+                f"The text of the book itself: {content}\n")
+    trans_all_text = _translate_text(all_text, translation_settings)
+    logger.info("The text was obtained from an FB2 file.")
+    return f"<< {trans_all_text} >> - {file_name}\n"
+
+@handle_errors
 def getting_text_from_files(file_name: str,
                             translation_settings: Dict,
                             **kwargs) -> str:
@@ -303,6 +349,26 @@ def logic_for_ocr(file_name: str,
     logger.info("The text was obtained from a photo.")
     return final_text
 
+def additional_supported_files_to_read() -> Dict:
+    """
+    All additional binary file formats that the program can
+    read and extract text from there.
+    :return: A dictionary, where the value is the format itself,
+    and the value is the function that reads this file.
+    """
+    logger.info("Challenge additional_supported_files_to_read")
+    return {
+        ".pdf": get_text_from_pdf,
+        ".docx": get_text_from_word,
+        ".odf": get_text_from_odf,
+        ".pptx": get_text_from_pptx,
+        ".xlsx": get_text_from_xlsx,
+        ".xls": get_text_from_xlsx,
+        ".epub": get_text_from_epub,
+        ".mobi": get_text_from_mobi,
+        ".fb2": get_text_from_fb2
+    }
+
 def main_get_text_from_files(file_name: str,
                              lang_lst: Optional[List[str]] = None,
                              use_gpu: bool = False,
@@ -350,42 +416,27 @@ def main_get_text_from_files(file_name: str,
         request_language=request_language
     )
 
+    add_supported_files = additional_supported_files_to_read()
     suffix = Path(file_name).suffix.lower()
 
-    if suffix == '.pdf':
-        return get_text_from_pdf(file_name, translation_settings)
+    if suffix in add_supported_files:
+        return add_supported_files[suffix](file_name, translation_settings)
 
-    if suffix == '.docx':
-        return get_text_from_word(file_name, translation_settings)
-
-    if suffix == '.odf':
-        return get_text_from_odf(file_name, translation_settings)
-
-    if suffix == '.pptx':
-        return get_text_from_pptx(file_name, translation_settings)
-
-    if suffix == '.xlsx' or suffix == ".xls":
-        return get_text_from_xlsx(file_name, translation_settings)
-
-    if suffix == ".epub":
-        return get_text_from_epub(file_name, translation_settings)
-
-    if suffix in PHOTO_FORMATS:
-        if suffix in PHOTO_FORMATS:
-            return logic_for_ocr(
-                file_name=file_name,
-                translation_settings=translation_settings,
-                lang_lst=lang_lst,
-                use_gpu=use_gpu,
-                verbose=verbose,
-                with_deepseek=with_deepseek,
-                cloud_version=cloud_version,
-                model_size=model_size,
-                crop_mode=crop_mode,
-                base_url=base_url,
-                api_key_for_deepseek_ocr=api_key_for_deepseek_ocr,
-                timeout_for_deepseek_ocr=timeout_for_deepseek_ocr,
-                max_rate_limit_retries=max_rate_limit_retries
-            )
+    if suffix in PHOTO_SUPPORTED_FORMATS:
+        return logic_for_ocr(
+            file_name=file_name,
+            translation_settings=translation_settings,
+            lang_lst=lang_lst,
+            use_gpu=use_gpu,
+            verbose=verbose,
+            with_deepseek=with_deepseek,
+            cloud_version=cloud_version,
+            model_size=model_size,
+            crop_mode=crop_mode,
+            base_url=base_url,
+            api_key_for_deepseek_ocr=api_key_for_deepseek_ocr,
+            timeout_for_deepseek_ocr=timeout_for_deepseek_ocr,
+            max_rate_limit_retries=max_rate_limit_retries
+        )
 
     return getting_text_from_files(file_name, translation_settings)

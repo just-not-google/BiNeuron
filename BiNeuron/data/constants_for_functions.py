@@ -8,8 +8,12 @@ PROJECT_NAME = "biNeuron"
 PROTOCOL_LST = ["http://", "https://"]
 GOOGLE_TRANSLATE_URL = "https://translate.google.ru/?sl=auto&tl=ru&op=translate"
 DEEPL_TRANSLATE_URL = "https://www.deepl.com/en/translator?mb"
-PHOTO_FORMATS = [".jpg", ".jpeg", ".png", ".bmp", ".gif", ".webp", ".tiff", ".tif"]
-PREFERENCES_IN_AI_LIST = ["DeepSeek", "Qwen", "MiniMax", "CodeLlama", "Mellum", "Wizard"]
+PREFERENCES_IN_AI_LIST = ["DeepSeek", "Qwen", "MiniMax", "CodeLlama",
+                          "Mellum", "Wizard", "StarCoder", "YI Coder",
+                          "CodeGemma", "Devstral", "Granite", "Codestral",
+                          "CodeGEEX4", "OpenCodeInterpreter", "Ornith 1.0",
+                          "Kat Dev", "Magistral Small", "Laguna-XS",
+                          "Breeze"]
 DETERMINANT_MODE_LIST = ["lite", "full", "auto"]
 TYPE_FORMATS = ["read_files", "unread_files"]
 TINY_TYPE = "tiny"

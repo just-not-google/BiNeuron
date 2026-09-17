@@ -149,6 +149,24 @@ MODELS_AND_FILE_NAMES = {
         "hard": "smolcode-coder-powershell-1.5b-q4_k_m.gguf",
         "very_hard": "smolcode-coder-powershell-1.5b-q4_k_m.gguf"
     },
+    "mradermacher/Solidity-Llama3-8b-GGUF": {
+        "easy": "Solidity-Llama3-8b.Q2_K.gguf",
+        "middle": "Solidity-Llama3-8b.Q4_K_M.gguf",
+        "hard": "Solidity-Llama3-8b.Q8_0.gguf",
+        "very_hard": "Solidity-Llama3-8b.f16.gguf"
+    },
+    "mradermacher/Qwen2.5-1.5B-Instruct-abliterated-GGUF": {
+        "easy": "Qwen2.5-1.5B-Instruct-abliterated.Q2_K.gguf",
+        "middle": "Qwen2.5-1.5B-Instruct-abliterated.Q5_K_M.gguf",
+        "hard": "Qwen2.5-1.5B-Instruct-abliterated.Q8_0.gguf",
+        "very_hard": "Qwen2.5-1.5B-Instruct-abliterated.f16.gguf"
+    },
+    "mradermacher/COBOL-Coder-7B-Instruct-GGUF": {
+        "easy": "COBOL-Coder-7B-Instruct.Q2_K.gguf",
+        "middle": "COBOL-Coder-7B-Instruct.Q5_K_M.gguf",
+        "hard": "COBOL-Coder-7B-Instruct.Q8_0.gguf",
+        "very_hard": "COBOL-Coder-7B-Instruct.f16.gguf"
+    },
     "bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF": {
         "easy": "DeepSeek-Coder-V2-Lite-Instruct-IQ2_XS.gguf",
         "middle": "DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf",
@@ -250,5 +268,17 @@ MODELS_AND_FILE_NAMES = {
         "middle": "Magistral-Small-2506-Q4_K_M.gguf",
         "hard": "Magistral-Small-2506-UD-Q6_K_XL.gguf",
         "very_hard": "Magistral-Small-2506-UD-Q8_K_XL.gguf"
+    },
+    "AtomicChat/Laguna-XS-2.1-GGUF": {
+        "easy": "Laguna-XS-2.1-Q3_K_M.gguf",
+        "middle": "Laguna-XS-2.1-Q4_K_M.gguf",
+        "hard": "Laguna-XS-2.1-Q6_K.gguf",
+        "very_hard": "Laguna-XS-2.1-Q8_0.gguf"
+    },
+    "mradermacher/breeze-3b-GGUF": {
+        "easy": "breeze-3b.Q2_K.gguf",
+        "middle": "breeze-3b.IQ4_XS.gguf",
+        "hard": "breeze-3b.Q8_0.gguf",
+        "very_hard": "breeze-3b.f16.gguf"
     }
 }

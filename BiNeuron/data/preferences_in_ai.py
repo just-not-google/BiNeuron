@@ -15,5 +15,7 @@ PREFERENCES_IN_AI_LIST = [
     "opencode_interpreter",
     "ornith_1_0",
     "kat_dev",
-    "magistral_small"
+    "magistral_small",
+    "laguna_xs",
+    "breeze"
 ]

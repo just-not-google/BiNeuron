@@ -25,6 +25,9 @@ MODELS_DICT = {
     "ada": "the-clanker-lover/steelman-14b-ada-GGUF",
     "zig": "fulgidus/zignet-qwen2.5-coder-7b",
     "powershell": "seanpoyner/smolcode-coder-powershell-1.5b-tools",
+    "solidity": "mradermacher/Solidity-Llama3-8b-GGUF",
+    "ocaml": "mradermacher/Qwen2.5-1.5B-Instruct-abliterated-GGUF",
+    "cobol": "mradermacher/COBOL-Coder-7B-Instruct-GGUF",
     "default": {
         "deepseek": "bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF",
         "qwen": "Qwen/Qwen3-Coder-Next-GGUF",
@@ -42,6 +45,8 @@ MODELS_DICT = {
         "opencode_interpreter": "LoneStriker/OpenCodeInterpreter-CL-7B-GGUF",
         "ornith_1_0": "ornith-ai/Ornith-1.0-35B-GGUF",
         "kat_dev": "bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF",
-        "magistral_small": "unsloth/Magistral-Small-2506-GGUF"
+        "magistral_small": "unsloth/Magistral-Small-2506-GGUF",
+        "laguna_xs": "AtomicChat/Laguna-XS-2.1-GGUF",
+        "breeze": "mradermacher/breeze-3b-GGUF"
     }
 }

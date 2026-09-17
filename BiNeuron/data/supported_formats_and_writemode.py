@@ -14,6 +14,3 @@ SUPPORTED_FORMATS_W = [
     ".clj", ".cljs", ".cljc", ".groovy", ".gvy", ".vb", ".vbs", ".html",
     ".htm", ".xhtml", ".css", ".scss", ".sass", ".less", ".rss", ".atom"
 ]
-SUPPORTED_FORMATS_WB = [
-    ".pdf", ".word", ".odf", ".pptx", ".xlsx", ".xls", ".epub"
-]

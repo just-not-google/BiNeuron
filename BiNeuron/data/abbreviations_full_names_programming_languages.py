@@ -1,4 +1,6 @@
 LANG_SHORTCUT_TO_FULL = {
+    "c": "c",
+    "cbl": "cobol",
     "cpp": "cpp",
     "cs": "csharp",
     "dart": "dart",
@@ -10,11 +12,9 @@ LANG_SHORTCUT_TO_FULL = {
     "r": "r",
     "rb": "ruby",
     "rs": "rust",
+    "sh": "shell",
+    "sol": "solidity",
+    "sql": "sql",
     "swift": "swift",
-    "ts": "typescript",
-    "matlab": "matlab",
-    "lua": "lua",
-    "julia": "julia",
-    "html": "html",
-    "sql": "sql"
+    "ts": "typescript"
 }

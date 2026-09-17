@@ -13,7 +13,8 @@ SUPPORTED_FORMATS_WITHOUT_PHOTO = [
     ".pl", ".pm", ".t", ".hs", ".lhs", ".erl", ".hrl", ".ex", ".exs",
     ".clj", ".cljs", ".cljc", ".groovy", ".gvy", ".vb", ".vbs", ".html",
     ".htm", ".xhtml", ".css", ".scss", ".sass", ".less", ".rss", ".atom",
-    ".pdf", ".word", ".odf", ".pptx", ".xlsx", ".xls", ".epub"
+    ".pdf", ".word", ".odf", ".pptx", ".xlsx", ".xls", ".epub", ".mobi",
+    ".fb2"
 ]
 PHOTO_SUPPORTED_FORMATS = [
     ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".webp", ".tiff", ".tif"

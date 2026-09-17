@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from typing import Optional, Union, Dict
-from BiNeuron.data.supported_formats_and_writemode import SUPPORTED_FORMATS_W, SUPPORTED_FORMATS_WB
+from BiNeuron.data.supported_formats_and_writemode import SUPPORTED_FORMATS_W
 import logging
 
 
@@ -9,11 +9,16 @@ logger = logging.getLogger(__name__)
 
 def logic_editing_files(str_json: str) -> Union[Optional[bool], Optional[Dict]]:
     """
-    The AI response is converted into a JSON object and then files are overwritten
-    or created that are specified in the keys of this json, with the value specified
-    in the same JSON. The suffix defines a record in text or bytes.
-    :param str_json: The AI's response is in the form of a JSON file.
-    :return: If there is an error reading the JSON file, a Boolean value is returned, otherwise None.
+    Apply file changes described in a JSON object produced by the AI.
+    The function parses the input string as JSON, where each key is an absolute
+    file path and each value is the complete new content for that file. For each
+    entry, the file is created or overwritten with the provided content. Only
+    text-based formats listed in SUPPORTED_FORMATS_W are processed; binary
+    formats (PDF, DOCX, PPTX, images, etc.) are skipped with a warning, since
+    they cannot be safely reconstructed from a text value. Entries with a
+    `null` value are ignored (deletion is handled elsewhere, if enabled).
+    :param str_json: JSON string where keys are file paths and values are new file contents.
+    :return: Parsed JSON dictionary on success, or False if the input is not valid JSON.
     """
     logger.info("Challenge logic_editing_files")
     answer_json = None
@@ -34,9 +39,8 @@ def logic_editing_files(str_json: str) -> Union[Optional[bool], Optional[Dict]]:
             if suffix in SUPPORTED_FORMATS_W:
                 with open(key, "w", encoding="utf-8") as file:
                     file.write(value)
-            elif suffix in SUPPORTED_FORMATS_WB:
-                with open(key, "wb") as file:
-                    file.write(value.encode("utf-8"))
+            else:
+                logger.warning(f"Skipping binary file: {key} (not editable via JSON).")
         except Exception as e:
             logger.exception(f"An error occurred when trying to edit the file ({key}) - {e}")
             continue
