@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="midnight">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +16,20 @@
       <option value="ru">Русский</option>
       <option value="zh">中文</option>
     </select>
-    <button class="btn" id="langOk">OK</button>
+    <button class="btn" id="langOk" data-i18n="lang_ok">OK</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="unlockModal">
+  <div class="modal">
+    <h3 data-i18n="unlock_title">BiNeuron is locked</h3>
+    <p class="unlock-hint" id="unlockHint" data-i18n="unlock_hint">Enter your master password</p>
+    <input class="input" type="password" id="unlockPassword" autocomplete="off">
+    <div class="unlock-attempts" id="unlockAttempts"></div>
+    <button class="btn" id="unlockOk" style="margin-top:10px;" data-i18n="unlock_btn">Unlock</button>
+    <button class="btn small" id="unlockWipeHint"
+            style="margin-top:6px;background:transparent;border:none;color:var(--fg-dark);"
+            data-i18n="unlock_forgot">Forgot password? (data will be wiped)</button>
   </div>
 </div>
 
@@ -186,6 +199,33 @@
 
       <fieldset class="fieldset">
         <legend data-i18n="other_frame">Other</legend>
+        <div class="row"><label data-i18n="theme_label">Theme</label>
+          <select class="select" data-setting="theme" id="themeSelect">
+            <option value="midnight">Midnight Deep</option>
+            <option value="monokai">Monokai Classic</option>
+            <option value="dracula">Dracula's Castle</option>
+            <option value="nord">Nordic Frost</option>
+            <option value="solar-flare">Solar Flare</option>
+            <option value="github-noir">GitHub Noir</option>
+            <option value="one-dark">One Dark Pro</option>
+            <option value="catppuccin">Catppuccin Mocha</option>
+            <option value="tokyo-night">Tokyo Night Drift</option>
+            <option value="gruvbox">Gruvbox Retro</option>
+            <option value="ayu-mirage">Ayu Mirage</option>
+            <option value="material-ocean">Material Ocean</option>
+            <option value="cobalt">Cobalt Abyss</option>
+            <option value="synthwave">Synthwave '84</option>
+            <option value="everforest">Everforest</option>
+            <option value="rose-pine">Rose Pine</option>
+            <option value="kanagawa">Kanagawa Wave</option>
+            <option value="cyberpunk">Cyberpunk 2077</option>
+            <option value="matrix">Matrix Terminal</option>
+            <option value="vaporwave">Vaporwave Sunset</option>
+            <option value="obsidian">Obsidian Night</option>
+            <option value="oceanic">Oceanic Abyss</option>
+            <option value="forest">Deep Forest</option>
+            <option value="amoled">AMOLED Black</option>
+          </select></div>
         <div class="row check-row"><label data-i18n="filter_swearing_label">Filter swearing</label>
           <input class="check" type="checkbox" data-setting="filter_for_swearing"></div>
         <div class="row check-row"><label data-i18n="verbose_label">Verbose</label>
@@ -200,6 +240,15 @@
           <input class="check" type="checkbox" data-setting="writing_response_to_file"></div>
         <div class="row check-row"><label data-i18n="editing_files_label">Editing files</label>
           <input class="check" type="checkbox" data-setting="editing_files"></div>
+
+        <div class="master-box">
+          <div class="master-title" data-i18n="master_title">Master password</div>
+          <div class="master-state" id="masterState">Checking...</div>
+          <div class="master-actions">
+            <button class="btn small" id="btnMasterEnable"  data-i18n="master_enable">Enable</button>
+            <button class="btn small" id="btnMasterDisable" data-i18n="master_disable">Disable</button>
+          </div>
+        </div>
       </fieldset>
     </div>
   </aside>
@@ -218,7 +267,7 @@
         <span class="logs-title" data-i18n="logs_title">Logs</span>
         <span class="logs-count" id="logsCount">0</span>
         <span class="logs-spinner" id="logsSpinner" hidden></span>
-        <button class="logs-copy" id="logsCopy" type="button" title="Copy logs">⧉</button>
+        <button class="logs-copy" id="logsCopy" type="button" data-i18n-title="copy_logs">C</button>
       </div>
       <div class="logs-body" id="logsBody"></div>
     </section>
@@ -250,8 +299,8 @@
     <div class="history-header">
       <div class="panel-title" id="historyTitle" data-i18n="history_title">History</div>
       <label class="vs-label">
-        <input class="check" type="checkbox" data-setting="virtual_storage" id="virtualStorage">
-        <span data-i18n="virtual_storage_switch">Virtual</span>
+        <span class="vs-text" data-i18n="virtual_storage_switch">Virtual storage</span>
+        <input class="check vs-check" type="checkbox" data-setting="virtual_storage" id="virtualStorage">
       </label>
     </div>
 
@@ -265,9 +314,10 @@
 
     <div class="storage-controls" id="storageControls">
       <input class="input" type="text" id="storagePath"
-             data-setting="virtual_storage_path" placeholder="Storage path...">
-      <button class="btn small" id="btnBrowse">Browse</button>
-      <button class="btn small" id="btnRefresh">Refresh</button>
+             data-setting="virtual_storage_path" data-i18n-ph="storage_path_placeholder"
+             placeholder="Storage path...">
+      <button class="btn small" id="btnBrowse" data-i18n="browse_btn">Browse</button>
+      <button class="btn small" id="btnRefresh" data-i18n="refresh_btn">Refresh</button>
     </div>
 
     <div class="history-list" id="historyList"></div>

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Literal, List
 from BiNeuron.data.preferences_in_ai import PREFERENCES_IN_AI_LIST
 from BiNeuron.data.links_to_raw_github_proxies import PROXY_LINK_LST
@@ -17,15 +17,11 @@ class ModelConfig:
     """
     Configuration for AI model selection and downloading.
     :param preferences_in_ai: Preferred model family (e.g., 'deepseek', 'qwen').
-    Must be a value from PREFERENCES_IN_AI_LIST.
     :param models_dir: Directory where downloaded models are cached.
     :param type_computer: Predefined computer power level ('easy', 'middle', 'hard', 'very_hard').
-    If None, it is auto-detected via benchmarking.
-    :param repo_id: Explicit Hugging Face repository ID (e.g., 'deepseek-ai/deepseek-coder-6.7b').
-    Overrides automatic model selection.
-    :param filename: Filename of the model inside the repository (e.g., 'model.Q4_K_M.gguf').
-    Must be used together with repo_id.
-    :param your_token_for_hf: Hugging Face access token (optional, for private models).
+    :param repo_id: Explicit Hugging Face repository ID.
+    :param filename: Filename of the model inside the repository.
+    :param your_token_for_hf: Hugging Face access token (optional).
     :param subdomain: Prefix to add to the model filename during download.
     :param retries: Number of attempts to download the model using a proxy.
     :param prefer_mirror: If True, forces using the mirror endpoint (hf-mirror.com).
@@ -62,9 +58,7 @@ class LLMConfig:
 class PromptConfig:
     """
     Configuration for the system prompt used by the AI.
-    :param main_prompt_mode: Predefined prompt scenario from ALL_MAIN_PROMPTS
-    ('default', 'testing', 'explanation', 'no_comments', 'refactor', 'debug',
-    'code_review', 'documentation', 'scaffold', 'security_hardening', 'algorithm_strategy').
+    :param main_prompt_mode: Predefined prompt scenario from ALL_MAIN_PROMPTS.
     :param main_prompt: Custom system prompt. If provided, overrides main_prompt_mode.
     """
     main_prompt_mode: Literal["default", "testing", "explanation", "no_comments",
@@ -77,11 +71,11 @@ class TranslationConfig:
     """
     Configuration for text translation and language detection.
     :param determinant_mode: Mode for language detection ('lite', 'full', 'auto').
-    :param accurate_translation: If True, tries DeepL API first (requires key) before Google.
+    :param accurate_translation: If True, tries DeepL API first.
     :param your_key_for_deepl: DeepL API key (required if accurate_translation is True).
     :param request_language: Target language code for translation (default MAIN_LANGUAGE).
     :param local_trans: If True, uses ArgosTranslate for fully offline translation.
-    :param from_code_lang: Source language code for local translation (e.g., 'en', 'ru').
+    :param from_code_lang: Source language code for local translation.
     """
     determinant_mode: Optional[Literal["lite", "full", "auto"]] = LITE_TYPE
     accurate_translation: bool = False
@@ -94,10 +88,8 @@ class TranslationConfig:
 class LanguageDetectionConfig:
     """
     Configuration for programming language detection.
-    :param with_ai_orchestrator: If True, uses AI model to detect the programming language
-    from the request and file contents (more accurate).
-    :param proprietary_algorithms: If True and AI is disabled, uses keyword-based detection
-    (faster but less accurate).
+    :param with_ai_orchestrator: If True, uses AI model to detect the programming language.
+    :param proprietary_algorithms: If True and AI is disabled, uses keyword-based detection.
     """
     with_ai_orchestrator: bool = True
     proprietary_algorithms: bool = False
@@ -110,8 +102,8 @@ class ProxyConfig:
     :param protocol: Proxy protocol (default 'http').
     :param max_timeout: Maximum timeout (seconds) for proxy availability checks.
     :param is_working: If True, only working proxies are used.
-    :param auto_proxies: Enable automatic fallback to proxies if the primary connection fails.
-    :param your_proxies_dict: Custom list of proxy URLs; overrides automatic discovery.
+    :param auto_proxies: Enable automatic fallback to proxies.
+    :param your_proxies_dict: Custom list of proxy URLs.
     :param min_timeout_for_checking_availability: Minimum timeout for connection checks.
     :param max_timeout_for_checking_availability: Maximum timeout for connection checks.
     :param github_proxies: If True, fetches proxies from GitHub raw lists first.
@@ -128,7 +120,7 @@ class ProxyConfig:
     min_timeout_for_checking_availability: int = MIN_TIMEOUT_FOR_CHECK
     max_timeout_for_checking_availability: int = MAX_TIMEOUT_FOR_CHECK
     github_proxies: bool = False
-    url_lst: List[str] = PROXY_LINK_LST
+    url_lst: List[str] = field(default_factory=lambda: list(PROXY_LINK_LST))
     proxy_retries: int = NUMBER_ATTEMPTS
     main_retries: int = MAIN_PROXY_ATTEMPTS
 
@@ -136,13 +128,13 @@ class ProxyConfig:
 class OCRConfig:
     """
     Configuration for optical character recognition (OCR).
-    :param lang_lst: List of language codes for OCR (e.g., ['en', 'ru']). Used if file is an image.
+    :param lang_lst: List of language codes for OCR.
     :param use_gpu_for_ocr: Whether to use GPU for OCR.
-    :param with_ocr: If True, includes image files for OCR processing in virtual storage.
-    :param cloud_version: If True, uses cloud API for DeepSeek OCR instead of local model.
+    :param with_ocr: If True, includes image files for OCR processing.
+    :param cloud_version: If True, uses cloud API for DeepSeek OCR.
     :param with_deepseek: If True, uses DeepSeek OCR; otherwise uses EasyOCR.
-    :param model_size: Size of the DeepSeek model ('tiny', 'small', 'base', 'large', 'gundam').
-    :param crop_mode: If True, splits large images into fragments for detailed recognition.
+    :param model_size: Size of the DeepSeek model.
+    :param crop_mode: If True, splits large images into fragments.
     :param base_url: API endpoint URL for DeepSeek cloud service.
     :param api_key_for_deepseek_ocr: API key for DeepSeek cloud service.
     :param timeout_for_deepseek_ocr: Timeout (seconds) for DeepSeek API requests.
@@ -164,13 +156,11 @@ class OCRConfig:
 class FileConfig:
     """
     Configuration for virtual storage and file editing.
-    :param virtual_storage: If True, enables virtual storage mode to process entire folders.
+    :param virtual_storage: If True, enables virtual storage mode.
     :param virtual_storage_path: Path to the virtual storage folder.
-    :param writing_response_to_file: If True, saves the AI response to a timestamped text file.
-    :param editing_files: If True, enables automatic file creation and modification via AI
-    (two-stage pipeline with a JSON formatter).
-    :param deleting_files: If True, enables automatic file deletion via AI
-    (uses a separate prompt that allows `null` values for deletion).
+    :param writing_response_to_file: If True, saves the AI response to a file.
+    :param editing_files: If True, enables automatic file creation and modification via AI.
+    :param deleting_files: If True, enables automatic file deletion via AI.
     """
     virtual_storage: bool = False
     virtual_storage_path: Optional[str] = None
@@ -182,7 +172,6 @@ class FileConfig:
 class SafetyConfig:
     """
     Configuration for content safety and filtering.
-    :param filter_for_swearing: If True, blocks responses containing profanity
-    and returns a predefined template response.
+    :param filter_for_swearing: If True, blocks responses containing profanity.
     """
     filter_for_swearing: bool = False

@@ -42,6 +42,8 @@ This allows the AI to tailor the code to your ecosystem, avoiding incompatible A
 
 AI can accept and process files in the following formats. They are grouped into three categories for clarity.
 
+> **Note on extensions:** the lists below reflect the extensions actually recognised by the runtime. Some code‑file extensions that are not listed in the primary router (e.g. exotic or framework‑specific ones) are still opened as plain text, but they are **not** considered first‑class supported formats.
+
 ### Programming Language Files
 
 | Extension(s) | Language / Purpose |
@@ -99,16 +101,28 @@ AI can accept and process files in the following formats. They are grouped into 
 | `.css`, `.scss`, `.sass`, `.less` | Stylesheets |
 | `.rss`, `.atom` | Web feeds |
 
-### Binary and Document Formats (Newer Support)
+### Binary and Document Formats
+
+All formats in this section are **actually parsed** by the runtime (each has a dedicated extractor in `getting_text_from_files.py`).
+
+| Extension(s) | Type | Extractor |
+|--------------|------|-----------|
+| `.pdf` | Portable Document Format | PyMuPDF |
+| `.docx` | Microsoft Word (Office Open XML) | `docx2txt` |
+| `.word` | Legacy alias — treated as plain text | plain read |
+| `.odf` | OpenDocument Format | `odfdo` |
+| `.pptx` | PowerPoint presentation | `pptx2txt2` |
+| `.xlsx`, `.xls` | Microsoft Excel spreadsheets | MarkItDown |
+| `.epub` | EPUB e-book | `epub2txt` |
+| `.mobi` | Mobipocket e-book | `mobi` |
+| `.fb2` | FictionBook 2 | `fb2reader` |
+
+### Image Formats (OCR)
+
+Images are processed through the OCR pipeline (`EasyOCR` or `DeepSeek OCR`, depending on settings).
 
 | Extension(s) | Type |
 |--------------|------|
-| `.pdf` | Portable Document Format |
-| `.epub` | EPUB e-book |
-| `.docx` (or `.word`) | Microsoft Word document |
-| `.odf` | OpenDocument Format |
-| `.pptx` | PowerPoint presentation |
-| `.xlsx`, `.xls` | Microsoft Excel spreadsheets |
 | `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.webp`, `.tiff`, `.tif` | Raster images |
 
 ---
@@ -180,6 +194,8 @@ By following these guidelines, you will harness the full potential of AI assista
 
 ИИ может принимать и обрабатывать файлы следующих форматов. Для ясности они сгруппированы в три категории.
 
+> **Примечание о расширениях:** списки ниже отражают расширения, которые реально распознаются во время работы. Некоторые расширения кода, не указанные в основном маршрутизаторе (экзотические или специфичные для фреймворков), всё равно открываются как обычный текст, но они **не** считаются полноценно поддерживаемыми форматами.
+
 ### Файлы языков программирования
 
 | Расширение(я) | Язык / Назначение |
@@ -237,16 +253,28 @@ By following these guidelines, you will harness the full potential of AI assista
 | `.css`, `.scss`, `.sass`, `.less` | Таблицы стилей |
 | `.rss`, `.atom` | Веб-ленты |
 
-### Двоичные и документные форматы (более новая поддержка)
+### Двоичные и документные форматы
+
+Все форматы в этом разделе **реально парсятся** во время работы (для каждого есть отдельный экстрактор в `getting_text_from_files.py`).
+
+| Расширение(я) | Тип | Экстрактор |
+|--------------|------|-----------|
+| `.pdf` | Переносимый формат документов | PyMuPDF |
+| `.docx` | Microsoft Word (Office Open XML) | `docx2txt` |
+| `.word` | Legacy-алиас — открывается как обычный текст | plain read |
+| `.odf` | OpenDocument Format | `odfdo` |
+| `.pptx` | Презентация PowerPoint | `pptx2txt2` |
+| `.xlsx`, `.xls` | Электронные таблицы Microsoft Excel | MarkItDown |
+| `.epub` | Электронная книга EPUB | `epub2txt` |
+| `.mobi` | Электронная книга Mobipocket | `mobi` |
+| `.fb2` | FictionBook 2 | `fb2reader` |
+
+### Форматы изображений (OCR)
+
+Изображения обрабатываются через OCR-конвейер (`EasyOCR` или `DeepSeek OCR` - в зависимости от настроек).
 
 | Расширение(я) | Тип |
 |--------------|------|
-| `.pdf` | Переносимый формат документов |
-| `.epub` | Электронная книга EPUB |
-| `.docx` (или `.word`) | Документ Microsoft Word |
-| `.odf` | OpenDocument Format |
-| `.pptx` | Презентация PowerPoint |
-| `.xlsx`, `.xls` | Электронные таблицы Microsoft Excel |
 | `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.webp`, `.tiff`, `.tif` | Растровые изображения |
 
 ---
@@ -318,6 +346,8 @@ By following these guidelines, you will harness the full potential of AI assista
 
 AI可以接受并处理以下格式的文件。为清晰起见，它们分为三类。
 
+> **关于扩展名的说明：** 下列列表反映运行时实际识别的扩展名。某些未在主路由器中列出的代码扩展名（例如小众或框架专用的扩展名）仍会以纯文本方式打开，但它们**不**被视为一等支持的格式。
+
 ### 编程语言文件
 
 | 扩展名 | 语言 / 用途 |
@@ -375,16 +405,28 @@ AI可以接受并处理以下格式的文件。为清晰起见，它们分为三
 | `.css`, `.scss`, `.sass`, `.less` | 样式表 |
 | `.rss`, `.atom` | Web订阅源 |
 
-### 二进制和文档格式（较新支持）
+### 二进制和文档格式
+
+本节中的所有格式在运行时**都会实际被解析**（每个格式在 `getting_text_from_files.py` 中都有专用的提取器）。
+
+| 扩展名 | 类型 | 提取器 |
+|--------|------|--------|
+| `.pdf` | 便携式文档格式 | PyMuPDF |
+| `.docx` | Microsoft Word（Office Open XML） | `docx2txt` |
+| `.word` | 遗留别名 — 作为纯文本打开 | plain read |
+| `.odf` | OpenDocument格式 | `odfdo` |
+| `.pptx` | PowerPoint演示文稿 | `pptx2txt2` |
+| `.xlsx`, `.xls` | Microsoft Excel 电子表格 | MarkItDown |
+| `.epub` | EPUB 电子书 | `epub2txt` |
+| `.mobi` | Mobipocket 电子书 | `mobi` |
+| `.fb2` | FictionBook 2 | `fb2reader` |
+
+### 图像格式（OCR）
+
+图像通过 OCR 流水线处理（`EasyOCR` 或 `DeepSeek OCR`，取决于设置）。
 
 | 扩展名 | 类型 |
 |--------|------|
-| `.pdf` | 便携式文档格式 |
-| `.epub` | EPUB 电子书 |
-| `.docx`（或 `.word`） | Microsoft Word文档 |
-| `.odf` | OpenDocument格式 |
-| `.pptx` | PowerPoint演示文稿 |
-| `.xlsx`, `.xls` | Microsoft Excel 电子表格 |
 | `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.webp`, `.tiff`, `.tif` | 栅格图像 |
 
 ---

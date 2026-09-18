@@ -4,6 +4,7 @@ window.addEventListener("error", function (e) {
 
 const TRANSLATIONS = {
   en: {
+    lang_ok:"OK",
     settings_title:"Settings", reset_btn:"Reset", export_all_btn:"Export",
     delete_all_btn:"Delete", apply_settings_btn:"Apply",
     network_frame:"Network", country_label:"Country", protocol_label:"Protocol",
@@ -29,10 +30,15 @@ const TRANSLATIONS = {
     crop_mode_label:"Crop mode", base_url_label:"Base URL",
     api_key_deepseek_label:"DeepSeek API key", timeout_deepseek_label:"DeepSeek timeout",
     max_rate_limit_retries_label:"Rate limit retries",
-    other_frame:"Other", filter_swearing_label:"Filter swearing",
+    other_frame:"Other", theme_label:"Theme", filter_swearing_label:"Filter swearing",
     verbose_label:"Verbose", echo_label:"Echo", type_computer_label:"Type computer",
     proprietary_algorithms_label:"Proprietary algorithms",
     writing_response_label:"Writing response to file", editing_files_label:"Editing files",
+    master_title:"Master password", master_enable:"Enable", master_disable:"Disable",
+    master_checking:"Checking...", master_enabled_unlocked:"Enabled - unlocked",
+    master_enabled_locked:"Enabled - locked",
+    master_disabled:"Disabled - chats are stored as plaintext",
+    master_crypto_missing:"cryptography not installed (pip install cryptography)",
     chat_title:"Chat", resume_button_text:"Resume request",
     welcome_text:"Welcome to BiNeuron!<br>Type your request below to begin.",
     attached_files_label:"Attached files", request_placeholder:"Type your request...",
@@ -40,7 +46,8 @@ const TRANSLATIONS = {
     remove_file:"Remove", logs_title:"Logs", copy_logs:"Copy logs",
     upload_btn:"Upload", send_btn:"Send", copy_chat_btn:"Copy chat", copy_message:"Copy",
     history_title:"History", history_title_virtual:"Virtual Storage",
-    virtual_storage_switch:"Virtual", search_placeholder:"Search...",
+    virtual_storage_switch:"Virtual storage", search_placeholder:"Search...",
+    storage_path_placeholder:"Storage path...",
     add_btn:"Add", delete_btn:"Del", download_btn:"Save",
     browse_btn:"Browse", refresh_btn:"Refresh",
     gguf_models_frame:"GGUF models", refresh_models_btn:"Refresh models",
@@ -48,9 +55,36 @@ const TRANSLATIONS = {
     polling_fail:"Connection to server lost",
     status_phrases:["Processing request...","Thinking...","Analyzing data...",
       "Generating response...","Working on it...","Almost there...",
-      "Consulting the AI...","Crunching numbers...","Reading files...","Optimizing answer..."]
+      "Consulting the AI...","Crunching numbers...","Reading files...","Optimizing answer..."],
+    no_chats_yet:"No chats yet", empty_chat:"Empty chat",
+    no_models_found:"No models found", loading:"Loading...",
+    scanning:"Scanning...", enter_storage_path:"Enter a storage path and click Refresh",
+    enter_storage_prompt:"Enter full path to storage directory:",
+    delete_chat_confirm:"Delete this chat?",
+    delete_all_chats_confirm:"Delete ALL chats? This cannot be undone.",
+    reset_settings_confirm:"Reset settings to defaults?",
+    settings_applied:"Settings applied", settings_reset:"Settings reset",
+    chat_copied:"Chat copied", no_chat_selected:"No chat selected",
+    no_chats_to_export:"No chats to export", logs_empty:"Logs are empty",
+    files_attached:"{n} file(s) attached",
+    unlock_title:"BiNeuron is locked", unlock_hint:"Enter your master password",
+    unlock_btn:"Unlock", unlock_forgot:"Forgot password? (data will be wiped)",
+    last_attempt_warning:"Last attempt! Data will be wiped.",
+    attempts_remaining:"{n} attempts remaining",
+    all_data_wiped:"All data has been wiped.",
+    unlock_failed:"Unlock failed", network_error:"Network error",
+    set_master_password:"Set a master password (min 4 chars):",
+    repeat_password:"Repeat master password:",
+    password_too_short:"Password too short",
+    passwords_do_not_match:"Passwords do not match",
+    encryption_enabled:"Encryption enabled", encryption_disabled:"Encryption disabled",
+    failed_prefix:"Failed: ", unknown:"unknown",
+    disable_encryption_confirm:"Disable encryption? Chats will be stored as plaintext.",
+    wipe_confirm_1:"This will PERMANENTLY delete all chats and the master key. Continue?",
+    wipe_confirm_2:"Are you absolutely sure? This cannot be undone."
   },
   ru: {
+    lang_ok:"OK",
     settings_title:"Настройки", reset_btn:"Сброс", export_all_btn:"Экспорт",
     delete_all_btn:"Удалить", apply_settings_btn:"Применить",
     network_frame:"Сеть", country_label:"Страна", protocol_label:"Протокол",
@@ -78,10 +112,15 @@ const TRANSLATIONS = {
     crop_mode_label:"Режим обрезки", base_url_label:"Базовый URL",
     api_key_deepseek_label:"API-ключ DeepSeek", timeout_deepseek_label:"Таймаут DeepSeek",
     max_rate_limit_retries_label:"Повторы при лимите",
-    other_frame:"Прочее", filter_swearing_label:"Фильтр мата",
+    other_frame:"Прочее", theme_label:"Тема", filter_swearing_label:"Фильтр мата",
     verbose_label:"Подробный вывод", echo_label:"Эхо", type_computer_label:"Тип компьютера",
     proprietary_algorithms_label:"Проприетарные алгоритмы",
     writing_response_label:"Запись ответа в файл", editing_files_label:"Редактирование файлов",
+    master_title:"Мастер-пароль", master_enable:"Включить", master_disable:"Отключить",
+    master_checking:"Проверка...", master_enabled_unlocked:"Включено - разблокировано",
+    master_enabled_locked:"Включено - заблокировано",
+    master_disabled:"Отключено - чаты хранятся в открытом виде",
+    master_crypto_missing:"cryptography не установлена (pip install cryptography)",
     chat_title:"Чат", resume_button_text:"Возобновить запрос",
     welcome_text:"Добро пожаловать в BiNeuron!<br>Введите запрос ниже, чтобы начать.",
     attached_files_label:"Прикреплённые файлы", request_placeholder:"Введите запрос...",
@@ -90,7 +129,8 @@ const TRANSLATIONS = {
     upload_btn:"Загрузить", send_btn:"Отправить", copy_chat_btn:"Копировать чат",
     copy_message:"Копировать",
     history_title:"История", history_title_virtual:"Виртуальное хранилище",
-    virtual_storage_switch:"Вирт.", search_placeholder:"Поиск...",
+    virtual_storage_switch:"Виртуальное хранилище", search_placeholder:"Поиск...",
+    storage_path_placeholder:"Путь к хранилищу...",
     add_btn:"Добавить", delete_btn:"Удалить", download_btn:"Сохранить",
     browse_btn:"Обзор", refresh_btn:"Обновить",
     gguf_models_frame:"Модели GGUF", refresh_models_btn:"Обновить модели",
@@ -98,9 +138,37 @@ const TRANSLATIONS = {
     polling_fail:"Соединение с сервером потеряно",
     status_phrases:["Обработка запроса...","Думаю...","Анализ данных...",
       "Генерация ответа...","Работаю над этим...","Почти готово...",
-      "Консультируюсь с ИИ...","Считаю числа...","Читаю файлы...","Оптимизирую ответ..."]
+      "Консультируюсь с ИИ...","Считаю числа...","Читаю файлы...","Оптимизирую ответ..."],
+    no_chats_yet:"Пока нет чатов", empty_chat:"Пустой чат",
+    no_models_found:"Модели не найдены", loading:"Загрузка...",
+    scanning:"Сканирование...", enter_storage_path:"Введите путь и нажмите Обновить",
+    enter_storage_prompt:"Введите полный путь к папке хранилища:",
+    delete_chat_confirm:"Удалить этот чат?",
+    delete_all_chats_confirm:"Удалить ВСЕ чаты? Это нельзя отменить.",
+    reset_settings_confirm:"Сбросить настройки до значений по умолчанию?",
+    settings_applied:"Настройки применены", settings_reset:"Настройки сброшены",
+    chat_copied:"Чат скопирован", no_chat_selected:"Чат не выбран",
+    no_chats_to_export:"Нечего экспортировать", logs_empty:"Логи пусты",
+    files_attached:"Прикреплено файлов: {n}",
+    unlock_title:"BiNeuron заблокирован", unlock_hint:"Введите мастер-пароль",
+    unlock_btn:"Разблокировать",
+    unlock_forgot:"Забыли пароль? (данные будут удалены)",
+    last_attempt_warning:"Последняя попытка! Данные будут удалены.",
+    attempts_remaining:"Осталось попыток: {n}",
+    all_data_wiped:"Все данные были удалены.",
+    unlock_failed:"Разблокировка не удалась", network_error:"Ошибка сети",
+    set_master_password:"Задайте мастер-пароль (мин. 4 символа):",
+    repeat_password:"Повторите мастер-пароль:",
+    password_too_short:"Пароль слишком короткий",
+    passwords_do_not_match:"Пароли не совпадают",
+    encryption_enabled:"Шифрование включено", encryption_disabled:"Шифрование отключено",
+    failed_prefix:"Ошибка: ", unknown:"неизвестно",
+    disable_encryption_confirm:"Отключить шифрование? Чаты будут храниться в открытом виде.",
+    wipe_confirm_1:"Это НАВСЕГДА удалит все чаты и мастер-ключ. Продолжить?",
+    wipe_confirm_2:"Вы абсолютно уверены? Это нельзя отменить."
   },
   zh: {
+    lang_ok:"确定",
     settings_title:"设置", reset_btn:"重置", export_all_btn:"导出",
     delete_all_btn:"删除", apply_settings_btn:"应用",
     network_frame:"网络", country_label:"国家", protocol_label:"协议",
@@ -129,10 +197,15 @@ const TRANSLATIONS = {
     api_key_deepseek_label:"DeepSeek API 密钥",
     timeout_deepseek_label:"DeepSeek 超时",
     max_rate_limit_retries_label:"限速重试次数",
-    other_frame:"其他", filter_swearing_label:"过滤脏话",
+    other_frame:"其他", theme_label:"主题", filter_swearing_label:"过滤脏话",
     verbose_label:"详细输出", echo_label:"回显", type_computer_label:"计算机类型",
     proprietary_algorithms_label:"专有算法",
     writing_response_label:"将回复写入文件", editing_files_label:"编辑文件",
+    master_title:"主密码", master_enable:"启用", master_disable:"禁用",
+    master_checking:"检查中...", master_enabled_unlocked:"已启用 - 已解锁",
+    master_enabled_locked:"已启用 - 已锁定",
+    master_disabled:"已禁用 - 聊天以明文存储",
+    master_crypto_missing:"未安装 cryptography (pip install cryptography)",
     chat_title:"对话", resume_button_text:"恢复请求",
     welcome_text:"欢迎使用 BiNeuron!<br>在下方输入请求以开始。",
     attached_files_label:"已附加文件", request_placeholder:"输入您的请求...",
@@ -140,7 +213,8 @@ const TRANSLATIONS = {
     remove_file:"移除", logs_title:"日志", copy_logs:"复制日志",
     upload_btn:"上传", send_btn:"发送", copy_chat_btn:"复制对话", copy_message:"复制",
     history_title:"历史记录", history_title_virtual:"虚拟存储",
-    virtual_storage_switch:"虚拟", search_placeholder:"搜索...",
+    virtual_storage_switch:"虚拟存储", search_placeholder:"搜索...",
+    storage_path_placeholder:"存储路径...",
     add_btn:"新增", delete_btn:"删除", download_btn:"保存",
     browse_btn:"浏览", refresh_btn:"刷新",
     gguf_models_frame:"GGUF 模型", refresh_models_btn:"刷新模型",
@@ -148,7 +222,33 @@ const TRANSLATIONS = {
     polling_fail:"与服务器的连接已断开",
     status_phrases:["正在处理请求...","思考中...","分析数据...",
       "生成回复...","正在处理...","快完成了...",
-      "正在咨询 AI...","计算数字...","读取文件...","优化回答..."]
+      "正在咨询 AI...","计算数字...","读取文件...","优化回答..."],
+    no_chats_yet:"暂无对话", empty_chat:"空对话",
+    no_models_found:"未找到模型", loading:"加载中...",
+    scanning:"扫描中...", enter_storage_path:"输入路径并点击刷新",
+    enter_storage_prompt:"输入存储目录的完整路径:",
+    delete_chat_confirm:"删除此对话?",
+    delete_all_chats_confirm:"删除所有对话?此操作无法撤销。",
+    reset_settings_confirm:"将设置重置为默认值?",
+    settings_applied:"设置已应用", settings_reset:"设置已重置",
+    chat_copied:"对话已复制", no_chat_selected:"未选择对话",
+    no_chats_to_export:"没有可导出的对话", logs_empty:"日志为空",
+    files_attached:"已附加 {n} 个文件",
+    unlock_title:"BiNeuron 已锁定", unlock_hint:"请输入主密码",
+    unlock_btn:"解锁", unlock_forgot:"忘记密码?(数据将被删除)",
+    last_attempt_warning:"最后一次尝试!数据将被删除。",
+    attempts_remaining:"剩余尝试次数: {n}",
+    all_data_wiped:"所有数据已被删除。",
+    unlock_failed:"解锁失败", network_error:"网络错误",
+    set_master_password:"设置主密码(至少 4 个字符):",
+    repeat_password:"再次输入主密码:",
+    password_too_short:"密码太短",
+    passwords_do_not_match:"密码不匹配",
+    encryption_enabled:"加密已启用", encryption_disabled:"加密已禁用",
+    failed_prefix:"失败: ", unknown:"未知",
+    disable_encryption_confirm:"禁用加密?聊天将以明文存储。",
+    wipe_confirm_1:"这将永久删除所有对话和主密钥。继续?",
+    wipe_confirm_2:"您确定吗?此操作无法撤销。"
   }
 };
 
@@ -157,9 +257,18 @@ const POLL_TIMEOUT_MS = 20000;
 const POLL_MAX_ERRORS = 15;
 const LAST_TASK_KEY = "bineuron_last_task_id";
 const STICK_TOLERANCE = 40;
+const AVAILABLE_THEMES = [
+  "midnight", "monokai", "dracula", "nord",
+  "solar-flare", "github-noir", "one-dark",
+  "catppuccin", "tokyo-night", "gruvbox", "ayu-mirage",
+  "material-ocean", "cobalt", "synthwave", "everforest",
+  "rose-pine", "kanagawa", "cyberpunk", "matrix", "vaporwave",
+  "obsidian", "oceanic", "forest", "amoled",
+];
 
 const state = {
   lang: "en",
+  theme: "midnight",
   meta: {},
   isBusy: false,
   taskId: null,
@@ -170,6 +279,7 @@ const state = {
   chats: {},
   timerStart: null,
   timerInterval: null,
+  master: { enabled: false, unlocked: false, attempts_left: 3, available: false },
 };
 
 let lastLogEl = null;
@@ -182,9 +292,15 @@ let copyResetTimer = null;
 
 const $  = function (sel, root) { return (root || document).querySelector(sel); };
 const $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
-const t  = function (key) {
+const t  = function (key, vars) {
   const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
-  return (dict[key] !== undefined) ? dict[key] : key;
+  let s = (dict[key] !== undefined) ? dict[key] : (TRANSLATIONS.en[key] !== undefined ? TRANSLATIONS.en[key] : key);
+  if (vars && typeof s === "string") {
+    s = s.replace(/\{(\w+)\}/g, function (m, k) {
+      return (vars[k] !== undefined) ? vars[k] : m;
+    });
+  }
+  return s;
 };
 
 function isAtBottom(el) {
@@ -229,6 +345,14 @@ const resumeBtn    = $("#resumeBtn");
 const messagesScroll = createStickyScroll(messagesWrap);
 const logsScroll     = createStickyScroll(logsBody);
 
+function applyTheme(name) {
+  const theme = AVAILABLE_THEMES.indexOf(name) >= 0 ? name : "midnight";
+  document.documentElement.setAttribute("data-theme", theme);
+  const sel = document.getElementById("themeSelect");
+  if (sel) sel.value = theme;
+  state.theme = theme;
+}
+
 function saveLastTask(tid) {
   try {
     if (tid) localStorage.setItem(LAST_TASK_KEY, tid);
@@ -245,17 +369,24 @@ function applyLanguage() {
   document.title = "BiNeuron";
   $$("[data-i18n]").forEach(function (el) { el.innerHTML = t(el.dataset.i18n); });
   $$("[data-i18n-ph]").forEach(function (el) { el.placeholder = t(el.dataset.i18nPh); });
+  $$("[data-i18n-title]").forEach(function (el) { el.title = t(el.dataset.i18nTitle); });
   const vs = $("#virtualStorage").checked;
   $("#historyTitle").textContent = vs ? t("history_title_virtual") : t("history_title");
   const lc = $("#logsCopy");
   if (lc) lc.title = t("copy_logs");
   renderFileChips();
+  updateMasterUI();
+  const ml = $("#modelsList");
+  if (ml && ml.children.length === 1) {
+    ml.firstChild.textContent = t("no_models_found");
+  }
 }
 
 $("#langOk").addEventListener("click", function () {
   state.lang = $("#langSelect").value || "en";
   $("#langModal").classList.add("hidden");
   applyLanguage();
+  applyTheme(state.theme);
 });
 
 $$(".spin").forEach(function (spin) {
@@ -263,7 +394,6 @@ $$(".spin").forEach(function (spin) {
   const up    = spin.querySelector('[data-spin="up"]');
   const down  = spin.querySelector('[data-spin="down"]');
   if (!input) return;
-
   function step(dir) {
     const s = parseFloat(input.step) || 1;
     let v = parseFloat(input.value) || 0;
@@ -296,7 +426,6 @@ async function loadMeta() {
   fillSelect("#promptModeSelect", state.meta.main_prompt_modes);
   fillSelect("#modelSizeSelect", state.meta.model_sizes);
   fillSelect("#typeComputerSelect", ["auto"].concat(state.meta.types_power || []));
-
   if (state.meta.import_error) {
     const w = $("#importWarning");
     w.style.display = "block";
@@ -312,6 +441,7 @@ function fillForm(settings) {
     else if (v === undefined || v === null) el.value = "";
     else el.value = v;
   });
+  if (settings.theme) applyTheme(settings.theme);
   onVirtualStorageChanged();
 }
 
@@ -325,6 +455,7 @@ function collectSettings() {
       out[key] = isNaN(n) ? 0 : n;
     } else out[key] = el.value;
   });
+  out.theme = state.theme;
   return out;
 }
 
@@ -344,17 +475,24 @@ async function saveSettings() {
 
 $("#btnApply").addEventListener("click", async function () {
   await saveSettings();
-  toast("Settings applied");
+  toast(t("settings_applied"));
 });
 $("#btnReset").addEventListener("click", async function () {
-  if (!confirm("Reset settings to defaults?")) return;
+  if (!confirm(t("reset_settings_confirm"))) return;
   const r = await fetch("/api/settings/reset", {method: "POST"});
   const data = await r.json();
   fillForm(data.settings);
-  toast("Settings reset");
+  toast(t("settings_reset"));
 });
 $("#btnExport").addEventListener("click", exportAllChats);
 $("#btnDelete").addEventListener("click", deleteAllChats);
+
+document.addEventListener("change", function (e) {
+  if (e.target && e.target.id === "themeSelect") {
+    applyTheme(e.target.value);
+    saveSettings();
+  }
+});
 
 logsToggle.addEventListener("click", function (e) {
   if (e.target.closest(".logs-copy")) return;
@@ -377,18 +515,18 @@ function setLogsActive(active) {
 function flashCopied() {
   if (!logsCopy) return;
   logsCopy.classList.add("copied");
-  logsCopy.textContent = "✓";
+  logsCopy.textContent = "OK";
   if (copyResetTimer) clearTimeout(copyResetTimer);
   copyResetTimer = setTimeout(function () {
     logsCopy.classList.remove("copied");
-    logsCopy.textContent = "⧉";
+    logsCopy.textContent = "C";
   }, 1200);
 }
 
 if (logsCopy) {
   logsCopy.addEventListener("click", function (e) {
     e.stopPropagation();
-    if (!fullLogBuffer.length) { toast("Logs are empty"); return; }
+    if (!fullLogBuffer.length) { toast(t("logs_empty")); return; }
     copyToClipboard(fullLogBuffer.join("\n"));
     flashCopied();
   });
@@ -403,23 +541,18 @@ function addMessage(role, text, timestamp) {
   hideWelcome();
   const wrap = document.createElement("div");
   wrap.className = "msg " + role;
-
   const body = document.createElement("div");
   body.className = "text";
   body.textContent = text;
-
   const meta = document.createElement("div");
   meta.className = "meta";
-
   const time = document.createElement("span");
   time.className = "time";
   time.textContent = timestamp || nowTime();
-
   const copy = document.createElement("button");
   copy.className = "btn small";
   copy.textContent = t("copy_message");
   copy.addEventListener("click", function () { copyToClipboard(text); });
-
   meta.appendChild(time);
   meta.appendChild(copy);
   wrap.appendChild(body);
@@ -444,7 +577,6 @@ function resetLogTracker() {
 
 function addLog(text) {
   const isProgress = looksLikeProgress(text);
-
   if (isProgress && lastLogEl && lastLogWasProgress && lastLogEl.parentNode === logsBody) {
     lastLogEl.textContent = text;
     if (fullLogBuffer.length > 0) fullLogBuffer[fullLogBuffer.length - 1] = text;
@@ -459,7 +591,6 @@ function addLog(text) {
     fullLogBuffer.push(text);
   }
   lastLogWasProgress = isProgress;
-
   if (!logsPanel.classList.contains("collapsed")) {
     logsScroll.scrollIfSticky();
   }
@@ -484,8 +615,9 @@ function clearMessages() {
 
 function nowTime() {
   const d = new Date();
-  return String(d.getHours()).padStart(2, "0") + ":" +
-         String(d.getMinutes()).padStart(2, "0");
+  const pad = function (n) { return String(n).padStart(2, "0"); };
+  return pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear() +
+         " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
 }
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).catch(function () {
@@ -522,6 +654,7 @@ function stopRequestTimer() {
 async function ensureCurrentChat() {
   if (state.currentChatId && state.chats[state.currentChatId]) return state.currentChatId;
   const r = await fetch("/api/chats", {method: "POST"});
+  if (r.status === 401) { handleLocked(); return null; }
   const data = await r.json();
   state.currentChatId = data.id;
   state.chats[data.id] = data.chat;
@@ -530,11 +663,13 @@ async function ensureCurrentChat() {
 }
 
 async function persistMessage(chatId, role, content) {
-  await fetch("/api/chats/" + chatId + "/messages", {
+  if (!chatId) return;
+  const r = await fetch("/api/chats/" + chatId + "/messages", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({role: role, content: content})
   });
+  if (r.status === 401) { handleLocked(); return; }
   if (state.chats[chatId]) {
     state.chats[chatId].messages.push({
       role: role, content: content, timestamp: nowTime()
@@ -546,24 +681,20 @@ async function sendMessage() {
   if (state.isBusy) return;
   const text = requestInput.value.trim();
   if (!text) return;
-
   const chatId = await ensureCurrentChat();
   addMessage("user", text);
   await persistMessage(chatId, "user", text);
   messagesScroll.forceScroll();
   requestInput.value = "";
   resumeBtn.classList.remove("visible");
-
   clearLogs();
   logsPanel.classList.remove("collapsed");
-
   state.isBusy = true;
   state.lastLogCount = 0;
   consecutivePollErrors = 0;
   resetLogTracker();
   setLogsActive(true);
   startRequestTimer();
-
   try {
     const r = await fetch("/api/chat", {
       method: "POST",
@@ -603,7 +734,6 @@ async function fetchTaskOnce(tid) {
 function pollTask(tid) {
   state.pollTimer = setTimeout(async function () {
     if (pollingPaused) { pollTask(tid); return; }
-
     let data;
     try {
       data = await fetchTaskOnce(tid);
@@ -624,10 +754,8 @@ function pollTask(tid) {
       pollTask(tid);
       return;
     }
-
     (data.logs || []).forEach(function (l) { addLog(l); });
     state.lastLogCount = data.log_count;
-
     if (data.status === "done") {
       addMessage("assistant", data.answer || "(empty response)");
       const chatId = state.currentChatId;
@@ -705,33 +833,29 @@ $("#copyBtn").addEventListener("click", function () {
     lines.push(role + ": " + el.textContent.trim());
   });
   copyToClipboard(lines.join("\n"));
-  toast("Chat copied");
+  toast(t("chat_copied"));
 });
 
 function renderFileChips() {
   const container = $("#fileChips");
   if (!container) return;
   container.innerHTML = "";
-
   state.attachedFiles.forEach(function (file, index) {
     const chip = document.createElement("span");
     chip.className = "file-chip";
-
     const name = document.createElement("span");
     name.className = "name";
     name.textContent = file.name;
     name.title = file.name;
-
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "remove";
-    btn.textContent = "×";
+    btn.textContent = "x";
     btn.title = t("remove_file");
     btn.addEventListener("click", function (e) {
       e.stopPropagation();
       removeAttachedFile(index);
     });
-
     chip.appendChild(name);
     chip.appendChild(btn);
     container.appendChild(chip);
@@ -756,7 +880,7 @@ async function uploadFiles(fileList) {
     state.attachedFiles.push({name: names[i] || paths[i], path: paths[i]});
   }
   renderFileChips();
-  if (paths.length) toast(paths.length + " file(s) attached");
+  if (paths.length) toast(t("files_attached", {n: paths.length}));
 }
 
 $("#uploadBtn").addEventListener("click", function () {
@@ -815,9 +939,8 @@ function renderHistoryList() {
   historyList.innerHTML = "";
   const entries = Object.entries(state.chats)
     .sort(function (a, b) { return (b[1].created_at || "").localeCompare(a[1].created_at || ""); });
-
   if (!entries.length) {
-    historyList.innerHTML = '<div style="color:var(--fg-dark);padding:8px;">No chats yet</div>';
+    historyList.innerHTML = '<div style="color:var(--fg-dark);padding:8px;">' + t("no_chats_yet") + '</div>';
     return;
   }
   entries.forEach(function (entry) {
@@ -825,8 +948,8 @@ function renderHistoryList() {
     const btn = document.createElement("button");
     btn.className = "chat-item" + (id === state.currentChatId ? " active" : "");
     const first = (chat.messages || []).find(function (m) { return m.role === "user"; });
-    const title = first ? first.content.slice(0, 30) : "Empty chat";
-    btn.textContent = (chat.created_at || "—") + " — " + title;
+    const title = first ? first.content.slice(0, 30) : t("empty_chat");
+    btn.textContent = (chat.created_at || "-") + " - " + title;
     btn.addEventListener("click", function () { loadChat(id); });
     historyList.appendChild(btn);
   });
@@ -834,6 +957,7 @@ function renderHistoryList() {
 
 async function loadChat(id) {
   const r = await fetch("/api/chats/" + id);
+  if (r.status === 401) { handleLocked(); return; }
   if (!r.ok) return;
   const chat = await r.json();
   state.currentChatId = id;
@@ -850,6 +974,7 @@ async function loadChat(id) {
 
 async function loadChats() {
   const r = await fetch("/api/chats");
+  if (r.status === 401) { handleLocked(); return; }
   state.chats = await r.json();
   const ids = Object.keys(state.chats)
     .sort(function (a, b) {
@@ -868,6 +993,7 @@ async function loadChats() {
 
 $("#btnAddChat").addEventListener("click", async function () {
   const r = await fetch("/api/chats", {method: "POST"});
+  if (r.status === 401) { handleLocked(); return; }
   const data = await r.json();
   state.currentChatId = data.id;
   state.chats[data.id] = data.chat;
@@ -878,8 +1004,9 @@ $("#btnAddChat").addEventListener("click", async function () {
 
 $("#btnDelChat").addEventListener("click", async function () {
   if (!state.currentChatId) return;
-  if (!confirm("Delete this chat?")) return;
-  await fetch("/api/chats/" + state.currentChatId, {method: "DELETE"});
+  if (!confirm(t("delete_chat_confirm"))) return;
+  const r = await fetch("/api/chats/" + state.currentChatId, {method: "DELETE"});
+  if (r.status === 401) { handleLocked(); return; }
   delete state.chats[state.currentChatId];
   state.currentChatId = null;
   const ids = Object.keys(state.chats);
@@ -889,7 +1016,7 @@ $("#btnDelChat").addEventListener("click", async function () {
 
 $("#btnDlChat").addEventListener("click", function () {
   if (!state.currentChatId || !state.chats[state.currentChatId]) {
-    toast("No chat selected"); return;
+    toast(t("no_chat_selected")); return;
   }
   const chat = state.chats[state.currentChatId];
   const text = (chat.messages || []).map(function (m) {
@@ -905,7 +1032,7 @@ $("#btnDlChat").addEventListener("click", function () {
 
 async function exportAllChats() {
   const ids = Object.keys(state.chats);
-  if (!ids.length) { toast("No chats to export"); return; }
+  if (!ids.length) { toast(t("no_chats_to_export")); return; }
   const lines = [];
   ids.forEach(function (id) {
     const c = state.chats[id];
@@ -923,9 +1050,10 @@ async function exportAllChats() {
 
 async function deleteAllChats() {
   if (!Object.keys(state.chats).length) return;
-  if (!confirm("Delete ALL chats? This cannot be undone.")) return;
+  if (!confirm(t("delete_all_chats_confirm"))) return;
   for (const id of Object.keys(state.chats)) {
-    await fetch("/api/chats/" + id, {method: "DELETE"});
+    const r = await fetch("/api/chats/" + id, {method: "DELETE"});
+    if (r.status === 401) { handleLocked(); return; }
   }
   state.chats = {};
   state.currentChatId = null;
@@ -959,10 +1087,10 @@ virtualStorage.addEventListener("change", onVirtualStorageChanged);
 async function loadStorageTree() {
   const path = $("#storagePath").value.trim();
   if (!path) {
-    treeView.innerHTML = '<div style="padding:8px;color:var(--fg-dark);">Enter a storage path and click Refresh</div>';
+    treeView.innerHTML = '<div style="padding:8px;color:var(--fg-dark);">' + t("enter_storage_path") + '</div>';
     return;
   }
-  treeView.innerHTML = '<div style="padding:8px;color:var(--fg-dark);">Scanning…</div>';
+  treeView.innerHTML = '<div style="padding:8px;color:var(--fg-dark);">' + t("scanning") + '</div>';
   const r = await fetch("/api/storage/tree", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
@@ -1001,7 +1129,7 @@ function renderTreeNode(node) {
 }
 
 $("#btnBrowse").addEventListener("click", function () {
-  const p = prompt("Enter full path to storage directory:");
+  const p = prompt(t("enter_storage_prompt"));
   if (p) { $("#storagePath").value = p; loadStorageTree(); }
 });
 $("#btnRefresh").addEventListener("click", loadStorageTree);
@@ -1009,12 +1137,12 @@ $("#btnRefresh").addEventListener("click", loadStorageTree);
 $("#refreshModels").addEventListener("click", async function () {
   const dir = $('[data-setting="models_dir"]').value.trim() || "./models";
   const list = $("#modelsList");
-  list.innerHTML = '<div style="color:var(--fg-dark);">Loading…</div>';
+  list.innerHTML = '<div style="color:var(--fg-dark);">' + t("loading") + '</div>';
   const r = await fetch("/api/models?dir=" + encodeURIComponent(dir));
   const data = await r.json();
   list.innerHTML = "";
   if (!data.ok || !data.models.length) {
-    list.innerHTML = '<div style="color:var(--fg-dark);">No models found</div>';
+    list.innerHTML = '<div style="color:var(--fg-dark);">' + t("no_models_found") + '</div>';
     return;
   }
   data.models.forEach(function (name) {
@@ -1043,6 +1171,183 @@ function toast(msg) {
   setTimeout(function () { el.remove(); }, 2200);
 }
 
+const unlockModal    = document.getElementById("unlockModal");
+const unlockPwd      = document.getElementById("unlockPassword");
+const unlockOk       = document.getElementById("unlockOk");
+const unlockHint     = document.getElementById("unlockHint");
+const unlockAttempts = document.getElementById("unlockAttempts");
+const unlockWipe     = document.getElementById("unlockWipeHint");
+
+function updateMasterUI() {
+  const box = document.getElementById("masterState");
+  if (!box) return;
+  const m = state.master;
+  if (!m.available) {
+    box.textContent = t("master_crypto_missing");
+    box.className = "master-state off";
+    const b1 = document.getElementById("btnMasterEnable");
+    const b2 = document.getElementById("btnMasterDisable");
+    if (b1) b1.disabled = true;
+    if (b2) b2.disabled = true;
+    return;
+  }
+  if (m.enabled) {
+    box.textContent = m.unlocked ? t("master_enabled_unlocked") : t("master_enabled_locked");
+    box.className = "master-state on";
+    document.getElementById("btnMasterEnable").disabled = true;
+    document.getElementById("btnMasterDisable").disabled = !m.unlocked;
+  } else {
+    box.textContent = t("master_disabled");
+    box.className = "master-state off";
+    document.getElementById("btnMasterEnable").disabled = false;
+    document.getElementById("btnMasterDisable").disabled = true;
+  }
+}
+
+async function refreshMasterStatus() {
+  try {
+    const r = await fetch("/api/master/status");
+    state.master = await r.json();
+    updateMasterUI();
+  } catch (e) {}
+}
+
+function showUnlockModal(attemptsLeft) {
+  unlockModal.classList.remove("hidden");
+  unlockPwd.value = "";
+  unlockPwd.focus();
+  unlockHint.textContent = t("unlock_hint");
+  if (attemptsLeft !== undefined && attemptsLeft !== null) {
+    if (attemptsLeft <= 1) {
+      unlockAttempts.classList.add("danger");
+      unlockAttempts.textContent = t("last_attempt_warning");
+    } else {
+      unlockAttempts.classList.remove("danger");
+      unlockAttempts.textContent = t("attempts_remaining", {n: attemptsLeft});
+    }
+  } else {
+    unlockAttempts.textContent = "";
+  }
+}
+
+function hideUnlockModal() {
+  unlockModal.classList.add("hidden");
+}
+
+function handleLocked() {
+  state.master.unlocked = false;
+  showUnlockModal(state.master.attempts_left);
+}
+
+async function tryUnlock() {
+  const pwd = unlockPwd.value;
+  if (!pwd) return;
+  unlockOk.disabled = true;
+  try {
+    const r = await fetch("/api/master/unlock", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({password: pwd}),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      hideUnlockModal();
+      state.master.unlocked = true;
+      await loadChats();
+      await refreshMasterStatus();
+      return;
+    }
+    if (data.wiped) {
+      unlockHint.textContent = t("all_data_wiped");
+      unlockAttempts.classList.remove("danger");
+      unlockAttempts.textContent = "";
+      unlockOk.disabled = true;
+      setTimeout(function () {
+        hideUnlockModal();
+        state.chats = {};
+        state.currentChatId = null;
+        clearMessages();
+        clearLogs();
+        renderHistoryList();
+        refreshMasterStatus();
+      }, 2500);
+      return;
+    }
+    if (data.wrong) {
+      state.master.attempts_left = data.attempts_left;
+      showUnlockModal(data.attempts_left);
+      unlockPwd.value = "";
+    } else {
+      unlockHint.textContent = data.error || t("unlock_failed");
+    }
+  } catch (e) {
+    unlockHint.textContent = t("network_error");
+  } finally {
+    unlockOk.disabled = false;
+  }
+}
+
+if (unlockOk) {
+  unlockOk.addEventListener("click", tryUnlock);
+  unlockPwd.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") tryUnlock();
+  });
+}
+
+if (unlockWipe) {
+  unlockWipe.addEventListener("click", async function () {
+    if (!confirm(t("wipe_confirm_1"))) return;
+    if (!confirm(t("wipe_confirm_2"))) return;
+    for (let i = 0; i < 3; i++) {
+      await fetch("/api/master/unlock", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({password: "__wipe__" + i}),
+      });
+    }
+    location.reload();
+  });
+}
+
+const btnMasterEnable  = document.getElementById("btnMasterEnable");
+const btnMasterDisable = document.getElementById("btnMasterDisable");
+
+if (btnMasterEnable) {
+  btnMasterEnable.addEventListener("click", async function () {
+    const pwd = prompt(t("set_master_password"));
+    if (!pwd) return;
+    if (pwd.length < 4) { toast(t("password_too_short")); return; }
+    const pwd2 = prompt(t("repeat_password"));
+    if (pwd !== pwd2) { toast(t("passwords_do_not_match")); return; }
+    const r = await fetch("/api/master/setup", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({password: pwd}),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast(t("encryption_enabled"));
+      await refreshMasterStatus();
+    } else {
+      toast(t("failed_prefix") + (data.error || t("unknown")));
+    }
+  });
+}
+
+if (btnMasterDisable) {
+  btnMasterDisable.addEventListener("click", async function () {
+    if (!confirm(t("disable_encryption_confirm"))) return;
+    const r = await fetch("/api/master/disable", {method: "POST"});
+    const data = await r.json();
+    if (data.ok) {
+      toast(t("encryption_disabled"));
+      await refreshMasterStatus();
+    } else {
+      toast(t("failed_prefix") + (data.error || t("unknown")));
+    }
+  });
+}
+
 document.addEventListener("visibilitychange", function () {
   pollingPaused = document.hidden;
 });
@@ -1050,6 +1355,13 @@ document.addEventListener("visibilitychange", function () {
 (async function init() {
   try {
     applyLanguage();
+    const m = await fetch("/api/master/status").then(r => r.json());
+    state.master = m;
+    updateMasterUI();
+    if (m.enabled && !m.unlocked) {
+      showUnlockModal(m.attempts_left);
+      return;
+    }
     await loadMeta();
     await loadSettings();
     await loadChats();
