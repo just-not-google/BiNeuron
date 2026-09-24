@@ -1,3 +1,7 @@
+//This code was made entirely using DeepSeek Coder.
+//Link to the model: https://huggingface.co/collections/deepseek-ai/deepseek-coder
+
+
 window.addEventListener("error", function (e) {
   console.error("[BiNeuron]", e.error || e.message);
 });

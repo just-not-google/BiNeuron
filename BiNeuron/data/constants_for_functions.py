@@ -4,6 +4,7 @@ HTTP_PROTOCOL = "http"
 HTTPS_PROTOCOL = "https"
 MAIN_LANGUAGE = "en"
 MARKER_FOR_FILES = "---file content---\n"
+MARKER_FOR_WEBSITES = "---new information from the website---\n"
 PROJECT_NAME = "biNeuron"
 PROTOCOL_LST = ["http://", "https://"]
 GOOGLE_TRANSLATE_URL = "https://translate.google.ru/?sl=auto&tl=ru&op=translate"
@@ -25,6 +26,8 @@ HF_MIRROR = "https://hf-mirror.com"
 MAIN_REPO_ID = "Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF"
 MAIN_FILENAME = "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
 NOT_UNREAD_FILES = "There are no unread files, all files have been read and have a context higher in the text."
+EASY_OCR = "easy_ocr"
+DEFINITION_OPTION_LIST = ["paddle_ocr", "easy_ocr", "deepseek_ocr"]
 MAX_NEW_TOKENS = 256
 MAX_TIMEOUT = 1000
 POINTS_PER_CORE = 1000000

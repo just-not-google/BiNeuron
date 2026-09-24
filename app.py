@@ -1,3 +1,6 @@
+# This code was made entirely using DeepSeek Coder.
+# Link to the model: https://huggingface.co/collections/deepseek-ai/deepseek-coder
+
 import os
 import sys
 import json

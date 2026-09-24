@@ -10,13 +10,17 @@ from typing import List, Optional, Literal, Dict
 from pathlib import Path
 from BiNeuron.data.supported_formats import PHOTO_SUPPORTED_FORMATS
 from BiNeuron.data.constants_for_functions import (NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
-                                                    MAIN_LANGUAGE, LITE_TYPE)
+                                                   MAIN_LANGUAGE, LITE_TYPE, EASY_OCR,
+                                                   DEFINITION_OPTION_LIST, MARKER_FOR_WEBSITES)
 from BiNeuron.additional_functions.advanced_definition_text_from_image import LaunchDeepSeekOCR
 from markitdown import MarkItDown
 from epub2txt import epub2txt
 import mobi
 import shutil
 from fb2reader import fb2book
+from paddleocr import PaddleOCR
+from html2text import html2text
+from BiNeuron.additional_functions.checking_site_access import main_template_requests
 
 
 logger = logging.getLogger(__name__)
@@ -281,11 +285,36 @@ def _easy_ocr_get_text(file_name: str,
         logger.exception(f"Error when trying to read text from a photo using EasyOCR - {e}")
         return []
 
+def _paddle_ocr_get_text(file_name: str,
+                         lang: str = MAIN_LANGUAGE,
+                         use_gpu: bool = False,
+                         verbose: bool = False) -> str:
+    """
+    Extracts text from an image using Paddle OCR.
+    :param file_name: Path to the image file.
+    :param lang: The language code to enter into OCR.
+    :param use_gpu: Whether to use GPU for OCR.
+    :param verbose: Enable detailed output from Paddle OCR.
+    :return:
+    """
+    try:
+        logger.info("Challenge _paddle_ocr_get_text")
+        text = PaddleOCR(lang=lang,
+                         use_gpu=use_gpu,
+                         show_log=verbose)
+        logger.info("The information is obtained from the photo using Paddle OCR.")
+        return text.ocr(file_name,
+                        cls=True)
+    except Exception as e:
+        logger.exception(f"Error when trying to get text using Paddle OCR - {e}")
+        return ""
+
 @handle_errors
 def logic_for_ocr(file_name: str,
                   translation_settings: Dict,
                   lang_lst: Optional[List[str]] = None,
-                  with_deepseek: bool = True,
+                  definition_option: Literal["paddle_ocr", "easy_ocr", "deepseek_ocr"] = EASY_OCR,
+                  paddle_lang: str = MAIN_LANGUAGE,
                   use_gpu: bool = False,
                   verbose: bool = False,
                   cloud_version: bool = False,
@@ -300,7 +329,8 @@ def logic_for_ocr(file_name: str,
     :param file_name: Path to the image file.
     :param translation_settings: Dict with settings for TranslatorText.
     :param lang_lst: List of language codes for OCR (used for EasyOCR). Defaults to [MAIN_LANGUAGE].
-    :param with_deepseek: If True, use DeepSeek OCR; otherwise use EasyOCR.
+    :param definition_option: Choose an OCR system from 3 ready-made ones.
+    :param paddle_lang: The main language code is needed for Paddle OCR to determine.
     :param use_gpu: Whether to use GPU for OCR.
     :param verbose: Enable verbose output.
     :param cloud_version: If True, use cloud API for DeepSeek.
@@ -319,7 +349,7 @@ def logic_for_ocr(file_name: str,
 
     device = DEVICE_OPTIONS[1] if use_gpu else DEVICE_OPTIONS[0]
 
-    if with_deepseek:
+    if definition_option == DEFINITION_OPTION_LIST[2]:
         result = LaunchDeepSeekOCR(
             photo_path=file_name,
             cloud_version=cloud_version,
@@ -331,7 +361,7 @@ def logic_for_ocr(file_name: str,
             timeout_for_deepseek_ocr=timeout_for_deepseek_ocr,
             max_rate_limit_retries=max_rate_limit_retries
         ).advanced_definition_text_from_image()
-    else:
+    elif definition_option == DEFINITION_OPTION_LIST[1]:
         result_list = _easy_ocr_get_text(
             file_name=file_name,
             lang_lst=lang_lst,
@@ -341,13 +371,36 @@ def logic_for_ocr(file_name: str,
 
         if not result_list:
             return "EasyOCR couldn't read the text from the photo."
+
         result = "\n".join(result_list)
+    elif definition_option == DEFINITION_OPTION_LIST[0]:
+        result = _paddle_ocr_get_text(
+            file_name=file_name,
+            lang=paddle_lang,
+            use_gpu=use_gpu,
+            verbose=verbose
+        )
 
     translated = _translate_text(result, translation_settings)
     final_text = f"<< {translated} >> - {file_name}\n"
 
     logger.info("The text was obtained from a photo.")
     return final_text
+
+def getting_text_from_website(goal_url: str) -> str:
+    """
+    Getting clean text from an HTML website template that is specified by URL.
+    :param goal_url: The link of the website that is being used.
+    :return: Clean text from the website.
+    """
+    logger.info("Challenge getting_text_from_website")
+    res_text = main_template_requests(url=goal_url).text
+    try:
+        logger.info("Received clean text (without HTML tags) from the site.")
+        return html2text(res_text)
+    except Exception as e:
+        logger.exception(f"Error when trying to get clear text from the HTML template of the website - {e}")
+        return res_text
 
 def additional_supported_files_to_read() -> Dict:
     """
@@ -385,7 +438,9 @@ def main_get_text_from_files(file_name: str,
                              base_url: str = "https://api.siliconflow.cn/v1/chat/completions",
                              api_key_for_deepseek_ocr: Optional[str] = None,
                              timeout_for_deepseek_ocr: Optional[int] = None,
-                             max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS) -> str:
+                             max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS,
+                             use_websites: bool = False,
+                             websites_sources_information: Optional[List[str]] = None) -> str:
     """
     Routes the file to the appropriate extraction function based on its extension.
     :param file_name: Path to the file.
@@ -405,6 +460,8 @@ def main_get_text_from_files(file_name: str,
     :param api_key_for_deepseek_ocr: API key for DeepSeek cloud.
     :param timeout_for_deepseek_ocr: Timeout for DeepSeek requests.
     :param max_rate_limit_retries: Number of retries on rate limit.
+    :param use_websites: Use text from websites.
+    :param websites_sources_information: The Internet sources from which the text is taken.
     :return: Extracted and translated text with a file marker.
     """
     logger.info("Challenge main_get_text_from_files")
@@ -415,6 +472,15 @@ def main_get_text_from_files(file_name: str,
         your_key_for_deepl=your_key_for_deepl,
         request_language=request_language
     )
+
+    if use_websites:
+        if (not websites_sources_information is None and
+                len(websites_sources_information) > 0):
+            answer = MARKER_FOR_WEBSITES
+            answer_lst = []
+            for web_source in websites_sources_information:
+                answer_lst.append(getting_text_from_website(web_source))
+            answer += "\n".join(answer_lst)
 
     add_supported_files = additional_supported_files_to_read()
     suffix = Path(file_name).suffix.lower()

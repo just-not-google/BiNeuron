@@ -29,3 +29,6 @@ flask~=3.1.3
 cryptography~=50.0.1
 mobi~=0.4.1
 fb2reader~=1.0.4
+paddleocr~=3.7.0
+pydantic~=2.13.4
+html2text~=2025.4.15

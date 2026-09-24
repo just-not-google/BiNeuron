@@ -1,9 +1,19 @@
 import requests
+from requests import Response
 from BiNeuron.additional_functions.proxy_from_raw_github import _template_for_requests
 import logging
 
 
 logger = logging.getLogger(__name__)
+
+def main_template_requests(url: str) -> Response:
+    """
+    Getting the Response object from the target link.
+    :param url: The target link to which the request is being sent.
+    :return: The Response object.
+    """
+    logger.info("Challenge main_template_requests")
+    return requests.get(url, **_template_for_requests())
 
 def checking_site_access(url: str) -> bool:
     """
@@ -13,8 +23,7 @@ def checking_site_access(url: str) -> bool:
     """
     logger.info("Challenge checking_site_access")
     try:
-        response = requests.get(url,
-                                **_template_for_requests())
+        response = main_template_requests(url=url)
 
         if response.status_code != 200:
             logger.info(f"The site ({url}) is unavailable.")

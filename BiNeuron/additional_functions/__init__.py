@@ -10,8 +10,9 @@ from .logic_orchestra.orchestrator_ai_models import orchestrator_ai_models
 from .determining_computer_power import determining_type_computer
 from .text_translation import TranslatorText
 from .proxy_from_raw_github import check_github_proxy
-from .checking_site_access import checking_site_access
+from .checking_site_access import checking_site_access, main_template_requests
 from .logic_virtual_storage import logic_virtual_storage
 from .advanced_definition_text_from_image import LaunchDeepSeekOCR
 from .logic_editing_files import logic_editing_files
 from .deleting_files_thanks_to_ai import deleting_files_thanks_to_ai
+from .getting_text_from_website import getting_text_from_website

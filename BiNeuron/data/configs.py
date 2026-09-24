@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from typing import Optional, Literal, List
 from BiNeuron.data.preferences_in_ai import PREFERENCES_IN_AI_LIST
 from BiNeuron.data.links_to_raw_github_proxies import PROXY_LINK_LST
@@ -6,14 +5,14 @@ from BiNeuron.data.constants_for_functions import (NUMBER_ATTEMPTS, MAX_TOKENS, 
                                                    LITE_TYPE, MAIN_LANGUAGE, HTTP_PROTOCOL,
                                                    MAX_TIMEOUT, MIN_TIMEOUT_FOR_CHECK,
                                                    MAX_TIMEOUT_FOR_CHECK, MAIN_PROXY_ATTEMPTS,
-                                                   TINY_TYPE)
+                                                   TINY_TYPE, EASY_OCR)
+from pydantic import BaseModel, Field, HttpUrl
 import logging
 
 
 logger = logging.getLogger(__name__)
 
-@dataclass
-class ModelConfig:
+class ModelConfig(BaseModel, extra="forbid"):
     """
     Configuration for AI model selection and downloading.
     :param preferences_in_ai: Preferred model family (e.g., 'deepseek', 'qwen').
@@ -26,18 +25,26 @@ class ModelConfig:
     :param retries: Number of attempts to download the model using a proxy.
     :param prefer_mirror: If True, forces using the mirror endpoint (hf-mirror.com).
     """
-    preferences_in_ai: str = PREFERENCES_IN_AI_LIST[0]
+    preferences_in_ai: Literal[
+        "deepseek", "qwen", "minimax", "code_llama",
+        "mellum", "wizard", "starcoder", "yi_coder",
+        "codegemma", "devstral", "granite", "codestral",
+        "codegeex4", "opencode_interpreter", "ornith_1_0",
+        "kat_dev", "magistral_small", "laguna_xs", "breeze"
+    ] = PREFERENCES_IN_AI_LIST[0]
     models_dir: str = "./models"
-    type_computer: Optional[Literal["easy", "middle", "hard", "very_hard"]] = None
+    type_computer: Optional[Literal[
+        "easy", "middle",
+        "hard", "very_hard"
+    ]] = None
     repo_id: Optional[str] = None
     filename: Optional[str] = None
-    your_token_for_hf: Optional[str] = None
+    your_token_for_hf: Optional[str] = Field(default=None, min_length=36, max_length=40)
     subdomain: str = ""
-    retries: int = NUMBER_ATTEMPTS
+    retries: int = Field(default=NUMBER_ATTEMPTS, gt=0)
     prefer_mirror: bool = True
 
-@dataclass
-class LLMConfig:
+class LLMConfig(BaseModel, extra="forbid"):
     """
     Configuration for large language model generation parameters.
     :param verbose: Enables verbose output from the underlying LLM.
@@ -48,26 +55,26 @@ class LLMConfig:
     :param temperature: Sampling temperature for generation (0.0 to 1.0).
     """
     verbose: bool = False
-    n_ctx: Optional[int] = None
-    n_gpu_layers: int = 0
+    n_ctx: Optional[int] = Field(default=None, gt=0)
+    n_gpu_layers: int = Field(default=0, ge=0)
     echo: bool = False
-    max_tokens: int = MAX_TOKENS
-    temperature: float = 0.1
+    max_tokens: int = Field(default=MAX_TOKENS, gt=0)
+    temperature: float = Field(default=0.1, ge=0.1, le=1)
 
-@dataclass
-class PromptConfig:
+class PromptConfig(BaseModel, extra="forbid"):
     """
     Configuration for the system prompt used by the AI.
     :param main_prompt_mode: Predefined prompt scenario from ALL_MAIN_PROMPTS.
     :param main_prompt: Custom system prompt. If provided, overrides main_prompt_mode.
     """
-    main_prompt_mode: Literal["default", "testing", "explanation", "no_comments",
-    "refactor", "debug", "code_review", "documentation", "scaffold",
-    "security_hardening", "algorithm_strategy"] = TYPE_DEFAULT
+    main_prompt_mode: Literal[
+        "default", "testing", "explanation", "no_comments",
+        "refactor", "debug", "code_review", "documentation",
+        "scaffold", "security_hardening", "algorithm_strategy"
+    ] = TYPE_DEFAULT
     main_prompt: Optional[str] = None
 
-@dataclass
-class TranslationConfig:
+class TranslationConfig(BaseModel, extra="forbid"):
     """
     Configuration for text translation and language detection.
     :param determinant_mode: Mode for language detection ('lite', 'full', 'auto').
@@ -77,15 +84,16 @@ class TranslationConfig:
     :param local_trans: If True, uses ArgosTranslate for fully offline translation.
     :param from_code_lang: Source language code for local translation.
     """
-    determinant_mode: Optional[Literal["lite", "full", "auto"]] = LITE_TYPE
+    determinant_mode: Optional[Literal[
+        "lite", "full", "auto"
+    ]] = LITE_TYPE
     accurate_translation: bool = False
-    your_key_for_deepl: str = ""
-    request_language: str = MAIN_LANGUAGE
+    your_key_for_deepl: str = Field(default="", min_length=36, max_length=39)
+    request_language: str = Field(default=MAIN_LANGUAGE, min_length=2, max_length=2)
     local_trans: bool = False
-    from_code_lang: str = ""
+    from_code_lang: str = Field(default="", min_length=2, max_length=2)
 
-@dataclass
-class LanguageDetectionConfig:
+class LanguageDetectionConfig(BaseModel, extra="forbid"):
     """
     Configuration for programming language detection.
     :param with_ai_orchestrator: If True, uses AI model to detect the programming language.
@@ -94,8 +102,7 @@ class LanguageDetectionConfig:
     with_ai_orchestrator: bool = True
     proprietary_algorithms: bool = False
 
-@dataclass
-class ProxyConfig:
+class ProxyConfig(BaseModel, extra="forbid"):
     """
     Configuration for proxy usage and rotation.
     :param country: Country code for proxy selection (e.g., 'ru', 'us').
@@ -111,28 +118,28 @@ class ProxyConfig:
     :param proxy_retries: Number of attempts per URL when fetching from GitHub.
     :param main_retries: Number of times to retry obtaining a working proxy from GitHub.
     """
-    country: Optional[str] = None
-    protocol: str = HTTP_PROTOCOL
-    max_timeout: int = MAX_TIMEOUT
+    country: Optional[str] = Field(default=None, min_length=2, max_length=2)
+    protocol: Literal["http", "https"] = HTTP_PROTOCOL
+    max_timeout: int = Field(default=MAX_TIMEOUT, ge=0)
     is_working: bool = True
     auto_proxies: bool = True
     your_proxies_dict: Optional[List[str]] = None
-    min_timeout_for_checking_availability: int = MIN_TIMEOUT_FOR_CHECK
-    max_timeout_for_checking_availability: int = MAX_TIMEOUT_FOR_CHECK
+    min_timeout_for_checking_availability: int = Field(default=MIN_TIMEOUT_FOR_CHECK, ge=0)
+    max_timeout_for_checking_availability: int = Field(default=MAX_TIMEOUT_FOR_CHECK, ge=0)
     github_proxies: bool = False
-    url_lst: List[str] = field(default_factory=lambda: list(PROXY_LINK_LST))
-    proxy_retries: int = NUMBER_ATTEMPTS
-    main_retries: int = MAIN_PROXY_ATTEMPTS
+    url_lst: List[str] = Field(default_factory=lambda: list(PROXY_LINK_LST))
+    proxy_retries: int = Field(default=NUMBER_ATTEMPTS, ge=1)
+    main_retries: int = Field(default=MAIN_PROXY_ATTEMPTS, ge=1)
 
-@dataclass
-class OCRConfig:
+class OCRConfig(BaseModel, extra="forbid"):
     """
     Configuration for optical character recognition (OCR).
     :param lang_lst: List of language codes for OCR.
     :param use_gpu_for_ocr: Whether to use GPU for OCR.
     :param with_ocr: If True, includes image files for OCR processing.
     :param cloud_version: If True, uses cloud API for DeepSeek OCR.
-    :param with_deepseek: If True, uses DeepSeek OCR; otherwise uses EasyOCR.
+    :param definition_option: Choose an OCR system from 3 ready-made ones.
+    :param paddle_lang: The main language code is needed for Paddle OCR to determine.
     :param model_size: Size of the DeepSeek model.
     :param crop_mode: If True, splits large images into fragments.
     :param base_url: API endpoint URL for DeepSeek cloud service.
@@ -144,16 +151,21 @@ class OCRConfig:
     use_gpu_for_ocr: bool = False
     with_ocr: bool = False
     cloud_version: bool = False
-    with_deepseek: bool = True
-    model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE
+    definition_option: Literal[
+        "paddle_ocr", "easy_ocr", "deepseek_ocr"
+    ] = EASY_OCR,
+    paddle_lang: str = Field(default=MAIN_LANGUAGE, min_length=2, max_length=2)
+    model_size: Literal[
+        "tiny", "small", "base",
+        "large", "gundam"
+    ] = TINY_TYPE
     crop_mode: bool = False
-    base_url: str = "https://api.siliconflow.cn/v1/chat/completions"
-    api_key_for_deepseek_ocr: Optional[str] = None
-    timeout_for_deepseek_ocr: Optional[int] = None
-    max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS
+    base_url: HttpUrl = "https://api.siliconflow.cn/v1/chat/completions"
+    api_key_for_deepseek_ocr: Optional[str] = Field(default=None, min_length=32, max_length=64)
+    timeout_for_deepseek_ocr: Optional[int] = Field(default=None, ge=0)
+    max_rate_limit_retries: Optional[int] = Field(default=NUMBER_ATTEMPTS, ge=1)
 
-@dataclass
-class FileConfig:
+class FileConfig(BaseModel, extra="forbid"):
     """
     Configuration for virtual storage and file editing.
     :param virtual_storage: If True, enables virtual storage mode.
@@ -161,15 +173,18 @@ class FileConfig:
     :param writing_response_to_file: If True, saves the AI response to a file.
     :param editing_files: If True, enables automatic file creation and modification via AI.
     :param deleting_files: If True, enables automatic file deletion via AI.
+    :param use_websites: Use text from websites.
+    :param websites_sources_information: The Internet sources from which the text is taken.
     """
     virtual_storage: bool = False
     virtual_storage_path: Optional[str] = None
     writing_response_to_file: bool = False
     editing_files: bool = False
     deleting_files: bool = False
+    use_websites: bool = False
+    websites_sources_information: Optional[List[str]] = None
 
-@dataclass
-class SafetyConfig:
+class SafetyConfig(BaseModel, extra="forbid"):
     """
     Configuration for content safety and filtering.
     :param filter_for_swearing: If True, blocks responses containing profanity.

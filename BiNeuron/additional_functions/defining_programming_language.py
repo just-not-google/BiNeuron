@@ -4,7 +4,7 @@ from typing import List, Optional, Literal, Dict
 from BiNeuron.data.hint_words_for_defining_programming_languages import HINT_WORDS
 from BiNeuron.additional_functions.logic_orchestra.orchestrator_ai_models import orchestrator_ai_models
 from BiNeuron.data.constants_for_functions import (TYPE_DEFAULT, MARKER_FOR_FILES, MAIN_LANGUAGE,
-                                                    LITE_TYPE, TINY_TYPE, NUMBER_ATTEMPTS)
+                                                    LITE_TYPE, TINY_TYPE, NUMBER_ATTEMPTS, EASY_OCR)
 import logging
 
 
@@ -26,7 +26,8 @@ class DefiningProgrammingLanguage:
                  your_key_for_deepl: str = "",
                  request_language: str = MAIN_LANGUAGE,
                  cloud_version: bool = False,
-                 with_deepseek: bool = True,
+                 definition_option: Literal["paddle_ocr", "easy_ocr", "deepseek_ocr"] = EASY_OCR,
+                 paddle_lang: str = MAIN_LANGUAGE,
                  model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE,
                  crop_mode: bool = False,
                  base_url: str = "https://api.siliconflow.cn/v1/chat/completions",
@@ -50,7 +51,8 @@ class DefiningProgrammingLanguage:
         :param your_key_for_deepl: API key for DeepL translation.
         :param request_language: Target language code for translation (default MAIN_LANGUAGE).
         :param cloud_version: If True, use cloud API for DeepSeek OCR.
-        :param with_deepseek: If True, use DeepSeek OCR; otherwise use EasyOCR.
+        :param definition_option: Choose an OCR system from 3 ready-made ones.
+        :param paddle_lang: The main language code is needed for Paddle OCR to determine.
         :param model_size: DeepSeek model size.
         :param crop_mode: Enable crop mode for DeepSeek OCR.
         :param base_url: Base URL for DeepSeek cloud API.
@@ -76,7 +78,8 @@ class DefiningProgrammingLanguage:
             "your_key_for_deepl": your_key_for_deepl,
             "request_language": request_language,
             "cloud_version": cloud_version,
-            "with_deepseek": with_deepseek,
+            "definition_option": definition_option,
+            "paddle_lang": paddle_lang,
             "model_size": model_size,
             "crop_mode": crop_mode,
             "base_url": base_url,
