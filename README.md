@@ -1,6 +1,6 @@
 <p align="center">  
   <img src="img_files/banner.png" width="100%" alt="BiNeuron Start" />  
-</p>  
+</p> 
 
 # BiNeuron  
 
@@ -9,6 +9,9 @@
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
+
+[![Follow on X](https://img.shields.io/badge/Follow-@BiNeuron123-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/BiNeuron123)
+[![Subscribe on YouTube](https://img.shields.io/badge/Subscribe-@bineuron-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@bineuron)
 
 <details>
 <summary>🇬🇧 English</summary>
