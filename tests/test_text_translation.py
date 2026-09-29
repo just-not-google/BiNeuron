@@ -1,5 +1,5 @@
 import pytest
-from AlexRadar.additional_functions import TranslatorText
+from BiNeuron.additional_functions import TranslatorText
 
 
 LST_FOR_TESTS = [
@@ -8,7 +8,11 @@ LST_FOR_TESTS = [
     "",
     "嗨,你好吗?",
     "¿Por qué no tomamos algo alcohólico?",
-    "!@#$%^&*"
+    "!@#$%^&*",
+    "Hello world",
+    "42",
+    "   ",
+    "Hello, world!",
 ]
 
 @pytest.mark.parametrize("original_text, bool_answer", [
@@ -18,6 +22,10 @@ LST_FOR_TESTS = [
     (LST_FOR_TESTS[3], True),
     (LST_FOR_TESTS[4], True),
     (LST_FOR_TESTS[5], True),
+    (LST_FOR_TESTS[6], False),
+    (LST_FOR_TESTS[7], True),
+    (LST_FOR_TESTS[8], True),
+    (LST_FOR_TESTS[9], False),
 ])
 def test_needs_translation_to_main_language(original_text: str, bool_answer: bool):
     translator = TranslatorText(original_text=original_text)
@@ -30,6 +38,10 @@ def test_needs_translation_to_main_language(original_text: str, bool_answer: boo
     (LST_FOR_TESTS[3], "Hi, how are you?"),
     (LST_FOR_TESTS[4], "Why don't we drink something alcoholic?"),
     (LST_FOR_TESTS[5], LST_FOR_TESTS[5]),
+    (LST_FOR_TESTS[6], LST_FOR_TESTS[6]),
+    (LST_FOR_TESTS[7], LST_FOR_TESTS[7]),
+    (LST_FOR_TESTS[8], LST_FOR_TESTS[8]),
+    (LST_FOR_TESTS[9], LST_FOR_TESTS[9]),
 ])
 def test_main_translater(text: str, expected_translation: str):
     translator = TranslatorText(original_text=text)

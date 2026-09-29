@@ -1,6 +1,6 @@
 import pytest
 from typing import List
-from AlexRadar.additional_functions.logic_virtual_storage import extraction_all_files
+from BiNeuron.additional_functions.logic_virtual_storage import extraction_all_files
 
 
 @pytest.mark.parametrize("path, path_lst", [

@@ -1,6 +1,6 @@
 import pytest
-from AlexRadar.additional_functions.defining_programming_language import DefiningProgrammingLanguage
-from AlexRadar.data import TYPE_DEFAULT
+from BiNeuron.additional_functions.defining_programming_language import DefiningProgrammingLanguage
+from BiNeuron.data.constants_for_functions import TYPE_DEFAULT
 
 
 @pytest.mark.parametrize("translated_text, answer, proprietary_algorithms", [

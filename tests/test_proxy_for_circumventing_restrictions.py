@@ -1,7 +1,7 @@
 import pytest
 import httpx
 from typing import Dict
-from AlexRadar.additional_functions import working_with_proxy
+from BiNeuron.additional_functions import working_with_proxy
 
 
 @pytest.mark.parametrize("version_1, proxy_answer", [

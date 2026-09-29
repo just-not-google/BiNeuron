@@ -1,5 +1,5 @@
 import pytest
-from AlexRadar.additional_functions.checking_integer_for_condition import checking_int_and_float
+from BiNeuron.additional_functions.checking_integer_for_condition import checking_int_and_float
 
 
 @pytest.mark.parametrize("value, option_1, answer", [
@@ -10,7 +10,9 @@ from AlexRadar.additional_functions.checking_integer_for_condition import checki
     (0.1, True, False),
     (0.1, False, True),
     ("000", False, False),
-    (-0.9, False, False)
+    (-0.9, False, False),
+    (0, True, False),
+    (0.0, False, False)
 ])
 def test_checking_int_and_float(value: int or float,
                                 option_1: bool,

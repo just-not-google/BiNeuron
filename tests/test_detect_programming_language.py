@@ -1,6 +1,6 @@
 import pytest
 from typing import List
-from AlexRadar.additional_functions import detect_programming_language
+from BiNeuron.additional_functions import detect_programming_language
 
 
 @pytest.mark.parametrize("text, answer_lst", [

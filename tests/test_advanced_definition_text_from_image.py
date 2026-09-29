@@ -1,5 +1,5 @@
 import pytest
-from AlexRadar.additional_functions.advanced_definition_text_from_image import LaunchDeepSeekOCR
+from BiNeuron.additional_functions.advanced_definition_text_from_image import LaunchDeepSeekOCR
 
 
 @pytest.mark.parametrize("photo_path, answer_text", [
