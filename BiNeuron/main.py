@@ -28,6 +28,9 @@ from BiNeuron.additional_functions.deleting_files_thanks_to_ai import deleting_f
 from BiNeuron.data.configs import (ModelConfig, LLMConfig, PromptConfig, TranslationConfig,
                                    LanguageDetectionConfig, ProxyConfig, OCRConfig, FileConfig,
                                    SafetyConfig)
+from BiNeuron.additional_functions.logic_text_compression import logic_text_compression
+from BiNeuron.additional_functions.request_anonymization import request_anonymization
+from BiNeuron.additional_functions.improving_user_text_through_ai import improving_user_text_through_ai
 from BiNeuron import main_logger
 
 
@@ -81,6 +84,26 @@ class BiNeuron:
         self.history = []
         self.unread_files = None
         self.files_context = None
+
+    def __settings_for_text_changes_via_ai(self) -> Dict:
+        """
+        Build a dictionary of parameters for any AI-driven text transformation
+        (compression, improvement, or any other text-rewriting operation).
+        The returned dictionary is passed via `**kwargs` to `template_for_changing_text_query_via_ai`
+        and its wrappers (e.g., `logic_text_compression`, `improving_user_text_through_ai`).
+        :return: Dictionary with keys: 'models_dir', 'n_gpu_layers', 'verbose', 'prefer_mirror',
+        'repo_id', 'filename', 'max_tokens'.
+        """
+        logger.info(f"Challenge __settings_for_text_changes_via_ai")
+        return {
+            "models_dir": self.model_conf.models_dir,
+            "n_gpu_layers": self.llm_conf.n_gpu_layers,
+            "verbose": self.llm_conf.verbose,
+            "prefer_mirror": self.model_conf.prefer_mirror,
+            "repo_id": self.model_conf.repo_id,
+            "filename": self.model_conf.filename,
+            "max_tokens": self.llm_conf.max_tokens
+        }
 
     def __settings_for_proxy(self) -> None:
         """
@@ -144,8 +167,22 @@ class BiNeuron:
         logger.info("Challenge __different_translation")
 
         logger.info("The original text has been translated into English for a better understanding of AI.")
+
+        if self.safety_conf.anonymize_text:
+            logger.info("The option is selected so that the text is anonymized.")
+            self.request = request_anonymization(
+                original_text=self.request,
+                request_language=self.translation_conf.request_language
+            )
+
         self.translated_text = TranslatorText(original_text=self.request,
                                               **self.__settings_for_translator()).main_translater()
+
+        if self.prompt_conf.improving_user_experience:
+            self.translated_text = improving_user_text_through_ai(
+                original_text=self.translated_text,
+                **self.__settings_for_text_changes_via_ai()
+            )
 
     def _virtual_storage_operation(self) -> None:
         """
@@ -157,7 +194,8 @@ class BiNeuron:
         logger.info("Challenge _virtual_storage_operation")
         answer = logic_virtual_storage(
             path=self.file_conf.virtual_storage_path,
-            with_ocr=self.ocr_conf.with_ocr
+            with_ocr=self.ocr_conf.with_ocr,
+            ignored_files=self.file_conf.ignored_files
         )
         logger.info("Additional files were overwritten to the files contained in the virtual storage.")
         self.additional_files = answer[TYPE_FORMATS[0]]
@@ -198,10 +236,19 @@ class BiNeuron:
             api_key_for_deepseek_ocr=self.ocr_conf.api_key_for_deepseek_ocr,
             timeout_for_deepseek_ocr=self.ocr_conf.timeout_for_deepseek_ocr,
             max_rate_limit_retries=self.ocr_conf.max_rate_limit_retries,
-            prefer_mirror=self.model_conf.prefer_mirror
+            prefer_mirror=self.model_conf.prefer_mirror,
+            anonymize_text=self.safety_conf.anonymize_text
         )
         self.programmer_langs = defining_obj.defining_programming_language_for_str()
         self.files_context = defining_obj.translated_text
+
+        if self.file_conf.compress_text:
+            logger.info("The item is selected so that the text is compressed.")
+            self.files_context = logic_text_compression(
+                original_text=self.files_context,
+                **self.__settings_for_text_changes_via_ai(),
+            )
+
         logger.info(f"The programming language is defined: {self.programmer_langs}")
 
     def _defining_ai_model(self) -> str or Dict:

@@ -43,15 +43,26 @@ try:
     from BiNeuron.data.constants_for_functions import (
         HTTP_PROTOCOL, HTTPS_PROTOCOL, TYPES_POWER,
         PREFERENCES_IN_AI_LIST, DETERMINANT_MODE_LIST,
+        DEFINITION_OPTION_LIST,
     )
     from BiNeuron.data.variants_industrial_scenarios import ALL_MAIN_PROMPTS
+    from BiNeuron.data.configs import (
+        ModelConfig, LLMConfig, PromptConfig, TranslationConfig,
+        LanguageDetectionConfig, ProxyConfig, OCRConfig, FileConfig,
+        SafetyConfig,
+    )
+    BINEURON_CONFIGS_AVAILABLE = True
 except Exception as e:
     BINEURON_IMPORT_ERROR = f"{type(e).__name__}: {e}"
     HTTP_PROTOCOL, HTTPS_PROTOCOL = "http", "https"
     TYPES_POWER = ["easy", "middle", "hard", "very_hard"]
     PREFERENCES_IN_AI_LIST = ["deepseek", "qwen", "llama"]
     DETERMINANT_MODE_LIST = ["lite", "full", "auto"]
+    DEFINITION_OPTION_LIST = ["paddle_ocr", "easy_ocr", "deepseek_ocr"]
     ALL_MAIN_PROMPTS = {"default": "You are a helpful assistant."}
+    BINEURON_CONFIGS_AVAILABLE = False
+    ModelConfig = LLMConfig = PromptConfig = TranslationConfig = None
+    LanguageDetectionConfig = ProxyConfig = OCRConfig = FileConfig = SafetyConfig = None
 
 
 class CryptoManager:
@@ -228,6 +239,7 @@ class CryptoManager:
 
 crypto = CryptoManager(BASE_DIR)
 
+
 def _wrap_init_with_kwargs_filter(cls, logger):
     orig_init = cls.__init__
     try:
@@ -252,6 +264,7 @@ def _wrap_init_with_kwargs_filter(cls, logger):
     cls.__init__ = _patched_init
     print(f"[compat] {cls.__name__} patched")
 
+
 def _apply_bineuron_compat_patches():
     logger = logging.getLogger(__name__)
     try:
@@ -274,6 +287,7 @@ def _apply_bineuron_compat_patches():
 _apply_bineuron_compat_patches()
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.config["MAX_CONTENT_LENGTH"] = 512 * 1024 * 1024
+
 
 class TaskManager:
     def __init__(self, max_tasks: int = 200):
@@ -334,6 +348,7 @@ class TaskManager:
 
 task_manager = TaskManager()
 _task_lock = threading.Lock()
+
 
 class TaskLogHandler(logging.Handler):
     def __init__(self, tm: TaskManager, tid: str):
@@ -398,6 +413,7 @@ class _StdStreamCapture:
                 pass
         raise OSError("fileno not available")
 
+
 def _to_int(v, default=None):
     if v in (None, ""):
         return default
@@ -405,6 +421,7 @@ def _to_int(v, default=None):
         return int(float(v))
     except (TypeError, ValueError):
         return default
+
 
 def _to_float(v, default=0.1):
     if v in (None, ""):
@@ -414,12 +431,14 @@ def _to_float(v, default=0.1):
     except (TypeError, ValueError):
         return default
 
+
 def _to_bool(v):
     if isinstance(v, bool):
         return v
     if v is None:
         return False
     return str(v).strip().lower() in ("1", "true", "yes", "on")
+
 
 def _to_list(v):
     if not v:
@@ -430,118 +449,243 @@ def _to_list(v):
     items = [line.strip() for line in str(v).splitlines() if line.strip()]
     return items or None
 
-def parse_settings_for_bineuron(data: dict) -> dict:
-    return {
-        "preferences_in_ai": data.get("preferences_in_ai") or PREFERENCES_IN_AI_LIST[0],
-        "filter_for_swearing": _to_bool(data.get("filter_for_swearing")),
-        "models_dir": (data.get("models_dir") or "./models").strip(),
-        "with_ai_orchestrator": _to_bool(data.get("with_ai_orchestrator", True)),
-        "verbose": _to_bool(data.get("verbose")),
-        "n_ctx": _to_int(data.get("n_ctx")),
-        "n_gpu_layers": _to_int(data.get("n_gpu_layers"), 0),
-        "echo": _to_bool(data.get("echo")),
-        "max_tokens": _to_int(data.get("max_tokens"), 4096),
-        "your_token_for_hf": data.get("your_token_for_hf") or None,
-        "subdomain": data.get("subdomain") or "",
-        "country": data.get("country") or None,
-        "protocol": data.get("protocol") or HTTP_PROTOCOL,
-        "max_timeout": _to_int(data.get("max_timeout"), 30),
-        "is_working": _to_bool(data.get("is_working")),
-        "type_computer": (data.get("type_computer")
-                          if data.get("type_computer") not in (None, "", "auto")
-                          else None),
-        "auto_proxies": _to_bool(data.get("auto_proxies")),
-        "writing_response_to_file": _to_bool(data.get("writing_response_to_file")),
-        "your_proxies_dict": _to_list(data.get("your_proxies_dict")),
-        "determinant_mode": data.get("determinant_mode") or "auto",
-        "accurate_translation": _to_bool(data.get("accurate_translation")),
-        "your_key_for_deepl": data.get("your_key_for_deepl") or "",
-        "proprietary_algorithms": _to_bool(data.get("proprietary_algorithms")),
-        "repo_id": data.get("repo_id") or None,
-        "filename": data.get("filename") or None,
-        "min_timeout_for_checking_availability": _to_int(data.get("min_timeout_for_checking_availability"), 5),
-        "max_timeout_for_checking_availability": _to_int(data.get("max_timeout_for_checking_availability"), 15),
-        "request_language": data.get("request_language") or "en",
-        "main_prompt_mode": data.get("main_prompt_mode") or "default",
-        "main_prompt": data.get("main_prompt") or None,
-        "temperature": _to_float(data.get("temperature"), 0.1),
-        "retries": _to_int(data.get("retries"), 3),
-        "github_proxies": _to_bool(data.get("github_proxies")),
-        "url_lst": _to_list(data.get("url_lst")),
-        "proxy_retries": _to_int(data.get("proxy_retries"), 3),
-        "main_retries": _to_int(data.get("main_retries"), 3),
-        "lang_lst": _to_list(data.get("lang_lst")),
-        "use_gpu_for_ocr": _to_bool(data.get("use_gpu_for_ocr")),
-        "virtual_storage": _to_bool(data.get("virtual_storage")),
-        "virtual_storage_path": data.get("virtual_storage_path") or None,
-        "with_ocr": _to_bool(data.get("with_ocr")),
-        "cloud_version": _to_bool(data.get("cloud_version")),
-        "with_deepseek": _to_bool(data.get("with_deepseek", True)),
-        "model_size": data.get("model_size") or "tiny",
-        "crop_mode": _to_bool(data.get("crop_mode")),
-        "base_url": data.get("base_url") or "https://api.siliconflow.cn/v1/chat/completions",
-        "api_key_for_deepseek_ocr": data.get("api_key_for_deepseek_ocr") or None,
-        "timeout_for_deepseek_ocr": _to_int(data.get("timeout_for_deepseek_ocr")),
-        "max_rate_limit_retries": _to_int(data.get("max_rate_limit_retries"), 3),
-        "prefer_mirror": _to_bool(data.get("prefer_mirror", True)),
-        "editing_files": _to_bool(data.get("editing_files")),
-    }
+
+def _short_str(v, min_len=None, max_len=None, allow_empty=True):
+    s = (v or "").strip() if isinstance(v, str) else ""
+    if not s:
+        return "" if allow_empty else None
+    if min_len is not None and len(s) < min_len:
+        return "" if allow_empty else None
+    if max_len is not None and len(s) > max_len:
+        s = s[:max_len]
+    return s
+
+
+def build_bineuron_configs(data: dict) -> dict:
+    if not BINEURON_CONFIGS_AVAILABLE:
+        return {}
+    data = data or {}
+    out = {}
+
+    def _build(cls, **kwargs):
+        try:
+            return cls(**kwargs)
+        except Exception as e:
+            logging.warning(f"[config] {cls.__name__} validation failed: {e}; using defaults")
+            return cls()
+
+    pref = (data.get("preferences_in_ai") or "").strip()
+    if pref not in PREFERENCES_IN_AI_LIST:
+        pref = PREFERENCES_IN_AI_LIST[0]
+    tc = data.get("type_computer")
+    if tc in (None, "", "auto"):
+        tc = None
+    token = _short_str(data.get("your_token_for_hf"), min_len=36, max_len=40) or None
+    out["model_conf"] = _build(
+        ModelConfig,
+        preferences_in_ai=pref,
+        models_dir=(data.get("models_dir") or "./models").strip() or "./models",
+        type_computer=tc,
+        repo_id=(data.get("repo_id") or "").strip() or None,
+        filename=(data.get("filename") or "").strip() or None,
+        your_token_for_hf=token,
+        subdomain=(data.get("subdomain") or "").strip(),
+        retries=max(1, _to_int(data.get("retries"), 3) or 3),
+        prefer_mirror=_to_bool(data.get("prefer_mirror", True)),
+    )
+
+    n_ctx = _to_int(data.get("n_ctx"))
+    if n_ctx is not None and n_ctx <= 0:
+        n_ctx = None
+    temperature = _to_float(data.get("temperature"), 0.1)
+    temperature = max(0.1, min(1.0, temperature))
+    out["llm_conf"] = _build(
+        LLMConfig,
+        verbose=_to_bool(data.get("verbose")),
+        n_ctx=n_ctx,
+        n_gpu_layers=max(0, _to_int(data.get("n_gpu_layers"), 0) or 0),
+        echo=_to_bool(data.get("echo")),
+        max_tokens=max(1, _to_int(data.get("max_tokens"), 4096) or 4096),
+        temperature=temperature,
+    )
+
+    mode = (data.get("main_prompt_mode") or "").strip()
+    if mode not in ALL_MAIN_PROMPTS:
+        mode = list(ALL_MAIN_PROMPTS.keys())[0]
+    out["prompt_conf"] = _build(
+        PromptConfig,
+        main_prompt_mode=mode,
+        main_prompt=(data.get("main_prompt") or "").strip() or None,
+        improving_user_experience=_to_bool(data.get("improving_user_experience")),
+    )
+
+    rl = (data.get("request_language") or "en").strip().lower()
+    if len(rl) != 2:
+        rl = "en"
+    fcl = (data.get("from_code_lang") or "").strip().lower()
+    if fcl and len(fcl) != 2:
+        fcl = ""
+    dm = data.get("determinant_mode") or DETERMINANT_MODE_LIST[0]
+    if dm not in ("lite", "full", "auto"):
+        dm = "lite"
+    deepl_key = _short_str(data.get("your_key_for_deepl"), min_len=36, max_len=39)
+    out["translation_conf"] = _build(
+        TranslationConfig,
+        determinant_mode=dm,
+        accurate_translation=_to_bool(data.get("accurate_translation")),
+        your_key_for_deepl=deepl_key,
+        request_language=rl,
+        local_trans=_to_bool(data.get("local_trans")),
+        from_code_lang=fcl,
+    )
+
+    out["language_detection_conf"] = _build(
+        LanguageDetectionConfig,
+        with_ai_orchestrator=_to_bool(data.get("with_ai_orchestrator", True)),
+        proprietary_algorithms=_to_bool(data.get("proprietary_algorithms")),
+    )
+
+    country = (data.get("country") or "").strip().lower()
+    if country and len(country) != 2:
+        country = None
+    elif not country:
+        country = None
+    protocol = (data.get("protocol") or HTTP_PROTOCOL).strip()
+    if protocol not in ("http", "https"):
+        protocol = HTTP_PROTOCOL
+    out["proxy_conf"] = _build(
+        ProxyConfig,
+        country=country,
+        protocol=protocol,
+        max_timeout=max(0, _to_int(data.get("max_timeout"), 30) or 30),
+        is_working=_to_bool(data.get("is_working", True)),
+        auto_proxies=_to_bool(data.get("auto_proxies", True)),
+        your_proxies_dict=_to_list(data.get("your_proxies_dict")),
+        min_timeout_for_checking_availability=max(
+            0, _to_int(data.get("min_timeout_for_checking_availability"), 5) or 5),
+        max_timeout_for_checking_availability=max(
+            0, _to_int(data.get("max_timeout_for_checking_availability"), 15) or 15),
+        github_proxies=_to_bool(data.get("github_proxies")),
+        proxy_retries=max(1, _to_int(data.get("proxy_retries"), 3) or 3),
+        main_retries=max(1, _to_int(data.get("main_retries"), 3) or 3),
+    )
+
+    do = data.get("definition_option") or "easy_ocr"
+    if do not in ("paddle_ocr", "easy_ocr", "deepseek_ocr"):
+        do = "easy_ocr"
+    pl = (data.get("paddle_lang") or "en").strip().lower()
+    if len(pl) != 2:
+        pl = "en"
+    ms = data.get("model_size") or "tiny"
+    if ms not in ("tiny", "small", "base", "large", "gundam"):
+        ms = "tiny"
+    api_key = _short_str(data.get("api_key_for_deepseek_ocr"), min_len=32, max_len=64) or None
+    base_url = (data.get("base_url") or "https://api.siliconflow.cn/v1/chat/completions").strip()
+    out["ocr_conf"] = _build(
+        OCRConfig,
+        lang_lst=_to_list(data.get("lang_lst")),
+        use_gpu_for_ocr=_to_bool(data.get("use_gpu_for_ocr")),
+        with_ocr=_to_bool(data.get("with_ocr")),
+        cloud_version=_to_bool(data.get("cloud_version")),
+        definition_option=do,
+        paddle_lang=pl,
+        model_size=ms,
+        crop_mode=_to_bool(data.get("crop_mode")),
+        base_url=base_url,
+        api_key_for_deepseek_ocr=api_key,
+        timeout_for_deepseek_ocr=_to_int(data.get("timeout_for_deepseek_ocr")),
+        max_rate_limit_retries=max(1, _to_int(data.get("max_rate_limit_retries"), 3) or 3),
+    )
+
+    out["file_conf"] = _build(
+        FileConfig,
+        virtual_storage=_to_bool(data.get("virtual_storage")),
+        virtual_storage_path=(data.get("virtual_storage_path") or "").strip() or None,
+        writing_response_to_file=_to_bool(data.get("writing_response_to_file")),
+        editing_files=_to_bool(data.get("editing_files")),
+        deleting_files=_to_bool(data.get("deleting_files")),
+        use_websites=_to_bool(data.get("use_websites")),
+        websites_sources_information=_to_list(data.get("websites_sources_information")),
+        compress_text=_to_bool(data.get("compress_text")),
+        ignored_files=_to_list(data.get("ignored_files")),
+    )
+
+    out["safety_conf"] = _build(
+        SafetyConfig,
+        filter_for_swearing=_to_bool(data.get("filter_for_swearing")),
+        anonymize_text=_to_bool(data.get("anonymize_text")),
+    )
+
+    return out
+
+
 
 def default_settings() -> dict:
     return {
         "preferences_in_ai": PREFERENCES_IN_AI_LIST[0] if PREFERENCES_IN_AI_LIST else "deepseek",
         "filter_for_swearing": False,
+        "anonymize_text": False,
         "models_dir": "./models",
         "with_ai_orchestrator": True,
+        "proprietary_algorithms": False,
         "verbose": False,
         "n_ctx": 0,
         "n_gpu_layers": 0,
         "echo": False,
         "max_tokens": 4096,
+        "temperature": 0.1,
         "your_token_for_hf": "",
         "subdomain": "",
+        "repo_id": "",
+        "filename": "",
+        "prefer_mirror": True,
+        "type_computer": "auto",
+        "retries": 3,
         "country": "",
         "protocol": HTTP_PROTOCOL,
         "max_timeout": 30,
         "is_working": False,
-        "type_computer": "auto",
         "auto_proxies": False,
-        "writing_response_to_file": False,
         "your_proxies_dict": "",
-        "determinant_mode": DETERMINANT_MODE_LIST[0] if DETERMINANT_MODE_LIST else "auto",
-        "accurate_translation": False,
-        "your_key_for_deepl": "",
-        "proprietary_algorithms": False,
-        "repo_id": "",
-        "filename": "",
         "min_timeout_for_checking_availability": 5,
         "max_timeout_for_checking_availability": 15,
-        "request_language": "en",
-        "main_prompt_mode": (list(ALL_MAIN_PROMPTS.keys())[0] if ALL_MAIN_PROMPTS else "default"),
-        "main_prompt": "",
-        "temperature": 0.1,
-        "retries": 3,
         "github_proxies": False,
         "url_lst": "",
         "proxy_retries": 3,
         "main_retries": 3,
+        "determinant_mode": DETERMINANT_MODE_LIST[0] if DETERMINANT_MODE_LIST else "lite",
+        "accurate_translation": False,
+        "your_key_for_deepl": "",
+        "request_language": "en",
+        "local_trans": False,
+        "from_code_lang": "",
+        "main_prompt_mode": (list(ALL_MAIN_PROMPTS.keys())[0] if ALL_MAIN_PROMPTS else "default"),
+        "main_prompt": "",
+        "improving_user_experience": False,
         "lang_lst": "",
         "use_gpu_for_ocr": False,
-        "virtual_storage": False,
-        "virtual_storage_path": "",
         "with_ocr": False,
         "cloud_version": False,
-        "with_deepseek": True,
+        "definition_option": "easy_ocr",
+        "paddle_lang": "en",
         "model_size": "tiny",
         "crop_mode": False,
         "base_url": "https://api.siliconflow.cn/v1/chat/completions",
         "api_key_for_deepseek_ocr": "",
         "timeout_for_deepseek_ocr": 30,
         "max_rate_limit_retries": 3,
-        "prefer_mirror": True,
+        "virtual_storage": False,
+        "virtual_storage_path": "",
+        "writing_response_to_file": False,
         "editing_files": False,
-        "theme": "dark-plus",
+        "deleting_files": False,
+        "use_websites": False,
+        "websites_sources_information": "",
+        "compress_text": False,
+        "ignored_files": "",
+        "theme": "midnight",
     }
+
 
 def load_json(path, default):
     if not os.path.exists(path):
@@ -552,6 +696,7 @@ def load_json(path, default):
     except Exception:
         return default
 
+
 def save_json(path, data):
     try:
         with open(path, "w", encoding="utf-8") as f:
@@ -559,19 +704,23 @@ def save_json(path, data):
     except Exception as e:
         logging.error(f"Failed to save {path}: {e}")
 
+
 def _get_chats_or_401():
     data = crypto.load_chats()
     if data is None:
         abort(401, description="chats_locked")
     return data
 
+
 @app.errorhandler(401)
 def _handle_401(e):
     return jsonify({"locked": True, "error": "chats_locked"}), 401
 
+
 @app.route("/")
 def index():
     return render_template("index.html")
+
 
 @app.route("/api/meta")
 def api_meta():
@@ -582,24 +731,29 @@ def api_meta():
         "determinant_modes": DETERMINANT_MODE_LIST,
         "main_prompt_modes": list(ALL_MAIN_PROMPTS.keys()),
         "model_sizes": ["tiny", "small", "base", "large", "gundam"],
+        "definition_options": DEFINITION_OPTION_LIST,
         "import_error": BINEURON_IMPORT_ERROR,
     })
+
 
 @app.route("/api/settings", methods=["GET"])
 def api_get_settings():
     data = load_json(SETTINGS_FILE, None)
     return jsonify(data if data is not None else default_settings())
 
+
 @app.route("/api/settings", methods=["POST"])
 def api_save_settings():
     save_json(SETTINGS_FILE, request.get_json(silent=True) or {})
     return jsonify({"ok": True})
+
 
 @app.route("/api/settings/reset", methods=["POST"])
 def api_reset_settings():
     data = default_settings()
     save_json(SETTINGS_FILE, data)
     return jsonify({"ok": True, "settings": data})
+
 
 @app.route("/api/master/status", methods=["GET"])
 def api_master_status():
@@ -610,6 +764,7 @@ def api_master_status():
         "attempts_left": crypto.attempts_left(),
         "max_attempts": MAX_ATTEMPTS,
     })
+
 
 @app.route("/api/master/setup", methods=["POST"])
 def api_master_setup():
@@ -623,6 +778,7 @@ def api_master_setup():
         return jsonify({"ok": False, "error": "password too short (min 4)"}), 400
     ok = crypto.setup(pwd)
     return jsonify({"ok": ok})
+
 
 @app.route("/api/master/unlock", methods=["POST"])
 def api_master_unlock():
@@ -639,6 +795,7 @@ def api_master_unlock():
         return jsonify({"ok": False, "wiped": True, "attempts_left": 0}), 410
     return jsonify({"ok": False, "error": status}), 400
 
+
 @app.route("/api/master/disable", methods=["POST"])
 def api_master_disable():
     if not crypto.is_enabled():
@@ -646,9 +803,11 @@ def api_master_disable():
     ok = crypto.disable()
     return jsonify({"ok": ok})
 
+
 @app.route("/api/chats", methods=["GET"])
 def api_list_chats():
     return jsonify(_get_chats_or_401())
+
 
 @app.route("/api/chats", methods=["POST"])
 def api_create_chat():
@@ -661,6 +820,7 @@ def api_create_chat():
     crypto.save_chats(chats)
     return jsonify({"id": new_id, "chat": chats[new_id]})
 
+
 @app.route("/api/chats/<chat_id>", methods=["GET"])
 def api_get_chat(chat_id):
     chats = _get_chats_or_401()
@@ -668,12 +828,14 @@ def api_get_chat(chat_id):
         abort(404)
     return jsonify(chats[chat_id])
 
+
 @app.route("/api/chats/<chat_id>", methods=["DELETE"])
 def api_delete_chat(chat_id):
     chats = _get_chats_or_401()
     chats.pop(chat_id, None)
     crypto.save_chats(chats)
     return jsonify({"ok": True})
+
 
 @app.route("/api/chats/<chat_id>/messages", methods=["POST"])
 def api_append_message(chat_id):
@@ -694,7 +856,8 @@ def api_append_message(chat_id):
     crypto.save_chats(chats)
     return jsonify({"ok": True})
 
-def _run_bi_neuron_task(tid, params, request_text, additional_files):
+
+def _run_bi_neuron_task(tid, configs, request_text, additional_files):
     with _task_lock:
         handler = TaskLogHandler(task_manager, tid)
         handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
@@ -710,7 +873,7 @@ def _run_bi_neuron_task(tid, params, request_text, additional_files):
             if BINEURON_IMPORT_ERROR is not None:
                 raise RuntimeError(f"BiNeuron could not be imported: {BINEURON_IMPORT_ERROR}")
             task_manager.log(tid, "[web] Creating BiNeuron instance...")
-            bi = BiNeuron(request=request_text, additional_files=additional_files, **params)
+            bi = BiNeuron(request=request_text, additional_files=additional_files, **configs)
             task_manager.log(tid, "[web] Running final_ai_request()...")
             answer = bi.final_ai_request()
             task_manager.finish(tid, answer or "")
@@ -729,13 +892,14 @@ def _run_bi_neuron_task(tid, params, request_text, additional_files):
             root.removeHandler(handler)
             root.setLevel(old_level)
 
+
 @app.route("/api/chat", methods=["POST"])
 def api_chat():
     body = request.get_json(silent=True) or {}
     user_text = (body.get("request") or "").strip()
     if not user_text:
         return jsonify({"error": "empty request"}), 400
-    params = parse_settings_for_bineuron(body.get("settings") or {})
+    configs = build_bineuron_configs(body.get("settings") or {})
     uploaded = body.get("attached_files") or []
     additional_files = None
     if isinstance(uploaded, list) and uploaded:
@@ -744,9 +908,10 @@ def api_chat():
             additional_files = existing
     tid = task_manager.create()
     threading.Thread(target=_run_bi_neuron_task,
-                     args=(tid, params, user_text, additional_files),
+                     args=(tid, configs, user_text, additional_files),
                      daemon=True).start()
     return jsonify({"task_id": tid})
+
 
 @app.route("/api/chat/task/<tid>", methods=["GET"])
 def api_chat_task(tid):
@@ -755,6 +920,7 @@ def api_chat_task(tid):
     if t is None:
         abort(404)
     return jsonify(t)
+
 
 @app.route("/api/upload", methods=["POST"])
 def api_upload():
@@ -772,6 +938,7 @@ def api_upload():
         saved.append(dest)
     return jsonify({"ok": True, "paths": saved})
 
+
 @app.route("/api/models", methods=["GET"])
 def api_list_models():
     models_dir = request.args.get("dir") or "./models"
@@ -783,6 +950,7 @@ def api_list_models():
             if name.lower().endswith(".gguf"):
                 gguf.append(os.path.relpath(os.path.join(root, name), models_dir))
     return jsonify({"ok": True, "models": sorted(gguf)})
+
 
 @app.route("/api/storage/tree", methods=["POST"])
 def api_storage_tree():
@@ -809,6 +977,7 @@ def api_storage_tree():
         "name": os.path.basename(path) or path,
         "path": path, "type": "dir", "children": build(path),
     }})
+
 
 @app.route("/api/storage/open", methods=["POST"])
 def api_storage_open():

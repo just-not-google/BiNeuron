@@ -19,3 +19,5 @@ from .configs import (ModelConfig, LLMConfig, PromptConfig, TranslationConfig,
                       LanguageDetectionConfig, ProxyConfig, OCRConfig, FileConfig,
                       SafetyConfig)
 from .constants_for_functions import *
+from .prompt_for_compression import PROMPT_FOR_COMPRESSION
+from .prompt_for_improvement import PROMPT_FOR_IMPROVEMENT

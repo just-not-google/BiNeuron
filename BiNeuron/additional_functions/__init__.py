@@ -3,7 +3,7 @@ from .checking_integer_for_condition import checking_int_and_float
 from .defining_programming_language import DefiningProgrammingLanguage
 from .definition_swearing import definition_swearing
 from .detect_programming_language import detect_programming_language
-from .getting_text_from_files import main_get_text_from_files
+from .getting_text_from_files import GettingTextFromFiles
 from .launching_ai_model_and_requesting import launching_ai_model_and_requesting
 from .proxy_for_circumventing_restrictions import working_with_proxy
 from .logic_orchestra.orchestrator_ai_models import orchestrator_ai_models
@@ -15,4 +15,7 @@ from .logic_virtual_storage import logic_virtual_storage
 from .advanced_definition_text_from_image import LaunchDeepSeekOCR
 from .logic_editing_files import logic_editing_files
 from .deleting_files_thanks_to_ai import deleting_files_thanks_to_ai
-from .getting_text_from_website import getting_text_from_website
+from .logic_text_compression import logic_text_compression
+from .request_anonymization import request_anonymization
+from .template_for_changing_text_query_via_ai import template_for_changing_text_query_via_ai
+from .improving_user_text_through_ai import improving_user_text_through_ai

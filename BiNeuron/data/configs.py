@@ -5,7 +5,8 @@ from BiNeuron.data.constants_for_functions import (NUMBER_ATTEMPTS, MAX_TOKENS, 
                                                    LITE_TYPE, MAIN_LANGUAGE, HTTP_PROTOCOL,
                                                    MAX_TIMEOUT, MIN_TIMEOUT_FOR_CHECK,
                                                    MAX_TIMEOUT_FOR_CHECK, MAIN_PROXY_ATTEMPTS,
-                                                   TINY_TYPE, EASY_OCR)
+                                                   TINY_TYPE, EASY_OCR, MODELS_DIR_CONST,
+                                                   API_BASE_URL)
 from pydantic import BaseModel, Field, HttpUrl
 import logging
 
@@ -32,7 +33,7 @@ class ModelConfig(BaseModel, extra="forbid"):
         "codegeex4", "opencode_interpreter", "ornith_1_0",
         "kat_dev", "magistral_small", "laguna_xs", "breeze"
     ] = PREFERENCES_IN_AI_LIST[0]
-    models_dir: str = "./models"
+    models_dir: str = MODELS_DIR_CONST
     type_computer: Optional[Literal[
         "easy", "middle",
         "hard", "very_hard"
@@ -66,6 +67,7 @@ class PromptConfig(BaseModel, extra="forbid"):
     Configuration for the system prompt used by the AI.
     :param main_prompt_mode: Predefined prompt scenario from ALL_MAIN_PROMPTS.
     :param main_prompt: Custom system prompt. If provided, overrides main_prompt_mode.
+    :param improving_user_experience: The user's promptness will be improved and structured using AI.
     """
     main_prompt_mode: Literal[
         "default", "testing", "explanation", "no_comments",
@@ -73,6 +75,7 @@ class PromptConfig(BaseModel, extra="forbid"):
         "scaffold", "security_hardening", "algorithm_strategy"
     ] = TYPE_DEFAULT
     main_prompt: Optional[str] = None
+    improving_user_experience: bool = False
 
 class TranslationConfig(BaseModel, extra="forbid"):
     """
@@ -160,7 +163,7 @@ class OCRConfig(BaseModel, extra="forbid"):
         "large", "gundam"
     ] = TINY_TYPE
     crop_mode: bool = False
-    base_url: HttpUrl = "https://api.siliconflow.cn/v1/chat/completions"
+    base_url: HttpUrl = API_BASE_URL
     api_key_for_deepseek_ocr: Optional[str] = Field(default=None, min_length=32, max_length=64)
     timeout_for_deepseek_ocr: Optional[int] = Field(default=None, ge=0)
     max_rate_limit_retries: Optional[int] = Field(default=NUMBER_ATTEMPTS, ge=1)
@@ -175,6 +178,8 @@ class FileConfig(BaseModel, extra="forbid"):
     :param deleting_files: If True, enables automatic file deletion via AI.
     :param use_websites: Use text from websites.
     :param websites_sources_information: The Internet sources from which the text is taken.
+    :param compress_text: If True, text compression is used.
+    :param ignored_files: A list of files that the program does not need to read.
     """
     virtual_storage: bool = False
     virtual_storage_path: Optional[str] = None
@@ -183,10 +188,14 @@ class FileConfig(BaseModel, extra="forbid"):
     deleting_files: bool = False
     use_websites: bool = False
     websites_sources_information: Optional[List[str]] = None
+    compress_text: bool = False
+    ignored_files: Optional[List[str]] = None
 
 class SafetyConfig(BaseModel, extra="forbid"):
     """
     Configuration for content safety and filtering.
     :param filter_for_swearing: If True, blocks responses containing profanity.
+    :param anonymize_text: If True, it anonymizes personal data in a general request to the AI.
     """
     filter_for_swearing: bool = False
+    anonymize_text: bool = False

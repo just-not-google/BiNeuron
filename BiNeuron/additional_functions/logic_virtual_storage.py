@@ -7,10 +7,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def extraction_all_files(path: str) -> List[str]:
+def extraction_all_files(path: str,
+                         ignored_files: Optional[List[str]]) -> List[str]:
     """
     Retrieves all paths to files located in this folder.
     :param path: The location of your virtual storage.
+    :param ignored_files: A list of files that the program does not need to read.
     :return: List of file paths.
     """
     logger.info("Challenge extraction_all_files")
@@ -19,6 +21,11 @@ def extraction_all_files(path: str) -> List[str]:
         answer_lst = []
         for item in folder_path.rglob('*'):
             if item.is_file():
+                str_item = str(item)
+
+                if str_item in ignored_files:
+                    continue
+
                 answer_lst.append(str(item))
         logger.info("All file paths from this folder have been retrieved.")
         return answer_lst
@@ -27,11 +34,13 @@ def extraction_all_files(path: str) -> List[str]:
         return []
 
 def logic_virtual_storage(path: Optional[str] = None,
-                          with_ocr: bool = False) -> Dict:
+                          with_ocr: bool = False,
+                          ignored_files: Optional[List[str]] = None) -> Dict:
     """
     Checking the unsorted list of files for certain conditions.
     :param path: The location of your virtual storage.
     :param with_ocr: If there are photos among your files.
+    :param ignored_files: A list of files that the program does not need to read.
     :return: Dictionary of files read and unread by the program.
     """
     logger.info("Challenge logic_virtual_storage")
@@ -39,7 +48,8 @@ def logic_virtual_storage(path: Optional[str] = None,
         logger.warning("The path to the virtual storage was not specified.")
         return dict()
 
-    file_paths = extraction_all_files(path=path)
+    file_paths = extraction_all_files(path=path,
+                                      ignored_files=ignored_files)
     supported_formats = SUPPORTED_FORMATS_WITHOUT_PHOTO.copy()
 
     if with_ocr:

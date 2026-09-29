@@ -1,9 +1,10 @@
+from typing import Union
 import logging
 
 
 logger = logging.getLogger(__name__)
 
-def checking_int_and_float(value: int or float,
+def checking_int_and_float(value: Union[int, float],
                            option_1: bool = True) -> bool:
     """
     Checking integers and floating-point numbers for validity.

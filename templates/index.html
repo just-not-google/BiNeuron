@@ -114,6 +114,8 @@
           <input class="input" type="text" data-setting="models_dir" value="./models"></div>
         <div class="row check-row"><label data-i18n="with_ai_orchestrator_label">AI orchestrator</label>
           <input class="check" type="checkbox" data-setting="with_ai_orchestrator"></div>
+        <div class="row check-row"><label data-i18n="proprietary_algorithms_label">Proprietary algorithms</label>
+          <input class="check" type="checkbox" data-setting="proprietary_algorithms"></div>
         <div class="row"><label data-i18n="n_ctx_label">n_ctx</label>
           <div class="spin">
             <input class="input" type="number" step="1" data-setting="n_ctx" value="0">
@@ -132,6 +134,12 @@
             <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
             <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
           </div></div>
+        <div class="row"><label data-i18n="temperature_label">Temperature</label>
+          <div class="spin">
+            <input class="input" type="number" step="0.1" data-setting="temperature" value="0.1">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
         <div class="row"><label data-i18n="token_hf_label">HF token</label>
           <input class="input" type="text" data-setting="your_token_for_hf"></div>
         <div class="row"><label data-i18n="subdomain_label">Subdomain</label>
@@ -142,16 +150,18 @@
           <input class="input" type="text" data-setting="filename"></div>
         <div class="row check-row"><label data-i18n="prefer_mirror_label">Prefer mirror</label>
           <input class="check" type="checkbox" data-setting="prefer_mirror"></div>
+        <div class="row"><label data-i18n="type_computer_label">Type computer</label>
+          <select class="select" data-setting="type_computer" id="typeComputerSelect"></select></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="prompt_frame">Prompt</legend>
         <div class="row"><label data-i18n="main_prompt_mode_label">Main prompt mode</label>
           <select class="select" data-setting="main_prompt_mode" id="promptModeSelect"></select></div>
         <div class="row top"><label data-i18n="main_prompt_label">Main prompt</label>
           <textarea class="textarea" rows="3" data-setting="main_prompt"></textarea></div>
-        <div class="row"><label data-i18n="temperature_label">Temperature</label>
-          <div class="spin">
-            <input class="input" type="number" step="0.1" data-setting="temperature" value="0.1">
-            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
-            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
-          </div></div>
+        <div class="row check-row"><label data-i18n="improving_user_experience_label">Improve user experience</label>
+          <input class="check" type="checkbox" data-setting="improving_user_experience"></div>
       </fieldset>
 
       <fieldset class="fieldset">
@@ -164,6 +174,10 @@
           <input class="input" type="text" data-setting="your_key_for_deepl"></div>
         <div class="row"><label data-i18n="request_language_label">Request language</label>
           <input class="input" type="text" data-setting="request_language" value="en"></div>
+        <div class="row check-row"><label data-i18n="local_trans_label">Local translation (Argos)</label>
+          <input class="check" type="checkbox" data-setting="local_trans"></div>
+        <div class="row"><label data-i18n="from_code_lang_label">Source language code</label>
+          <input class="input" type="text" data-setting="from_code_lang" maxlength="2" placeholder="en"></div>
       </fieldset>
 
       <fieldset class="fieldset">
@@ -176,8 +190,10 @@
           <input class="check" type="checkbox" data-setting="with_ocr"></div>
         <div class="row check-row"><label data-i18n="cloud_version_label">Cloud version</label>
           <input class="check" type="checkbox" data-setting="cloud_version"></div>
-        <div class="row check-row"><label data-i18n="with_deepseek_label">With DeepSeek</label>
-          <input class="check" type="checkbox" data-setting="with_deepseek"></div>
+        <div class="row"><label data-i18n="definition_option_label">OCR engine</label>
+          <select class="select" data-setting="definition_option" id="ocrOptionSelect"></select></div>
+        <div class="row"><label data-i18n="paddle_lang_label">Paddle lang</label>
+          <input class="input" type="text" data-setting="paddle_lang" value="en" maxlength="2"></div>
         <div class="row"><label data-i18n="model_size_label">Model size</label>
           <select class="select" data-setting="model_size" id="modelSizeSelect"></select></div>
         <div class="row check-row"><label data-i18n="crop_mode_label">Crop mode</label>
@@ -199,6 +215,28 @@
             <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
             <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
           </div></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="files_frame">Files &amp; Safety</legend>
+        <div class="row check-row"><label data-i18n="writing_response_label">Writing response to file</label>
+          <input class="check" type="checkbox" data-setting="writing_response_to_file"></div>
+        <div class="row check-row"><label data-i18n="editing_files_label">Editing files</label>
+          <input class="check" type="checkbox" data-setting="editing_files"></div>
+        <div class="row check-row"><label data-i18n="deleting_files_label">Deleting files</label>
+          <input class="check" type="checkbox" data-setting="deleting_files"></div>
+        <div class="row check-row"><label data-i18n="compress_text_label">Compress text</label>
+          <input class="check" type="checkbox" data-setting="compress_text"></div>
+        <div class="row check-row"><label data-i18n="anonymize_text_label">Anonymize text</label>
+          <input class="check" type="checkbox" data-setting="anonymize_text"></div>
+        <div class="row check-row"><label data-i18n="use_websites_label">Use websites</label>
+          <input class="check" type="checkbox" data-setting="use_websites"></div>
+        <div class="row top"><label data-i18n="websites_sources_label">Website sources</label>
+          <textarea class="textarea" rows="3" data-setting="websites_sources_information"
+                    placeholder="https://... (one per line)"></textarea></div>
+        <div class="row top"><label data-i18n="ignored_files_label">Ignored files</label>
+          <textarea class="textarea" rows="3" data-setting="ignored_files"
+                    placeholder="path/to/file (one per line)"></textarea></div>
       </fieldset>
 
       <fieldset class="fieldset">
@@ -236,14 +274,6 @@
           <input class="check" type="checkbox" data-setting="verbose"></div>
         <div class="row check-row"><label data-i18n="echo_label">Echo</label>
           <input class="check" type="checkbox" data-setting="echo"></div>
-        <div class="row"><label data-i18n="type_computer_label">Type computer</label>
-          <select class="select" data-setting="type_computer" id="typeComputerSelect"></select></div>
-        <div class="row check-row"><label data-i18n="proprietary_algorithms_label">Proprietary algorithms</label>
-          <input class="check" type="checkbox" data-setting="proprietary_algorithms"></div>
-        <div class="row check-row"><label data-i18n="writing_response_label">Writing response to file</label>
-          <input class="check" type="checkbox" data-setting="writing_response_to_file"></div>
-        <div class="row check-row"><label data-i18n="editing_files_label">Editing files</label>
-          <input class="check" type="checkbox" data-setting="editing_files"></div>
 
         <div class="master-box">
           <div class="master-title" data-i18n="master_title">Master password</div>

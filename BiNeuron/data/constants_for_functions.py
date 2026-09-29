@@ -9,12 +9,13 @@ PROJECT_NAME = "biNeuron"
 PROTOCOL_LST = ["http://", "https://"]
 GOOGLE_TRANSLATE_URL = "https://translate.google.ru/?sl=auto&tl=ru&op=translate"
 DEEPL_TRANSLATE_URL = "https://www.deepl.com/en/translator?mb"
-PREFERENCES_IN_AI_LIST = ["DeepSeek", "Qwen", "MiniMax", "CodeLlama",
-                          "Mellum", "Wizard", "StarCoder", "YI Coder",
-                          "CodeGemma", "Devstral", "Granite", "Codestral",
-                          "CodeGEEX4", "OpenCodeInterpreter", "Ornith 1.0",
-                          "Kat Dev", "Magistral Small", "Laguna-XS",
-                          "Breeze"]
+PREFERENCES_IN_AI_LIST = [
+    "DeepSeek", "Qwen", "MiniMax", "CodeLlama",
+    "Mellum", "Wizard", "StarCoder", "YI Coder",
+    "CodeGemma", "Devstral", "Granite", "Codestral",
+    "CodeGEEX4", "OpenCodeInterpreter", "Ornith 1.0",
+    "Kat Dev", "Magistral Small", "Laguna-XS",
+    "Breeze"]
 DETERMINANT_MODE_LIST = ["lite", "full", "auto"]
 TYPE_FORMATS = ["read_files", "unread_files"]
 TINY_TYPE = "tiny"
@@ -28,6 +29,8 @@ MAIN_FILENAME = "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
 NOT_UNREAD_FILES = "There are no unread files, all files have been read and have a context higher in the text."
 EASY_OCR = "easy_ocr"
 DEFINITION_OPTION_LIST = ["paddle_ocr", "easy_ocr", "deepseek_ocr"]
+MODELS_DIR_CONST = "./models"
+API_BASE_URL = "https://api.siliconflow.cn/v1/chat/completions"
 MAX_NEW_TOKENS = 256
 MAX_TIMEOUT = 1000
 POINTS_PER_CORE = 1000000

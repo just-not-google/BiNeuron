@@ -1,7 +1,7 @@
 from typing import List
 from BiNeuron.data.prompt_for_orchestrator_ai_models import PROMPT
 from BiNeuron.additional_functions.launching_ai_model_and_requesting import launching_ai_model_and_requesting
-from BiNeuron.data.constants_for_functions import MAIN_REPO_ID, MAIN_FILENAME
+from BiNeuron.data.constants_for_functions import MAIN_REPO_ID, MAIN_FILENAME, MODELS_DIR_CONST
 import logging
 
 
@@ -13,8 +13,7 @@ def orchestrator_ai_models(user_prompt: str,
                            n_ctx: int = 8192,
                            n_gpu_layers: int = 0,
                            verbose: bool = False,
-                           echo: bool = False,
-                           models_dir: str = "./models",
+                           models_dir: str = MODELS_DIR_CONST,
                            prefer_mirror: bool = True,
                            template_prompt: str = PROMPT) -> List[str]:
     """
@@ -25,7 +24,6 @@ def orchestrator_ai_models(user_prompt: str,
     :param n_ctx: Context window size.
     :param n_gpu_layers: Number of GPU layers.
     :param verbose: Whether to enable verbose output.
-    :param echo: Whether to echo input.
     :param models_dir: Directory to cache downloaded models.
     :param prefer_mirror: If True, forces using the mirror endpoint (hf-mirror.com).
     :param template_prompt: Template string with '{your_prompt_for_ai}' placeholder (for string messages).
@@ -41,7 +39,6 @@ def orchestrator_ai_models(user_prompt: str,
             n_gpu_layers=n_gpu_layers,
             template_prompt=template_prompt,
             verbose=verbose,
-            echo=echo,
             models_dir=models_dir,
             prefer_mirror=prefer_mirror
         )

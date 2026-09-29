@@ -3,8 +3,9 @@ import logging
 from typing import Literal, Optional
 import random
 from BiNeuron.data.constants_for_functions import (MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
-                                                    NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
-                                                    RETURN_TENSORS, MAX_NEW_TOKENS, DEEPSEEK_LOCAL_OCR)
+                                                   NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
+                                                   RETURN_TENSORS, MAX_NEW_TOKENS, DEEPSEEK_LOCAL_OCR,
+                                                   API_BASE_URL)
 from BiNeuron.additional_functions.checking_integer_for_condition import checking_int_and_float
 import torch
 from transformers import AutoProcessor, AutoModelForImageTextToText
@@ -22,7 +23,7 @@ class LaunchDeepSeekOCR:
                  model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE,
                  device: Literal["cpu", "cuda:0"] = DEVICE_OPTIONS[0],
                  crop_mode: bool = False,
-                 base_url: str = "https://api.siliconflow.cn/v1/chat/completions",
+                 base_url: str = API_BASE_URL,
                  api_key_for_deepseek_ocr: Optional[str] = None,
                  timeout_for_deepseek_ocr: Optional[int] = None,
                  max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS) -> None:

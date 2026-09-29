@@ -1,10 +1,11 @@
-from BiNeuron.additional_functions.getting_text_from_files import main_get_text_from_files
+from BiNeuron.additional_functions.getting_text_from_files import GettingTextFromFiles
 from BiNeuron.additional_functions.detect_programming_language import detect_programming_language
 from typing import List, Optional, Literal, Dict
 from BiNeuron.data.hint_words_for_defining_programming_languages import HINT_WORDS
 from BiNeuron.additional_functions.logic_orchestra.orchestrator_ai_models import orchestrator_ai_models
 from BiNeuron.data.constants_for_functions import (TYPE_DEFAULT, MARKER_FOR_FILES, MAIN_LANGUAGE,
-                                                    LITE_TYPE, TINY_TYPE, NUMBER_ATTEMPTS, EASY_OCR)
+                                                   LITE_TYPE, TINY_TYPE, NUMBER_ATTEMPTS, EASY_OCR,
+                                                   API_BASE_URL)
 import logging
 
 
@@ -30,11 +31,12 @@ class DefiningProgrammingLanguage:
                  paddle_lang: str = MAIN_LANGUAGE,
                  model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE,
                  crop_mode: bool = False,
-                 base_url: str = "https://api.siliconflow.cn/v1/chat/completions",
+                 base_url: str = API_BASE_URL,
                  api_key_for_deepseek_ocr: Optional[str] = None,
                  timeout_for_deepseek_ocr: Optional[int] = None,
                  max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS,
-                 prefer_mirror: bool = True) -> None:
+                 prefer_mirror: bool = True,
+                 anonymize_text: bool = False) -> None:
         """
         Initialize the language detector with all necessary configuration.
         :param translated_text: The already-translated user input.
@@ -60,6 +62,7 @@ class DefiningProgrammingLanguage:
         :param timeout_for_deepseek_ocr: Timeout for DeepSeek requests.
         :param max_rate_limit_retries: Number of retries on rate limit errors.
         :param prefer_mirror: If True, forces using the mirror endpoint (hf-mirror.com).
+        :param anonymize_text: If True, it anonymizes personal data in a general request to the AI.
         """
         logger.info("Initializing DefiningProgrammingLanguage")
         self.translated_text = translated_text
@@ -85,7 +88,8 @@ class DefiningProgrammingLanguage:
             "base_url": base_url,
             "api_key_for_deepseek_ocr": api_key_for_deepseek_ocr,
             "timeout_for_deepseek_ocr": timeout_for_deepseek_ocr,
-            "max_rate_limit_retries": max_rate_limit_retries
+            "max_rate_limit_retries": max_rate_limit_retries,
+            "anonymize_text": anonymize_text
         }
 
     def defining_programming_language_for_files(self) -> str:
@@ -103,8 +107,8 @@ class DefiningProgrammingLanguage:
         answer_file = []
 
         for file in self.additional_files:
-            value = main_get_text_from_files(file,
-                                             **self.settings_for_get_text)
+            value = GettingTextFromFiles(
+                file, **self.settings_for_get_text).main_get_text_from_files()
             key = f"{file} - {detect_programming_language(value)}"
             answer = f"{key}: {value}"
             answer_file.append(answer)
