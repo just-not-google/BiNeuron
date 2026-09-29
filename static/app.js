@@ -37,7 +37,6 @@ const TRANSLATIONS = {
     ocr_frame:"OCR", languages_list_label:"Languages list", use_gpu_label:"Use GPU for OCR",
     with_ocr_label:"With OCR", cloud_version_label:"Cloud version",
     definition_option_label:"OCR engine",
-    paddle_lang_label:"Paddle lang",
     model_size_label:"Model size",
     crop_mode_label:"Crop mode", base_url_label:"Base URL",
     api_key_deepseek_label:"DeepSeek API key", timeout_deepseek_label:"DeepSeek timeout",
@@ -133,7 +132,6 @@ const TRANSLATIONS = {
     ocr_frame:"OCR", languages_list_label:"Список языков", use_gpu_label:"GPU для OCR",
     with_ocr_label:"Использовать OCR", cloud_version_label:"Облачная версия",
     definition_option_label:"OCR-движок",
-    paddle_lang_label:"Язык Paddle",
     model_size_label:"Размер модели",
     crop_mode_label:"Режим обрезки", base_url_label:"Базовый URL",
     api_key_deepseek_label:"API-ключ DeepSeek", timeout_deepseek_label:"Таймаут DeepSeek",
@@ -231,7 +229,6 @@ const TRANSLATIONS = {
     ocr_frame:"OCR", languages_list_label:"语言列表", use_gpu_label:"使用 GPU 进行 OCR",
     with_ocr_label:"启用 OCR", cloud_version_label:"云版本",
     definition_option_label:"OCR 引擎",
-    paddle_lang_label:"Paddle 语言",
     model_size_label:"模型大小",
     crop_mode_label:"裁剪模式", base_url_label:"基础 URL",
     api_key_deepseek_label:"DeepSeek API 密钥",
@@ -473,7 +470,7 @@ async function loadMeta() {
   fillSelect("#modelSizeSelect", state.meta.model_sizes);
   fillSelect("#typeComputerSelect", ["auto"].concat(state.meta.types_power || []));
   fillSelect("#ocrOptionSelect",
-             state.meta.definition_options || ["paddle_ocr", "easy_ocr", "deepseek_ocr"]);
+             state.meta.definition_options || ["easy_ocr", "deepseek_ocr"]);
   if (state.meta.import_error) {
     const w = $("#importWarning");
     w.style.display = "block";

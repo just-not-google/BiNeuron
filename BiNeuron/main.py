@@ -229,7 +229,6 @@ class BiNeuron:
             **self.__settings_for_translator(),
             cloud_version=self.ocr_conf.cloud_version,
             definition_option=self.ocr_conf.definition_option,
-            paddle_lang=self.ocr_conf.paddle_lang,
             model_size=self.ocr_conf.model_size,
             crop_mode=self.ocr_conf.crop_mode,
             base_url=self.ocr_conf.base_url,

@@ -58,7 +58,7 @@ except Exception as e:
     TYPES_POWER = ["easy", "middle", "hard", "very_hard"]
     PREFERENCES_IN_AI_LIST = ["deepseek", "qwen", "llama"]
     DETERMINANT_MODE_LIST = ["lite", "full", "auto"]
-    DEFINITION_OPTION_LIST = ["paddle_ocr", "easy_ocr", "deepseek_ocr"]
+    DEFINITION_OPTION_LIST = ["easy_ocr", "deepseek_ocr"]
     ALL_MAIN_PROMPTS = {"default": "You are a helpful assistant."}
     BINEURON_CONFIGS_AVAILABLE = False
     ModelConfig = LLMConfig = PromptConfig = TranslationConfig = None
@@ -571,11 +571,8 @@ def build_bineuron_configs(data: dict) -> dict:
     )
 
     do = data.get("definition_option") or "easy_ocr"
-    if do not in ("paddle_ocr", "easy_ocr", "deepseek_ocr"):
+    if do not in ("easy_ocr", "deepseek_ocr"):
         do = "easy_ocr"
-    pl = (data.get("paddle_lang") or "en").strip().lower()
-    if len(pl) != 2:
-        pl = "en"
     ms = data.get("model_size") or "tiny"
     if ms not in ("tiny", "small", "base", "large", "gundam"):
         ms = "tiny"
@@ -588,7 +585,6 @@ def build_bineuron_configs(data: dict) -> dict:
         with_ocr=_to_bool(data.get("with_ocr")),
         cloud_version=_to_bool(data.get("cloud_version")),
         definition_option=do,
-        paddle_lang=pl,
         model_size=ms,
         crop_mode=_to_bool(data.get("crop_mode")),
         base_url=base_url,
@@ -667,7 +663,6 @@ def default_settings() -> dict:
         "with_ocr": False,
         "cloud_version": False,
         "definition_option": "easy_ocr",
-        "paddle_lang": "en",
         "model_size": "tiny",
         "crop_mode": False,
         "base_url": "https://api.siliconflow.cn/v1/chat/completions",

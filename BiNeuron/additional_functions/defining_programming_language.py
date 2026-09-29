@@ -27,8 +27,7 @@ class DefiningProgrammingLanguage:
                  your_key_for_deepl: str = "",
                  request_language: str = MAIN_LANGUAGE,
                  cloud_version: bool = False,
-                 definition_option: Literal["paddle_ocr", "easy_ocr", "deepseek_ocr"] = EASY_OCR,
-                 paddle_lang: str = MAIN_LANGUAGE,
+                 definition_option: Literal["easy_ocr", "deepseek_ocr"] = EASY_OCR,
                  model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE,
                  crop_mode: bool = False,
                  base_url: str = API_BASE_URL,
@@ -53,8 +52,7 @@ class DefiningProgrammingLanguage:
         :param your_key_for_deepl: API key for DeepL translation.
         :param request_language: Target language code for translation (default MAIN_LANGUAGE).
         :param cloud_version: If True, use cloud API for DeepSeek OCR.
-        :param definition_option: Choose an OCR system from 3 ready-made ones.
-        :param paddle_lang: The main language code is needed for Paddle OCR to determine.
+        :param definition_option: Choose an OCR system from 2 ready-made ones.
         :param model_size: DeepSeek model size.
         :param crop_mode: Enable crop mode for DeepSeek OCR.
         :param base_url: Base URL for DeepSeek cloud API.
@@ -82,7 +80,6 @@ class DefiningProgrammingLanguage:
             "request_language": request_language,
             "cloud_version": cloud_version,
             "definition_option": definition_option,
-            "paddle_lang": paddle_lang,
             "model_size": model_size,
             "crop_mode": crop_mode,
             "base_url": base_url,

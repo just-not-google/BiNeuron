@@ -141,8 +141,7 @@ class OCRConfig(BaseModel, extra="forbid"):
     :param use_gpu_for_ocr: Whether to use GPU for OCR.
     :param with_ocr: If True, includes image files for OCR processing.
     :param cloud_version: If True, uses cloud API for DeepSeek OCR.
-    :param definition_option: Choose an OCR system from 3 ready-made ones.
-    :param paddle_lang: The main language code is needed for Paddle OCR to determine.
+    :param definition_option: Choose an OCR system from 2 ready-made ones.
     :param model_size: Size of the DeepSeek model.
     :param crop_mode: If True, splits large images into fragments.
     :param base_url: API endpoint URL for DeepSeek cloud service.
@@ -155,9 +154,8 @@ class OCRConfig(BaseModel, extra="forbid"):
     with_ocr: bool = False
     cloud_version: bool = False
     definition_option: Literal[
-        "paddle_ocr", "easy_ocr", "deepseek_ocr"
+        "easy_ocr", "deepseek_ocr"
     ] = EASY_OCR,
-    paddle_lang: str = Field(default=MAIN_LANGUAGE, min_length=2, max_length=2)
     model_size: Literal[
         "tiny", "small", "base",
         "large", "gundam"

@@ -117,8 +117,7 @@ Parameters:
 * `use_gpu_for_ocr` (`bool`, default `False`): use GPU for OCR.
 * `with_ocr` (`bool`, default `False`): enable OCR for images when scanning virtual storage.
 * `cloud_version` (`bool`, default `False`): use DeepSeek cloud API instead of the local model.
-* `definition_option` (`Literal["paddle_ocr","easy_ocr","deepseek_ocr"]`, default `"easy_ocr"`): choose the OCR engine.
-* `paddle_lang` (`str`, default `"en"`): main language code for PaddleOCR.
+* `definition_option` (`Literal["easy_ocr","deepseek_ocr"]`, default `"easy_ocr"`): choose the OCR engine.
 * `model_size` (`Literal["tiny","small","base","large","gundam"]`, default `"tiny"`): size of the local DeepSeek OCR model.
 * `crop_mode` (`bool`, default `False`): split large images into four parts for detailed recognition.
 * `base_url` (`str`, default `"https://api.siliconflow.cn/v1/chat/completions"`): API endpoint for DeepSeek cloud.
@@ -142,6 +141,30 @@ Parameters:
 
 * `filter_for_swearing` (`bool`, default `False`): enable profanity filter, returning a predefined safe response if triggered.
 * `anonymize_text` (`bool`, default `False`): anonymize the user request with Microsoft Presidio before sending it to translation services or AI models.
+
+---
+
+## Example usage
+
+```python
+from BiNeuron import BiNeuron
+from BiNeuron.data.configs import (
+    ModelConfig, LLMConfig, PromptConfig, TranslationConfig,
+    LanguageDetectionConfig, ProxyConfig, OCRConfig, FileConfig, SafetyConfig,
+)
+
+agent = BiNeuron(
+    request="Write a Python function to compute factorial.",
+    additional_files=None,
+    model_conf=ModelConfig(preferences_in_ai="qwen", prefer_mirror=True),
+    llm_conf=LLMConfig(max_tokens=2048, temperature=0.2),
+    prompt_conf=PromptConfig(main_prompt_mode="default"),
+    translation_conf=TranslationConfig(request_language="en"),
+    safety_conf=SafetyConfig(filter_for_swearing=True),
+)
+
+print(agent.final_ai_request())
+```
 
 ---
 
@@ -273,8 +296,7 @@ BiNeuron(
 * `use_gpu_for_ocr` (`bool`, по умолчанию `False`): использовать GPU для OCR.
 * `with_ocr` (`bool`, по умолчанию `False`): OCR для изображений при сканировании виртуального хранилища.
 * `cloud_version` (`bool`, по умолчанию `False`): облачный API DeepSeek вместо локальной модели.
-* `definition_option` (`Literal["paddle_ocr","easy_ocr","deepseek_ocr"]`, по умолчанию `"easy_ocr"`): выбор OCR движка.
-* `paddle_lang` (`str`, по умолчанию `"en"`): основной язык для PaddleOCR.
+* `definition_option` (`Literal["easy_ocr","deepseek_ocr"]`, по умолчанию `"easy_ocr"`): выбор OCR движка.
 * `model_size` (`Literal["tiny","small","base","large","gundam"]`, по умолчанию `"tiny"`): размер локальной модели DeepSeek OCR.
 * `crop_mode` (`bool`, по умолчанию `False`): разбивать большие изображения на четыре части.
 * `base_url` (`str`, по умолчанию `"https://api.siliconflow.cn/v1/chat/completions"`): API эндпоинт облачного DeepSeek.
@@ -453,8 +475,7 @@ BiNeuron(
 * `use_gpu_for_ocr` (`bool`，默认 `False`)：对 OCR 使用 GPU。
 * `with_ocr` (`bool`，默认 `False`)：扫描虚拟存储时为图像启用 OCR。
 * `cloud_version` (`bool`，默认 `False`)：使用 DeepSeek 云 API 而不是本地模型。
-* `definition_option` (`Literal["paddle_ocr","easy_ocr","deepseek_ocr"]`，默认 `"easy_ocr"`)：选择 OCR 引擎。
-* `paddle_lang` (`str`，默认 `"en"`)：PaddleOCR 的主语言代码。
+* `definition_option` (`Literal["easy_ocr","deepseek_ocr"]`，默认 `"easy_ocr"`)：选择 OCR 引擎。
 * `model_size` (`Literal["tiny","small","base","large","gundam"]`，默认 `"tiny"`)：本地 DeepSeek OCR 模型的大小。
 * `crop_mode` (`bool`，默认 `False`)：将大图像分割成四部分以进行更详细的识别。
 * `base_url` (`str`，默认 `"https://api.siliconflow.cn/v1/chat/completions"`)：DeepSeek 云的 API 端点。

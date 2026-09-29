@@ -19,7 +19,6 @@ from epub2txt import epub2txt
 import mobi
 import shutil
 from fb2reader import fb2book
-from paddleocr import PaddleOCR
 from html2text import html2text
 from BiNeuron.additional_functions.checking_site_access import main_template_requests
 from BiNeuron.additional_functions.request_anonymization import request_anonymization
@@ -68,8 +67,7 @@ class GettingTextFromFiles:
                  max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS,
                  use_websites: bool = False,
                  websites_sources_information: Optional[List[str]] = None,
-                 paddle_lang: str = MAIN_LANGUAGE,
-                 definition_option: Literal["paddle_ocr", "easy_ocr", "deepseek_ocr"] = EASY_OCR,
+                 definition_option: Literal["easy_ocr", "deepseek_ocr"] = EASY_OCR,
                  anonymize_text: bool = False) -> None:
         """
         Initialization of parameters for getting text from files of different formats.
@@ -93,8 +91,7 @@ class GettingTextFromFiles:
         :param max_rate_limit_retries: Number of retry attempts on rate limit errors.
         :param use_websites: Use text from websites.
         :param websites_sources_information: The Internet sources from which the text is taken.
-        :param paddle_lang: The main language code is needed for Paddle OCR to determine.
-        :param definition_option: Choose an OCR system from 3 ready-made ones.
+        :param definition_option: Choose an OCR system from 2 ready-made ones.
         :param anonymize_text: If True, it anonymizes personal data in a general request to the AI.
         """
         logger.info("Initializing GettingTextFromFiles")
@@ -111,7 +108,6 @@ class GettingTextFromFiles:
         self.max_rate_limit_retries = max_rate_limit_retries
         self.use_websites = use_websites
         self.websites_sources_information = websites_sources_information
-        self.paddle_lang = paddle_lang
         self.definition_option = definition_option
         self.anonymize_text = anonymize_text
         self.translation_settings = {
@@ -278,23 +274,6 @@ class GettingTextFromFiles:
             logger.exception(f"Error when trying to read text from a photo using EasyOCR - {e}")
             return []
 
-    def _paddle_ocr_get_text(self) -> str:
-        """
-        Extracts text from an image using Paddle OCR.
-        :return: Text from the original photo as a string.
-        """
-        try:
-            logger.info("Challenge _paddle_ocr_get_text")
-            text = PaddleOCR(lang=self.paddle_lang,
-                             use_gpu=self.use_gpu,
-                             show_log=self.verbose)
-            logger.info("The information is obtained from the photo using Paddle OCR.")
-            return text.ocr(self.file_name,
-                            cls=True)
-        except Exception as e:
-            logger.exception(f"Error when trying to get text using Paddle OCR - {e}")
-            return ""
-
     @handle_errors
     def logic_for_ocr(self) -> str:
         """
@@ -309,7 +288,7 @@ class GettingTextFromFiles:
         device = DEVICE_OPTIONS[1] if self.use_gpu else DEVICE_OPTIONS[0]
         result = None
 
-        if self.definition_option == DEFINITION_OPTION_LIST[2]:
+        if self.definition_option == DEFINITION_OPTION_LIST[1]:
             result = LaunchDeepSeekOCR(
                 photo_path=self.file_name,
                 cloud_version=self.cloud_version,
@@ -321,15 +300,13 @@ class GettingTextFromFiles:
                 timeout_for_deepseek_ocr=self.timeout_for_deepseek_ocr,
                 max_rate_limit_retries=self.max_rate_limit_retries
             ).advanced_definition_text_from_image()
-        elif self.definition_option == DEFINITION_OPTION_LIST[1]:
+        elif self.definition_option == DEFINITION_OPTION_LIST[0]:
             result_list = self._easy_ocr_get_text()
 
             if not result_list:
                 return "EasyOCR couldn't read the text from the photo."
 
             result = "\n".join(result_list)
-        elif self.definition_option == DEFINITION_OPTION_LIST[0]:
-            result = self._paddle_ocr_get_text()
 
         final_text = f"<< {self.trans_text(result)} >> - {self.file_name}\n"
         logger.info("The text was obtained from a photo.")

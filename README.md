@@ -32,7 +32,7 @@ At its core, BiNeuron automatically identifies the programming language of a giv
 ### Comprehensive File Handling  
 * Extracts and translates text from common document formats: PDF, Word (DOCX), ODF, PowerPoint (PPTX), Excel (XLSX/XLS), EPUB, MOBI, and FB2.  
 * Processes source code files in nearly all text based formats, from plain text to configuration files.  
-* Integrates three interchangeable OCR engines (PaddleOCR, EasyOCR, and DeepSeek OCR) to read text from images, with optional GPU acceleration, language list selection, and automatic splitting of large images (`crop_mode`) for improved recognition.  
+* Integrates two interchangeable OCR engines (EasyOCR and DeepSeek OCR) to read text from images, with optional GPU acceleration, language list selection, and automatic splitting of large images (`crop_mode`) for improved recognition.  
 * Reads text from websites: the built in HTML scraper (`use_websites`) converts pages to clean Markdown and merges them into the request context.  
 
 ### AI Powered File Editing  
@@ -74,7 +74,7 @@ At its core, BiNeuron automatically identifies the programming language of a giv
 BiNeuron is engineered with a modular, separation of concerns design:  
 
 * **Core Engine** orchestrates the entire pipeline: request parsing, language detection, model selection, and response generation.  
-* **OCR Module** handles text extraction from images via three interchangeable engines: PaddleOCR, EasyOCR, and DeepSeek OCR (local HF Transformers or cloud API).  
+* **OCR Module** handles text extraction from images via two interchangeable engines: EasyOCR and DeepSeek OCR (local HF Transformers or cloud API).  
 * **Model Downloader** manages downloading and caching of Hugging Face models, with built in mirror and proxy support.  
 * **JSON Formatter Module** uses a lightweight model (e.g., Qwen2.5-Coder-1.5B) to convert the primary model’s response into a strict JSON object for file modifications.  
 * **File Editing Module** applies JSON based file changes (whole file replacements) with error handling and retry logic. Supports optional file deletion when `deleting_files=True`.  
@@ -122,7 +122,7 @@ The platform exposes nine independent configuration groups, all available from t
 | `TranslationConfig` | Determinant mode, DeepL, request language, offline Argos translation |
 | `LanguageDetectionConfig` | AI orchestrator vs. proprietary keyword matching |
 | `ProxyConfig` | Country, protocol, timeouts, retries, custom/GitHub proxy lists |
-| `OCRConfig` | Engine selection (Paddle/Easy/DeepSeek), languages, GPU, crop mode, cloud API key |
+| `OCRConfig` | Engine selection (Easy/DeepSeek), languages, GPU, crop mode, cloud API key |
 | `FileConfig` | Virtual storage, file editing, file deletion, website scraping, compression, ignored files |
 | `SafetyConfig` | Profanity filter, request anonymization |
 
@@ -145,7 +145,6 @@ The complete list of libraries used by BiNeuron (exactly as declared in `require
 | Library | Purpose | Repository |
 |---------|---------|-----------|
 | `easyocr` | OCR engine for text extraction from images | [github.com/JaidedAI/EasyOCR](https://github.com/JaidedAI/EasyOCR) |
-| `paddleocr` | PaddleOCR engine (fast, lightweight, multilingual) | [github.com/PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) |
 | `deepseek-ocr` | DeepSeek OCR client (local and cloud) | [pypi.org/project/deepseek-ocr](https://pypi.org/project/deepseek-ocr/) |
 
 ### Document Parsing  
@@ -237,7 +236,7 @@ BiNeuron представляет собой сложное программно
 ### Всесторонняя обработка файлов  
 * Извлекает и преобразует текст из распространённых форматов документов: PDF, Word (DOCX), ODF, PowerPoint (PPTX), Excel (XLSX/XLS), EPUB, MOBI и FB2.  
 * Обрабатывает файлы исходного кода почти во всех текстовых форматах, от обычного текста до конфигурационных файлов.  
-* Интегрирует три взаимозаменяемых OCR движка (PaddleOCR, EasyOCR и DeepSeek OCR) для чтения текста из изображений, с опциональным ускорением на GPU, выбором списка языков и автоматическим разбиением больших изображений (`crop_mode`) для улучшенного распознавания.  
+* Интегрирует два взаимозаменяемых OCR движка (EasyOCR и DeepSeek OCR) для чтения текста из изображений, с опциональным ускорением на GPU, выбором списка языков и автоматическим разбиением больших изображений (`crop_mode`) для улучшенного распознавания.  
 * Читает текст с сайтов: встроенный HTML скрапер (`use_websites`) конвертирует страницы в чистый Markdown и добавляет их в контекст запроса.  
 
 ### Изменение файлов с помощью ИИ  
@@ -279,7 +278,7 @@ BiNeuron представляет собой сложное программно
 BiNeuron спроектирован по модульному принципу с разделением ответственности:  
 
 * **Основной движок** управляет всем конвейером: разбор запроса, определение языка, выбор модели и генерация ответа.  
-* **Модуль OCR** обрабатывает извлечение текста из изображений через три взаимозаменяемых движка: PaddleOCR, EasyOCR и DeepSeek OCR (локальные HF Transformers или облачный API).  
+* **Модуль OCR** обрабатывает извлечение текста из изображений через два взаимозаменяемых движка: EasyOCR и DeepSeek OCR (локальные HF Transformers или облачный API).  
 * **Загрузчик моделей** управляет загрузкой и кэшированием моделей Hugging Face со встроенной поддержкой зеркал и прокси.  
 * **Модуль JSON форматтера** использует лёгкую модель (например, Qwen2.5-Coder-1.5B) для преобразования ответа основной модели в строгий JSON для изменения файлов.  
 * **Модуль редактирования файлов** применяет изменения на основе JSON (полная замена файлов) с обработкой ошибок и повторными попытками. Поддерживает опциональное удаление файлов при `deleting_files=True`.  
@@ -327,7 +326,7 @@ BiNeuron спроектирован по модульному принципу �
 | `TranslationConfig` | Режим определения, DeepL, язык запроса, офлайн перевод Argos |
 | `LanguageDetectionConfig` | ИИ оркестратор vs. проприетарный поиск по ключевым словам |
 | `ProxyConfig` | Страна, протокол, таймауты, повторы, свои/GitHub списки прокси |
-| `OCRConfig` | Движок (Paddle/Easy/DeepSeek), языки, GPU, crop mode, API ключ облака |
+| `OCRConfig` | Движок (Easy/DeepSeek), языки, GPU, crop mode, API ключ облака |
 | `FileConfig` | Виртуальное хранилище, редактирование/удаление файлов, скрапинг сайтов, сжатие, игнорируемые файлы |
 | `SafetyConfig` | Фильтр ненормативной лексики, анонимизация запроса |
 
@@ -350,7 +349,6 @@ BiNeuron спроектирован по модульному принципу �
 | Библиотека | Назначение | Репозиторий |
 |-----------|------------|------------|
 | `easyocr` | OCR движок для извлечения текста из изображений | [github.com/JaidedAI/EasyOCR](https://github.com/JaidedAI/EasyOCR) |
-| `paddleocr` | PaddleOCR (быстрый, лёгкий, мультиязычный) | [github.com/PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) |
 | `deepseek-ocr` | Клиент DeepSeek OCR (локально и в облаке) | [pypi.org/project/deepseek-ocr](https://pypi.org/project/deepseek-ocr/) |
 
 ### Парсинг документов  
@@ -442,7 +440,7 @@ BiNeuron 是一个先进的软件解决方案，旨在弥合人类意图与机�
 ### 全面的文件处理  
 * 从常见文档格式中提取和转换文本：PDF、Word（DOCX）、ODF、PowerPoint（PPTX）、Excel（XLSX/XLS）、EPUB、MOBI 和 FB2。  
 * 处理几乎所有基于文本格式的源代码文件，从纯文本到配置文件。  
-* 集成三个可互换的 OCR 引擎（PaddleOCR、EasyOCR 和 DeepSeek OCR）从图像中读取文本，支持可选的 GPU 加速、语言列表选择，并可自动分割大图像（`crop_mode`）以提高识别效果。  
+* 集成两个可互换的 OCR 引擎（EasyOCR 和 DeepSeek OCR）从图像中读取文本，支持可选的 GPU 加速、语言列表选择，并可自动分割大图像（`crop_mode`）以提高识别效果。  
 * 读取网站文本：内置 HTML 抓取器（`use_websites`）将页面转换为干净的 Markdown 并合并到请求上下文中。  
 
 ### AI 驱动的文件编辑  
@@ -484,7 +482,7 @@ BiNeuron 是一个先进的软件解决方案，旨在弥合人类意图与机�
 BiNeuron 采用模块化、关注点分离的设计：  
 
 * **核心引擎**负责编排整个流水线：请求解析、语言检测、模型选择和响应生成。  
-* **OCR 模块**通过三个可互换引擎处理图像中的文本提取：PaddleOCR、EasyOCR 和 DeepSeek OCR（本地 HF Transformers 或云端 API）。  
+* **OCR 模块**通过两个可互换引擎处理图像中的文本提取：EasyOCR 和 DeepSeek OCR（本地 HF Transformers 或云端 API）。  
 * **模型下载器**管理 Hugging Face 模型的下载和缓存，内置镜像和代理支持。  
 * **JSON 格式化器模块**使用轻量级模型（例如 Qwen2.5-Coder-1.5B）将主模型的响应转换为严格的 JSON 对象以用于文件修改。  
 * **文件编辑模块**应用基于 JSON 的文件更改（整文件替换），具备错误处理和重试逻辑。当 `deleting_files=True` 时支持可选的文件删除。  
@@ -532,7 +530,7 @@ BiNeuron 采用模块化、关注点分离的设计：
 | `TranslationConfig` | 检测模式、DeepL、请求语言、离线 Argos 翻译 |
 | `LanguageDetectionConfig` | AI 编排器 vs. 专有关键词匹配 |
 | `ProxyConfig` | 国家、协议、超时、重试、自定义/GitHub 代理列表 |
-| `OCRConfig` | 引擎选择（Paddle/Easy/DeepSeek）、语言、GPU、裁剪模式、云 API 密钥 |
+| `OCRConfig` | 引擎选择（Easy/DeepSeek）、语言、GPU、裁剪模式、云 API 密钥 |
 | `FileConfig` | 虚拟存储、文件编辑/删除、网站抓取、压缩、忽略文件 |
 | `SafetyConfig` | 脏话过滤、请求匿名化 |
 
@@ -555,7 +553,6 @@ BiNeuron 使用的完整库列表（与 `requirements.txt` 中声明的完全一
 | 库 | 用途 | 仓库 |
 |----|------|------|
 | `easyocr` | 从图像中提取文本的 OCR 引擎 | [github.com/JaidedAI/EasyOCR](https://github.com/JaidedAI/EasyOCR) |
-| `paddleocr` | PaddleOCR（快速、轻量、多语言） | [github.com/PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) |
 | `deepseek-ocr` | DeepSeek OCR 客户端（本地和云端） | [pypi.org/project/deepseek-ocr](https://pypi.org/project/deepseek-ocr/) |
 
 ### 文档解析  
