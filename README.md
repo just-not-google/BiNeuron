@@ -18,10 +18,10 @@
 
 ## Official Resources  
 
-WebSite: [https://just-not-google.github.io/BiNeuron/](https://just-not-google.github.io/BiNeuron/)  
+**WebSite**: [https://just-not-google.github.io/BiNeuron/](https://just-not-google.github.io/BiNeuron/)  
 This is the official BiNeuron website. There you can download the application for Windows, macOS, and Linux, as well as view the project overview and key features.
 
-Hub: [https://just-not-google.github.io/BiNeuron/website/hub.html](https://just-not-google.github.io/BiNeuron/website/hub.html)  
+**Hub**: [https://just-not-google.github.io/BiNeuron/website/hub.html](https://just-not-google.github.io/BiNeuron/website/hub.html)  
 This is a collection of ready-to-use configurations for local AI models. Each card contains a model, an optimal system prompt, tags, and a direct link to Hugging Face. Currently, the hub has 47 configurations, including specialized models for Python, Java, and other languages.  
 
 ## Intelligent Code Analysis and Generation Platform  
@@ -230,10 +230,10 @@ BiNeuron leverages a hand picked collection of open source code generation model
 
 ## Официальные ресурсы  
 
-ВебСайт: [https://just-not-google.github.io/BiNeuron/](https://just-not-google.github.io/BiNeuron/)  
+**ВебСайт**: [https://just-not-google.github.io/BiNeuron/](https://just-not-google.github.io/BiNeuron/)  
 Это официальный сайт BiNeuron. Там можно скачать приложение для Windows, macOS и Linux, а также посмотреть обзор проекта и ключевые возможности.   
 
-Хаб: [https://just-not-google.github.io/BiNeuron/website/hub.html](https://just-not-google.github.io/BiNeuron/website/hub.html)  
+**Хаб**: [https://just-not-google.github.io/BiNeuron/website/hub.html](https://just-not-google.github.io/BiNeuron/website/hub.html)  
 Это коллекция готовых конфигураций для локальных ИИ моделей. Каждая карточка содержит модель, оптимальный системный промпт, теги и прямую ссылку на Hugging Face. Сейчас в хабе 47 конфигураций, включая специализированные модели для Python, Java и других языков.  
 
 ## Интеллектуальная платформа для анализа и генерации кода
@@ -442,10 +442,10 @@ BiNeuron использует тщательно подобранную колл
 
 ## 官方资源  
 
-网站：[https://just-not-google.github.io/BiNeuron/](https://just-not-google.github.io/BiNeuron/)  
+**网站**：[https://just-not-google.github.io/BiNeuron/](https://just-not-google.github.io/BiNeuron/)  
 这是 BiNeuron 的官方网站。您可以在此下载适用于 Windows、macOS 和 Linux 的应用程序，并查看项目概述和主要功能。  
 
-枢纽：[https://just-not-google.github.io/BiNeuron/website/hub.html](https://just-not-google.github.io/BiNeuron/website/hub.html)  
+**枢纽**：[https://just-not-google.github.io/BiNeuron/website/hub.html](https://just-not-google.github.io/BiNeuron/website/hub.html)  
 这是本地 AI 模型的即用型配置集合。每张卡片包含一个模型、最佳系统提示、标签以及指向 Hugging Face 的直接链接。目前中心有 47 个配置，包括针对 Python、Java 和其他语言的专用模型。  
 
 ## 智能代码分析与生成平台
