@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BiNeuron</title>
+  <link rel="icon" type="image/x-icon" href="img_files/logo.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="img_files/logo.ico">
+  <link rel="apple-touch-icon" href="img_files/logo.ico">
 <link rel="stylesheet" href="website/style.css">
 <script>
 if ("scrollRestoration" in history) {
@@ -28,12 +31,12 @@ if ("scrollRestoration" in history) {
 
 <header class="nav">
   <div class="nav-inner">
-    <a href="/" class="logo">BiNeuron</a>
+    <a href="#" class="logo">BiNeuron</a>
     <nav class="nav-links">
       <a href="#about" data-i18n="nav_about">About</a>
       <a href="#download" data-i18n="nav_download">Download</a>
-      <a href="/hub/" data-i18n="nav_hub">Hub</a>
-      <a href="/docs/" data-i18n="nav_docs">Docs</a>
+      <a href="website/hub.html" data-i18n="nav_hub">Hub</a>
+      <a href="https://github.com/just-not-google/BiNeuron/tree/main/docs" data-i18n="nav_docs">Docs</a>
     </nav>
     <div class="nav-right">
       <div class="lang-switch">
@@ -318,8 +321,6 @@ buttons.forEach(function (btn) {
   else if (b === "zh") applyLang("zh");
   else applyLang("en");
 })();
-
-/* ---------- BINARY RAIN BACKGROUND ---------- */
 
 (function initBinary() {
   const canvas = document.getElementById("binaryCanvas");

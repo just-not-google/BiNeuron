@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BiNeuron</title>
+  <link rel="icon" type="image/x-icon" href="../img_files/logo.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="../img_files/logo.ico">
+  <link rel="apple-touch-icon" href="../img_files/logo.ico">
+<link rel="stylesheet" href="style.css">
+<script>
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+(function forceTop() {
+  if (window.location.hash) {
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+  window.scrollTo(0, 0);
+  window.addEventListener("load", function () {
+    window.scrollTo(0, 0);
+  });
+})();
+</script>
+</head>
+<body>
+
+<div class="bg-binary" aria-hidden="true">
+  <canvas id="binaryCanvas"></canvas>
+</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="logo">BiNeuron</a>
+    <nav class="nav-links">
+      <a href="../index.html#about" data-i18n="nav_about">About</a>
+      <a href="../index.html#download" data-i18n="nav_download">Download</a>
+      <a href="hub.html" class="active" data-i18n="nav_hub">Hub</a>
+      <a href="https://github.com/just-not-google/BiNeuron/tree/main/docs" data-i18n="nav_docs">Docs</a>
+    </nav>
+    <div class="nav-right">
+      <div class="lang-switch">
+        <button data-lang="en" class="active">EN</button>
+        <button data-lang="ru">RU</button>
+        <button data-lang="zh">中文</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="hub-head">
+    <div class="container">
+      <h1 class="hub-title" data-i18n="hub_title">Hub of configs for AI models</h1>
+      <p class="hub-sub" data-i18n="hub_sub">
+        A collection of ready to use configurations for local AI models. Each card pairs a model with its optimal system prompt, tag and a direct link to Hugging Face.
+      </p>
+    </div>
+  </section>
+
+  <section class="section hub-section">
+    <div class="container">
+
+      <div class="hub-toolbar">
+        <div class="hub-search">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="M20 20l-3.5-3.5"></path>
+          </svg>
+          <input type="search" id="hubSearch" autocomplete="off" spellcheck="false"
+                 data-i18n-placeholder="hub_search_ph"
+                 placeholder="Search models, prompts or tags...">
+        </div>
+
+        <select class="hub-select" id="hubScope" aria-label="Search scope" data-i18n-aria-label="hub_scope_label">
+          <option value="all" data-i18n="hub_scope_all">All fields</option>
+          <option value="name" data-i18n="hub_scope_name">Name only</option>
+          <option value="prompt" data-i18n="hub_scope_prompt">System prompt only</option>
+          <option value="tag" data-i18n="hub_scope_tag">Tag only</option>
+        </select>
+
+        <select class="hub-select" id="hubSort" aria-label="Sort order" data-i18n-aria-label="hub_sort_label">
+          <option value="new" data-i18n="hub_sort_new">Newest first</option>
+          <option value="old" data-i18n="hub_sort_old">Oldest first</option>
+        </select>
+
+        <button class="fav-toggle" id="hubFavToggle" type="button" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2.8l2.85 5.78 6.38.93-4.62 4.5 1.09 6.35L12 17.36l-5.7 3 1.09-6.35-4.62-4.5 6.38-.93z"/>
+          </svg>
+          <span data-i18n="hub_fav">Favorites</span>
+          <span class="fav-count" id="favCount">0</span>
+        </button>
+      </div>
+
+      <div class="hub-stats" id="hubCount"></div>
+
+      <div id="hubLoading" class="hub-loading">
+        <div class="hub-spinner"></div>
+        <p data-i18n="hub_loading">Loading configurations...</p>
+      </div>
+
+      <div class="hub-grid" id="hubGrid" hidden></div>
+
+      <div class="hub-empty" id="hubEmpty" hidden>
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <p id="hubEmptyText" data-i18n="hub_empty">Nothing found. Try a different query or clear the filters.</p>
+        <button class="btn btn-secondary" id="hubReset" type="button" data-i18n="hub_clear">Reset filters</button>
+      </div>
+
+      <nav class="hub-pagination" id="hubPagination" aria-label="Pagination" hidden></nav>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">BiNeuron</div>
+        <div class="footer-tag" data-i18n="footer_tag">Local AI for developers</div>
+      </div>
+      <div class="social-links">
+        <a href="https://github.com/just-not-google/BiNeuron" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+            <path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 016 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/>
+          </svg>
+        </a>
+        <a href="https://x.com/BiNeuron123" target="_blank" rel="noopener" aria-label="X (Twitter)" title="X (Twitter)">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+            <path d="M18.9 2h3.7l-8.1 9.2L24 22h-7.4l-5.8-7.6L3.9 22H.2l8.6-9.8L0 2h7.6l5.3 6.9L18.9 2zm-1.3 18h2L6.5 3.9H4.4L17.6 20z"/>
+          </svg>
+        </a>
+        <a href="https://www.youtube.com/@bineuron" target="_blank" rel="noopener" aria-label="YouTube" title="YouTube">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+            <path d="M23.5 6.5a3 3 0 00-2.1-2.1C19.5 3.9 12 3.9 12 3.9s-7.5 0-9.4.5A3 3 0 00.5 6.5C0 8.4 0 12 0 12s0 3.6.5 5.5a3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1c.5-1.9.5-5.5.5-5.5s0-3.6-.5-5.5zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-copy">© 2026 BiNeuron · MIT License</div>
+  </div>
+</footer>
+
+<script>
+const TRANSLATIONS = {
+  en: {
+    nav_about: "About",
+    nav_download: "Download",
+    nav_hub: "Hub",
+    nav_docs: "Docs",
+    footer_tag: "Local AI for developers",
+
+    hub_title: "Hub of configs for AI models",
+    hub_sub: "A collection of ready to use configurations for local AI models. Each card pairs a model with its optimal system prompt, tag and a direct link to Hugging Face.",
+    hub_search_ph: "Search models, prompts or tags...",
+    hub_scope_label: "Search scope",
+    hub_scope_all: "All fields",
+    hub_scope_name: "Name only",
+    hub_scope_prompt: "System prompt only",
+    hub_scope_tag: "Tag only",
+    hub_sort_label: "Sort order",
+    hub_sort_new: "Newest first",
+    hub_sort_old: "Oldest first",
+    hub_fav: "Favorites",
+    hub_prompt_label: "System prompt",
+    hub_copy: "Copy prompt",
+    hub_copied: "Copied",
+    hub_empty: "Nothing found. Try a different query or clear the filters.",
+    hub_clear: "Reset filters",
+    hub_count: "{n} configs",
+    hub_loading: "Loading configurations...",
+    hub_error: "Failed to load data.json. Make sure the file exists next to hub.html.",
+    hub_retry: "Retry",
+    hub_page: "Page {p} of {t}",
+    hub_prev: "Prev",
+    hub_next: "Next"
+  },
+  ru: {
+    nav_about: "О проекте",
+    nav_download: "Скачать",
+    nav_hub: "Хаб",
+    nav_docs: "Документация",
+    footer_tag: "Локальный ИИ для разработчиков",
+
+    hub_title: "Хаб конфигов для ИИ-моделей",
+    hub_sub: "Коллекция готовых конфигураций для локальных ИИ-моделей. В каждой карточке — модель, оптимальный системный промпт, тег и прямая ссылка на Hugging Face.",
+    hub_search_ph: "Поиск по моделям, промптам и тегам...",
+    hub_scope_label: "Область поиска",
+    hub_scope_all: "Все поля",
+    hub_scope_name: "Только название",
+    hub_scope_prompt: "Только системный промпт",
+    hub_scope_tag: "Только тег",
+    hub_sort_label: "Сортировка",
+    hub_sort_new: "Сначала новые",
+    hub_sort_old: "Сначала старые",
+    hub_fav: "Избранное",
+    hub_prompt_label: "Системный промпт",
+    hub_copy: "Скопировать промпт",
+    hub_copied: "Скопировано",
+    hub_empty: "Ничего не найдено. Измените запрос или сбросьте фильтры.",
+    hub_clear: "Сбросить фильтры",
+    hub_count: "{n} конфигов",
+    hub_loading: "Загрузка конфигураций...",
+    hub_error: "Не удалось загрузить data.json. Убедитесь, что файл лежит рядом с hub.html.",
+    hub_retry: "Повторить",
+    hub_page: "Страница {p} из {t}",
+    hub_prev: "Назад",
+    hub_next: "Вперёд"
+  },
+  zh: {
+    nav_about: "关于",
+    nav_download: "下载",
+    nav_hub: "中心",
+    nav_docs: "文档",
+    footer_tag: "面向开发者的本地 AI",
+
+    hub_title: "AI 模型配置中心",
+    hub_sub: "为本地 AI 模型准备的即用配置合集。每张卡片包含模型、最优系统提示词、标签以及 Hugging Face 直达链接。",
+    hub_search_ph: "搜索模型、提示词或标签…",
+    hub_scope_label: "搜索范围",
+    hub_scope_all: "全部字段",
+    hub_scope_name: "仅名称",
+    hub_scope_prompt: "仅系统提示词",
+    hub_scope_tag: "仅标签",
+    hub_sort_label: "排序方式",
+    hub_sort_new: "最新优先",
+    hub_sort_old: "最早优先",
+    hub_fav: "收藏",
+    hub_prompt_label: "系统提示词",
+    hub_copy: "复制提示词",
+    hub_copied: "已复制",
+    hub_empty: "没有找到结果，请更换关键词或重置筛选。",
+    hub_clear: "重置筛选",
+    hub_count: "{n} 个配置",
+    hub_loading: "正在加载配置…",
+    hub_error: "无法加载 data.json，请确认该文件与 hub.html 位于同一目录。",
+    hub_retry: "重试",
+    hub_page: "第 {p} / {t} 页",
+    hub_prev: "上一页",
+    hub_next: "下一页"
+  }
+};
+
+const DATA_URL = "data.json";
+const FAV_KEY = "bineuron_hub_favs";
+const PER_PAGE = 30;
+
+const state = {
+  lang: "en",
+  q: "",
+  scope: "all",
+  sort: "new",
+  favOnly: false,
+  page: 1,
+  dataError: false
+};
+
+let dict = TRANSLATIONS.en;
+let CONFIGS = [];
+let favs = new Set();
+
+try {
+  const raw = localStorage.getItem(FAV_KEY);
+  if (raw) favs = new Set(JSON.parse(raw));
+} catch (e) {}
+
+function t(key) {
+  return dict[key] || TRANSLATIONS.en[key] || key;
+}
+
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+
+function saveFavs() {
+  try { localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(favs))); } catch (e) {}
+}
+
+function applyLang(lang) {
+  dict = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  state.lang = lang;
+
+  document.documentElement.lang = lang;
+
+  document.querySelectorAll("[data-i18n]").forEach(function (el) {
+    const key = el.dataset.i18n;
+    if (dict[key]) el.textContent = dict[key];
+  });
+
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+    const key = el.dataset.i18nPlaceholder;
+    if (dict[key]) el.setAttribute("placeholder", dict[key]);
+  });
+
+  document.querySelectorAll("[data-i18n-aria-label]").forEach(function (el) {
+    const key = el.dataset.i18nAriaLabel;
+    if (dict[key]) el.setAttribute("aria-label", dict[key]);
+  });
+
+  document.querySelectorAll(".lang-switch button").forEach(function (btn) {
+    btn.classList.toggle("active", btn.dataset.lang === lang);
+  });
+
+  try { localStorage.setItem("bineuron_lang", lang); } catch (e) {}
+}
+
+const grid = document.getElementById("hubGrid");
+const emptyEl = document.getElementById("hubEmpty");
+const emptyText = document.getElementById("hubEmptyText");
+const loadingEl = document.getElementById("hubLoading");
+const countEl = document.getElementById("hubCount");
+const favCountEl = document.getElementById("favCount");
+const favToggle = document.getElementById("hubFavToggle");
+const paginationEl = document.getElementById("hubPagination");
+
+function showLoading() {
+  state.dataError = false;
+  loadingEl.hidden = false;
+  grid.hidden = true;
+  emptyEl.hidden = true;
+  paginationEl.hidden = true;
+  countEl.textContent = "";
+
+  // ensure loading text is translated
+  loadingEl.querySelectorAll("[data-i18n]").forEach(function (el) {
+    el.textContent = t(el.dataset.i18n);
+  });
+}
+
+function showError() {
+  state.dataError = true;
+  loadingEl.hidden = true;
+  grid.hidden = true;
+  paginationEl.hidden = true;
+  emptyEl.hidden = false;
+
+  emptyText.textContent = t("hub_error");
+
+  const resetBtn = document.getElementById("hubReset");
+  if (resetBtn) {
+    resetBtn.textContent = t("hub_retry");
+    resetBtn.dataset.mode = "retry";
+    resetBtn.dataset.i18n = "hub_retry";
+  }
+}
+
+function resetEmptyButton() {
+  const resetBtn = document.getElementById("hubReset");
+  if (!resetBtn) return;
+  resetBtn.textContent = t("hub_clear");
+  resetBtn.dataset.mode = "reset";
+  resetBtn.dataset.i18n = "hub_clear";
+}
+
+function loadData() {
+  showLoading();
+
+  fetch(DATA_URL, { cache: "no-cache" })
+    .then(function (res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    })
+    .then(function (data) {
+      if (!Array.isArray(data)) throw new Error("data.json must be an array");
+
+      CONFIGS = data.filter(function (c) {
+        return c && c.model && c.url && c.tag && c.prompt;
+      });
+
+      loadingEl.hidden = true;
+      grid.hidden = false;
+      state.page = 1;
+      render();
+    })
+    .catch(function (err) {
+      console.error("Hub load error:", err);
+      showError();
+    });
+}
+
+function getFilteredSorted() {
+  const q = state.q.trim().toLowerCase();
+
+  let list = CONFIGS.filter(function (c) {
+    if (state.favOnly && !favs.has(c.model)) return false;
+    if (!q) return true;
+
+    const name = c.model.toLowerCase();
+    const prompt = c.prompt.toLowerCase();
+    const tag = c.tag.toLowerCase();
+
+    if (state.scope === "name") return name.indexOf(q) !== -1;
+    if (state.scope === "prompt") return prompt.indexOf(q) !== -1;
+    if (state.scope === "tag") return tag.indexOf(q) !== -1;
+
+    return name.indexOf(q) !== -1 || prompt.indexOf(q) !== -1 || tag.indexOf(q) !== -1;
+  });
+
+  if (state.sort === "old") list = list.slice().reverse();
+
+  return list;
+}
+
+function pageRange(current, total) {
+  if (total <= 7) {
+    const arr = [];
+    for (let i = 1; i <= total; i++) arr.push(i);
+    return arr;
+  }
+
+  const delta = 1;
+  const raw = [];
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
+      raw.push(i);
+    }
+  }
+
+  const out = [];
+  let prev = 0;
+  raw.forEach(function (i) {
+    if (prev) {
+      if (i - prev === 2) out.push(prev + 1);
+      else if (i - prev > 2) out.push("...");
+    }
+    out.push(i);
+    prev = i;
+  });
+
+  return out;
+}
+
+function cardHTML(c) {
+  const isFav = favs.has(c.model);
+  const key = esc(c.model);
+
+  return '' +
+    '<article class="hub-card' + (isFav ? ' is-fav' : '') + '" data-key="' + key + '">' +
+
+      '<div class="hub-card-head">' +
+        '<a class="hub-model" href="' + esc(c.url) + '" target="_blank" rel="noopener">' +
+          '<span>' + esc(c.model) + '</span>' +
+          '<svg class="hub-ext" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>' +
+            '<path d="M15 3h6v6"/>' +
+            '<path d="M10 14 21 3"/>' +
+          '</svg>' +
+        '</a>' +
+
+        '<button class="fav-btn' + (isFav ? ' active' : '') + '" type="button" data-action="fav" ' +
+          'aria-pressed="' + isFav + '" aria-label="' + esc(t("hub_fav")) + '" title="' + esc(t("hub_fav")) + '">' +
+          '<svg viewBox="0 0 24 24" width="16" height="16" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M12 2.8l2.85 5.78 6.38.93-4.62 4.5 1.09 6.35L12 17.36l-5.7 3 1.09-6.35-4.62-4.5 6.38-.93z"/>' +
+          '</svg>' +
+        '</button>' +
+      '</div>' +
+
+      '<div class="hub-meta">' +
+        '<span class="hub-tag">' + esc(c.tag) + '</span>' +
+      '</div>' +
+
+      '<div class="hub-prompt-label">' + esc(t("hub_prompt_label")) + '</div>' +
+      '<pre class="hub-prompt">' + esc(c.prompt) + '</pre>' +
+
+      '<button class="hub-copy" type="button" data-action="copy">' + esc(t("hub_copy")) + '</button>' +
+    '</article>';
+}
+
+function renderPagination(totalItems) {
+  const totalPages = Math.max(1, Math.ceil(totalItems / PER_PAGE));
+
+  if (state.page > totalPages) state.page = totalPages;
+  if (state.page < 1) state.page = 1;
+
+  if (totalItems === 0) {
+    paginationEl.hidden = true;
+    paginationEl.innerHTML = "";
+    return;
+  }
+
+  paginationEl.hidden = false;
+
+  const prevDisabled = state.page <= 1;
+  const nextDisabled = state.page >= totalPages;
+
+  let html = '';
+
+  html += '<button class="hub-page-btn" data-page="prev"' + (prevDisabled ? " disabled" : "") + '>' +
+            esc(t("hub_prev")) +
+          '</button>';
+
+  pageRange(state.page, totalPages).forEach(function (p) {
+    if (p === "...") {
+      html += '<span class="hub-page-btn dots">…</span>';
+    } else {
+      html += '<button class="hub-page-btn' + (p === state.page ? " active" : "") + '" data-page="' + p + '">' + p + '</button>';
+    }
+  });
+
+  html += '<button class="hub-page-btn" data-page="next"' + (nextDisabled ? " disabled" : "") + '>' +
+            esc(t("hub_next")) +
+          '</button>';
+
+  html += '<span class="hub-page-info">' +
+            esc(t("hub_page").replace("{p}", state.page).replace("{t}", totalPages)) +
+          '</span>';
+
+  paginationEl.innerHTML = html;
+}
+
+function render() {
+  if (state.dataError) {
+    showError();
+    return;
+  }
+
+  resetEmptyButton();
+
+  const list = getFilteredSorted();
+  const total = list.length;
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+
+  if (state.page > totalPages) state.page = totalPages;
+  if (state.page < 1) state.page = 1;
+
+  const start = (state.page - 1) * PER_PAGE;
+  const pageItems = list.slice(start, start + PER_PAGE);
+
+  grid.innerHTML = pageItems.map(cardHTML).join("");
+
+  const hasResults = total > 0;
+  grid.hidden = !hasResults;
+  emptyEl.hidden = hasResults;
+  loadingEl.hidden = true;
+
+  if (!hasResults) {
+    emptyText.textContent = t("hub_empty");
+  }
+
+  countEl.textContent = t("hub_count").replace("{n}", total);
+  favCountEl.textContent = favs.size;
+  favToggle.classList.toggle("active", state.favOnly);
+  favToggle.setAttribute("aria-pressed", String(state.favOnly));
+
+  renderPagination(total);
+}
+
+function toggleFav(key) {
+  if (favs.has(key)) favs.delete(key);
+  else favs.add(key);
+  saveFavs();
+  render();
+}
+
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text).then(function () { return true; })
+      .catch(function () { return legacyCopy(text); });
+  }
+  return Promise.resolve(legacyCopy(text));
+}
+
+function legacyCopy(text) {
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-1000px";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+grid.addEventListener("click", function (e) {
+  const card = e.target.closest(".hub-card");
+  if (!card) return;
+
+  const key = card.dataset.key;
+
+  if (e.target.closest('[data-action="fav"]')) {
+    toggleFav(key);
+    return;
+  }
+
+  const copyBtn = e.target.closest('[data-action="copy"]');
+  if (copyBtn) {
+    const cfg = CONFIGS.filter(function (c) { return c.model === key; })[0];
+    if (!cfg) return;
+
+    copyText(cfg.prompt).then(function (ok) {
+      if (!ok) return;
+      copyBtn.classList.add("copied");
+      copyBtn.textContent = t("hub_copied");
+      setTimeout(function () {
+        copyBtn.classList.remove("copied");
+        copyBtn.textContent = t("hub_copy");
+      }, 1400);
+    });
+  }
+});
+
+paginationEl.addEventListener("click", function (e) {
+  const btn = e.target.closest(".hub-page-btn");
+  if (!btn || btn.disabled || btn.classList.contains("dots")) return;
+
+  const val = btn.dataset.page;
+  if (val === "prev") state.page = Math.max(1, state.page - 1);
+  else if (val === "next") state.page = state.page + 1;
+  else state.page = parseInt(val, 10);
+
+  render();
+
+  const toolbar = document.querySelector(".hub-toolbar");
+  if (toolbar) {
+    const y = toolbar.getBoundingClientRect().top + window.pageYOffset - 90;
+    window.scrollTo({ top: y, behavior: "smooth" });
+  }
+});
+
+const searchInput = document.getElementById("hubSearch");
+const scopeSel = document.getElementById("hubScope");
+const sortSel = document.getElementById("hubSort");
+
+searchInput.addEventListener("input", function (e) {
+  state.q = e.target.value;
+  state.page = 1;
+  render();
+});
+
+scopeSel.addEventListener("change", function (e) {
+  state.scope = e.target.value;
+  state.page = 1;
+  render();
+});
+
+sortSel.addEventListener("change", function (e) {
+  state.sort = e.target.value;
+  state.page = 1;
+  render();
+});
+
+favToggle.addEventListener("click", function () {
+  state.favOnly = !state.favOnly;
+  state.page = 1;
+  render();
+});
+
+emptyEl.addEventListener("click", function (e) {
+  const btn = e.target.closest("#hubReset");
+  if (!btn) return;
+
+  // If we're in error mode, retry loading the data instead
+  if (btn.dataset.mode === "retry") {
+    loadData();
+    return;
+  }
+
+  state.q = "";
+  state.scope = "all";
+  state.sort = "new";
+  state.favOnly = false;
+  state.page = 1;
+
+  searchInput.value = "";
+  scopeSel.value = "all";
+  sortSel.value = "new";
+
+  render();
+});
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "/" && document.activeElement !== searchInput) {
+    e.preventDefault();
+    searchInput.focus();
+    searchInput.select();
+  }
+});
+
+document.querySelectorAll(".lang-switch button").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    applyLang(btn.dataset.lang);
+    render();
+  });
+});
+
+(function initLang() {
+  let saved = null;
+  try { saved = localStorage.getItem("bineuron_lang"); } catch (e) {}
+
+  if (saved && TRANSLATIONS[saved]) applyLang(saved);
+  else {
+    const b = (navigator.language || "en").slice(0, 2).toLowerCase();
+    if (b === "ru") applyLang("ru");
+    else if (b === "zh") applyLang("zh");
+    else applyLang("en");
+  }
+})();
+
+loadData();
+
+(function initBinary() {
+  const canvas = document.getElementById("binaryCanvas");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  let width, height, columns, drops;
+  const fontSize = 16;
+  const chars = ["0", "1"];
+
+  function setup() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    columns = Math.floor(width / fontSize);
+    drops = new Array(columns).fill(0).map(function () {
+      return Math.random() * -50;
+    });
+  }
+
+  function draw() {
+    ctx.fillStyle = "rgba(13, 16, 20, 0.08)";
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.font = fontSize + "px monospace";
+    for (let i = 0; i < drops.length; i++) {
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      const x = i * fontSize;
+      const y = drops[i] * fontSize;
+
+      const fade = 1 - (y / height);
+      const alpha = Math.max(0.05, Math.min(0.5, fade * 0.6));
+
+      ctx.fillStyle = "rgba(74, 158, 255, " + alpha + ")";
+      ctx.fillText(char, x, y);
+
+      if (y > height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+
+  setup();
+  window.addEventListener("resize", setup);
+
+  let last = 0;
+  function loop(t) {
+    if (t - last > 55) {
+      draw();
+      last = t;
+    }
+    requestAnimationFrame(loop);
+  }
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) draw();
+  else requestAnimationFrame(loop);
+})();
+</script>
+
+</body>
+</html>
