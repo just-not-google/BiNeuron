@@ -1,0 +1,1 @@
+PROMPT = "Extract all visible text from the image. Return only the text, no explanations."

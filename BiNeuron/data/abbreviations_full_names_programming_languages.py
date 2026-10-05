@@ -1,0 +1,20 @@
+LANG_SHORTCUT_TO_FULL = {
+    "c": "c",
+    "cbl": "cobol",
+    "cpp": "cpp",
+    "cs": "csharp",
+    "dart": "dart",
+    "go": "go",
+    "java": "java",
+    "js": "javascript",
+    "kt": "kotlin",
+    "py": "python",
+    "r": "r",
+    "rb": "ruby",
+    "rs": "rust",
+    "sh": "shell",
+    "sol": "solidity",
+    "sql": "sql",
+    "swift": "swift",
+    "ts": "typescript"
+}

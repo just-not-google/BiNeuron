@@ -1,0 +1,455 @@
+<details>
+<summary>🇬🇧 English</summary>
+
+# Guidelines for Crafting Effective Prompts for AI
+
+To obtain the most accurate and relevant responses from AI models, it is essential to structure your prompts thoughtfully. This guide outlines proven practices and lists all file formats that AI systems can accept, helping you get the best possible results.
+
+---
+
+## Core Principles
+
+### 1. Use English When Possible
+Most advanced AI models are trained primarily on English-language data. Writing your prompt in English significantly improves recognition, understanding, and response quality. If English is not your native language, simple and clear English is still preferable to other languages in most cases.
+
+### 2. Specify Programming Languages Explicitly
+If your task involves code, always mention the exact programming language(s) you need. For example, state "Python 3.11" or "JavaScript (ES2022)" rather than just "code". This activates specialised AI sub‑systems tuned for those languages, resulting in more syntactically correct and idiomatic solutions.
+
+### 3. Provide Detailed Task Descriptions
+Vague requests yield vague answers. Include:
+- Input and output specifications (data types, formats, examples)
+- Edge cases or constraints (e.g., performance, memory limits)
+- Desired behaviour under error conditions
+- Any relevant business logic or domain context
+
+**Instead of:**  
+> *“Write a function to sort an array.”*
+
+**Prefer:**  
+> *“Write a Python function that takes a list of integers and returns a new list sorted in ascending order using the quicksort algorithm. Include type hints, docstrings, and handle empty lists gracefully.”*
+
+### 4. List Your Technology Stack
+If you know which frameworks, libraries, or tools will be used, state their full names and versions. For instance:
+- “Use Django 4.2 with PostgreSQL 15”
+- “Implement using React 18 and TypeScript 5”
+- “Run on Node.js 20 with Express 4”
+
+This allows the AI to tailor the code to your ecosystem, avoiding incompatible APIs or outdated patterns.
+
+---
+
+## Supported File Formats for Processing
+
+AI can accept and process files in the following formats. They are grouped into three categories for clarity.
+
+> **Note on extensions:** the lists below reflect the extensions actually recognised by the runtime. Some code‑file extensions that are not listed in the primary router (e.g. exotic or framework‑specific ones) are still opened as plain text, but they are **not** considered first‑class supported formats.
+
+### Programming Language Files
+
+| Extension(s) | Language / Purpose |
+|--------------|-------------------|
+| `.py`, `.pyw`, `.pyi`, `.pyx` | Python |
+| `.java` | Java |
+| `.c`, `.h` | C |
+| `.cpp`, `.cc`, `.cxx`, `.c++`, `.hpp`, `.hh`, `.hxx`, `.ipp` | C++ |
+| `.cs` | C# |
+| `.js`, `.mjs`, `.cjs` | JavaScript |
+| `.ts`, `.tsx` | TypeScript |
+| `.go` | Go |
+| `.rs` | Rust |
+| `.swift` | Swift |
+| `.kt`, `.kts` | Kotlin |
+| `.php`, `.php3`, `.php4`, `.php5`, `.phtml` | PHP |
+| `.rb`, `.rbw`, `.rake`, `.gemspec` | Ruby |
+| `.dart` | Dart |
+| `.r`, `.R`, `.Rmd` | R |
+| `.jl` | Julia |
+| `.lua` | Lua |
+| `.sql` | SQL |
+| `.scala`, `.sc` | Scala |
+| `.pl`, `.pm`, `.t` | Perl |
+| `.hs`, `.lhs` | Haskell |
+| `.erl`, `.hrl` | Erlang |
+| `.ex`, `.exs` | Elixir |
+| `.clj`, `.cljs`, `.cljc` | Clojure |
+| `.groovy`, `.gvy` | Groovy |
+| `.vb`, `.vbs` | Visual Basic |
+| `.sh`, `.bash`, `.zsh`, `.ksh`, `.csh`, `.fish` | Shell scripts |
+| `.ps1`, `.psm1`, `.psd1` | PowerShell |
+| `.bat`, `.cmd` | Windows batch files |
+
+### Text, Configuration, and Markup Formats
+
+| Extension(s) | Purpose |
+|--------------|---------|
+| `.txt`, `.log` | Plain text and log files |
+| `.md`, `.markdown`, `.rst` | Documentation (Markdown, reStructuredText) |
+| `.tex`, `.ltx`, `.bib` | TeX / LaTeX documents and bibliographies |
+| `.csv`, `.tsv` | Tabular data (comma‑/tab‑separated) |
+| `.json`, `.jsonl` | JSON and JSON Lines |
+| `.xml`, `.xsd`, `.xsl`, `.xslt` | XML and related schemas/transformations |
+| `.yaml`, `.yml` | YAML |
+| `.toml` | TOML |
+| `.ini`, `.cfg`, `.conf`, `.properties` | Configuration files |
+| `.env` | Environment variable files |
+| `.editorconfig` | Editor configuration |
+| `.gitignore` | Git ignore lists |
+| `.dockerfile` | Dockerfile |
+| `.makefile` | Makefile |
+| `.cmake`, `.cmakelists.txt` | CMake build files |
+| `.html`, `.htm`, `.xhtml` | HTML / XHTML |
+| `.css`, `.scss`, `.sass`, `.less` | Stylesheets |
+| `.rss`, `.atom` | Web feeds |
+
+### Binary and Document Formats
+
+All formats in this section are **actually parsed** by the runtime (each has a dedicated extractor in `getting_text_from_files.py`).
+
+| Extension(s) | Type | Extractor |
+|--------------|------|-----------|
+| `.pdf` | Portable Document Format | PyMuPDF |
+| `.docx` | Microsoft Word (Office Open XML) | `docx2txt` |
+| `.word` | Legacy alias — treated as plain text | plain read |
+| `.odf` | OpenDocument Format | `odfdo` |
+| `.pptx` | PowerPoint presentation | `pptx2txt2` |
+| `.xlsx`, `.xls` | Microsoft Excel spreadsheets | MarkItDown |
+| `.epub` | EPUB e-book | `epub2txt` |
+| `.mobi` | Mobipocket e-book | `mobi` |
+| `.fb2` | FictionBook 2 | `fb2reader` |
+
+### Image Formats (OCR)
+
+Images are processed through the OCR pipeline (`EasyOCR` or `DeepSeek OCR`, depending on settings).
+
+| Extension(s) | Type |
+|--------------|------|
+| `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.webp`, `.tiff`, `.tif` | Raster images |
+
+---
+
+## Example of a Well‑Structured Prompt
+
+**Weak prompt:**  
+> *“Write code for a web scraper.”*
+
+**Strong prompt:**  
+> *“Develop a Python 3.11 script using BeautifulSoup 4 and Requests 2.31 that scrapes product names and prices from https://example.com/products. The script should accept a URL as a command‑line argument, output results as a CSV file with columns ‘name’ and ‘price’, and handle pagination by following ‘Next’ links. Include error handling for network timeouts and missing elements.”*
+
+This prompt is specific, actionable, and includes all necessary context.
+
+---
+
+## Final Tips
+
+- **Be concise but complete** – avoid irrelevant background, but do not omit crucial details.
+- **Use bullet points** for complex requirements – they improve readability.
+- **Specify output format** – tell the AI whether you need code only, code with comments, or a full explanation.
+- **Mention constraints** – e.g., “must run on Windows”, “must be compatible with Python 3.8+”, “must not use external libraries”.
+
+By following these guidelines, you will harness the full potential of AI assistants, saving time and receiving high‑quality, tailored solutions.
+
+</details>
+
+<details>
+<summary>🇷🇺 Русский</summary>
+
+# Рекомендации по составлению эффективных запросов для ИИ
+
+Чтобы получать от ИИ-моделей наиболее точные и релевантные ответы, важно продуманно структурировать свои запросы. Данное руководство описывает проверенные практики и перечисляет все форматы файлов, которые могут обрабатывать ИИ-системы, помогая вам добиваться наилучших результатов.
+
+---
+
+## Основные принципы
+
+### 1. По возможности используйте английский язык
+Большинство современных ИИ-моделей обучаются преимущественно на англоязычных данных. Запрос на английском языке значительно улучшает распознавание, понимание и качество ответа. Если английский не является вашим родным языком, простой и понятный английский всё равно предпочтительнее других языков в большинстве случаев.
+
+### 2. Чётко указывайте языки программирования
+Если ваша задача связана с кодом, всегда точно называйте нужные языки программирования. Например, указывайте «Python 3.11» или «JavaScript (ES2022)», а не просто «код». Это активирует специализированные подсистемы ИИ, настроенные на эти языки, что даёт более синтаксически корректные и идиоматичные решения.
+
+### 3. Давайте подробное описание задачи
+Расплывчатые запросы приводят к расплывчатым ответам. Включайте:
+- Спецификацию входных и выходных данных (типы данных, форматы, примеры)
+- Краевые случаи или ограничения (например, производительность, лимиты памяти)
+- Желаемое поведение при ошибках
+- Любую релевантную бизнес-логику или предметную область
+
+**Вместо:**  
+> *«Напишите функцию для сортировки массива.»*
+
+**Лучше:**  
+> *«Напишите функцию на Python, которая принимает список целых чисел и возвращает новый список, отсортированный по возрастанию с использованием алгоритма быстрой сортировки. Включите аннотации типов, строки документации и корректно обрабатывайте пустые списки.»*
+
+### 4. Перечисляйте ваш технологический стек
+Если вы знаете, какие фреймворки, библиотеки или инструменты будут использоваться, укажите их полные названия и версии. Например:
+- «Использовать Django 4.2 с PostgreSQL 15»
+- «Реализовать на React 18 и TypeScript 5»
+- «Запускать на Node.js 20 с Express 4»
+
+Это позволит ИИ адаптировать код под вашу экосистему, избегая несовместимых API или устаревших шаблонов.
+
+---
+
+## Поддерживаемые форматы файлов для обработки
+
+ИИ может принимать и обрабатывать файлы следующих форматов. Для ясности они сгруппированы в три категории.
+
+> **Примечание о расширениях:** списки ниже отражают расширения, которые реально распознаются во время работы. Некоторые расширения кода, не указанные в основном маршрутизаторе (экзотические или специфичные для фреймворков), всё равно открываются как обычный текст, но они **не** считаются полноценно поддерживаемыми форматами.
+
+### Файлы языков программирования
+
+| Расширение(я) | Язык / Назначение |
+|--------------|-------------------|
+| `.py`, `.pyw`, `.pyi`, `.pyx` | Python |
+| `.java` | Java |
+| `.c`, `.h` | C |
+| `.cpp`, `.cc`, `.cxx`, `.c++`, `.hpp`, `.hh`, `.hxx`, `.ipp` | C++ |
+| `.cs` | C# |
+| `.js`, `.mjs`, `.cjs` | JavaScript |
+| `.ts`, `.tsx` | TypeScript |
+| `.go` | Go |
+| `.rs` | Rust |
+| `.swift` | Swift |
+| `.kt`, `.kts` | Kotlin |
+| `.php`, `.php3`, `.php4`, `.php5`, `.phtml` | PHP |
+| `.rb`, `.rbw`, `.rake`, `.gemspec` | Ruby |
+| `.dart` | Dart |
+| `.r`, `.R`, `.Rmd` | R |
+| `.jl` | Julia |
+| `.lua` | Lua |
+| `.sql` | SQL |
+| `.scala`, `.sc` | Scala |
+| `.pl`, `.pm`, `.t` | Perl |
+| `.hs`, `.lhs` | Haskell |
+| `.erl`, `.hrl` | Erlang |
+| `.ex`, `.exs` | Elixir |
+| `.clj`, `.cljs`, `.cljc` | Clojure |
+| `.groovy`, `.gvy` | Groovy |
+| `.vb`, `.vbs` | Visual Basic |
+| `.sh`, `.bash`, `.zsh`, `.ksh`, `.csh`, `.fish` | Скрипты оболочки |
+| `.ps1`, `.psm1`, `.psd1` | PowerShell |
+| `.bat`, `.cmd` | Пакетные файлы Windows |
+
+### Текстовые, конфигурационные и разметочные форматы
+
+| Расширение(я) | Назначение |
+|--------------|---------|
+| `.txt`, `.log` | Простые текстовые и журнальные файлы |
+| `.md`, `.markdown`, `.rst` | Документация (Markdown, reStructuredText) |
+| `.tex`, `.ltx`, `.bib` | Документы TeX / LaTeX и библиографии |
+| `.csv`, `.tsv` | Табличные данные (разделители запятая/табуляция) |
+| `.json`, `.jsonl` | JSON и JSON Lines |
+| `.xml`, `.xsd`, `.xsl`, `.xslt` | XML и связанные схемы/преобразования |
+| `.yaml`, `.yml` | YAML |
+| `.toml` | TOML |
+| `.ini`, `.cfg`, `.conf`, `.properties` | Конфигурационные файлы |
+| `.env` | Файлы переменных окружения |
+| `.editorconfig` | Конфигурация редактора |
+| `.gitignore` | Списки игнорирования Git |
+| `.dockerfile` | Dockerfile |
+| `.makefile` | Makefile |
+| `.cmake`, `.cmakelists.txt` | Сборочные файлы CMake |
+| `.html`, `.htm`, `.xhtml` | HTML / XHTML |
+| `.css`, `.scss`, `.sass`, `.less` | Таблицы стилей |
+| `.rss`, `.atom` | Веб-ленты |
+
+### Двоичные и документные форматы
+
+Все форматы в этом разделе **реально парсятся** во время работы (для каждого есть отдельный экстрактор в `getting_text_from_files.py`).
+
+| Расширение(я) | Тип | Экстрактор |
+|--------------|------|-----------|
+| `.pdf` | Переносимый формат документов | PyMuPDF |
+| `.docx` | Microsoft Word (Office Open XML) | `docx2txt` |
+| `.word` | Legacy-алиас — открывается как обычный текст | plain read |
+| `.odf` | OpenDocument Format | `odfdo` |
+| `.pptx` | Презентация PowerPoint | `pptx2txt2` |
+| `.xlsx`, `.xls` | Электронные таблицы Microsoft Excel | MarkItDown |
+| `.epub` | Электронная книга EPUB | `epub2txt` |
+| `.mobi` | Электронная книга Mobipocket | `mobi` |
+| `.fb2` | FictionBook 2 | `fb2reader` |
+
+### Форматы изображений (OCR)
+
+Изображения обрабатываются через OCR-конвейер (`EasyOCR` или `DeepSeek OCR` - в зависимости от настроек).
+
+| Расширение(я) | Тип |
+|--------------|------|
+| `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.webp`, `.tiff`, `.tif` | Растровые изображения |
+
+---
+
+## Пример хорошо структурированного запроса
+
+**Слабый запрос:**  
+> *«Напишите код для веб-скрапера.»*
+
+**Сильный запрос:**  
+> *«Разработайте скрипт на Python 3.11 с использованием BeautifulSoup 4 и Requests 2.31, который собирает названия товаров и цены с https://example.com/products. Скрипт должен принимать URL как аргумент командной строки, выводить результаты в CSV-файл с колонками «name» и «price» и обрабатывать пагинацию, переходя по ссылкам «Next». Включите обработку ошибок для сетевых тайм-аутов и отсутствующих элементов.»*
+
+Этот запрос конкретен, выполним и содержит весь необходимый контекст.
+
+---
+
+## Заключительные советы
+
+- **Будьте кратки, но полны** – избегайте нерелевантной информации, но не упускайте важных деталей.
+- **Используйте маркированные списки** для сложных требований – это улучшает читаемость.
+- **Указывайте формат вывода** – скажите ИИ, нужен ли вам только код, код с комментариями или полное объяснение.
+- **Упоминайте ограничения** – например, «должен работать в Windows», «должен быть совместим с Python 3.8+», «не должен использовать внешние библиотеки».
+
+Следуя этим рекомендациям, вы полностью раскроете потенциал ИИ-помощников, сэкономите время и получите высококачественные, адаптированные решения.
+
+</details>
+
+<details>
+<summary>🇨🇳 中文</summary>
+
+# 为AI编写有效提示词的指南
+
+为了从AI模型中获得最准确和相关的回答，精心构建您的提示词至关重要。本指南概述了行之有效的实践方法，并列出了AI系统可以接受的所有文件格式，帮助您获得最佳效果。
+
+---
+
+## 核心原则
+
+### 1. 尽可能使用英语
+大多数先进的AI模型主要基于英语数据进行训练。用英语编写提示词可以显著提高识别、理解和回答质量。如果英语不是您的母语，简单清晰的英语在大多数情况下仍然优于其他语言。
+
+### 2. 明确指定编程语言
+如果您的任务涉及代码，请始终明确指出所需的确切编程语言。例如，说明“Python 3.11”或“JavaScript (ES2022)”，而不仅仅是“代码”。这样可以激活针对这些语言调整的专用AI子系统，从而产生语法更正确、更地道的解决方案。
+
+### 3. 提供详细的任务描述
+模糊的请求会导致模糊的答案。请包括：
+- 输入和输出规范（数据类型、格式、示例）
+- 边缘情况或约束（例如性能、内存限制）
+- 错误情况下的预期行为
+- 任何相关的业务逻辑或领域背景
+
+**不应这样写：**  
+> *“编写一个排序数组的函数。”*
+
+**应该这样写：**  
+> *“编写一个Python函数，接受一个整数列表，使用快速排序算法返回一个按升序排列的新列表。包括类型提示、文档字符串，并优雅地处理空列表。”*
+
+### 4. 列出您的技术栈
+如果您知道将要使用的框架、库或工具，请说明其完整名称和版本。例如：
+- “使用 Django 4.2 和 PostgreSQL 15”
+- “使用 React 18 和 TypeScript 5 实现”
+- “在 Node.js 20 和 Express 4 上运行”
+
+这使AI能够根据您的生态系统定制代码，避免不兼容的API或过时的模式。
+
+---
+
+## 支持处理的文件格式
+
+AI可以接受并处理以下格式的文件。为清晰起见，它们分为三类。
+
+> **关于扩展名的说明：** 下列列表反映运行时实际识别的扩展名。某些未在主路由器中列出的代码扩展名（例如小众或框架专用的扩展名）仍会以纯文本方式打开，但它们**不**被视为一等支持的格式。
+
+### 编程语言文件
+
+| 扩展名 | 语言 / 用途 |
+|--------|------------|
+| `.py`, `.pyw`, `.pyi`, `.pyx` | Python |
+| `.java` | Java |
+| `.c`, `.h` | C |
+| `.cpp`, `.cc`, `.cxx`, `.c++`, `.hpp`, `.hh`, `.hxx`, `.ipp` | C++ |
+| `.cs` | C# |
+| `.js`, `.mjs`, `.cjs` | JavaScript |
+| `.ts`, `.tsx` | TypeScript |
+| `.go` | Go |
+| `.rs` | Rust |
+| `.swift` | Swift |
+| `.kt`, `.kts` | Kotlin |
+| `.php`, `.php3`, `.php4`, `.php5`, `.phtml` | PHP |
+| `.rb`, `.rbw`, `.rake`, `.gemspec` | Ruby |
+| `.dart` | Dart |
+| `.r`, `.R`, `.Rmd` | R |
+| `.jl` | Julia |
+| `.lua` | Lua |
+| `.sql` | SQL |
+| `.scala`, `.sc` | Scala |
+| `.pl`, `.pm`, `.t` | Perl |
+| `.hs`, `.lhs` | Haskell |
+| `.erl`, `.hrl` | Erlang |
+| `.ex`, `.exs` | Elixir |
+| `.clj`, `.cljs`, `.cljc` | Clojure |
+| `.groovy`, `.gvy` | Groovy |
+| `.vb`, `.vbs` | Visual Basic |
+| `.sh`, `.bash`, `.zsh`, `.ksh`, `.csh`, `.fish` | Shell脚本 |
+| `.ps1`, `.psm1`, `.psd1` | PowerShell |
+| `.bat`, `.cmd` | Windows批处理文件 |
+
+### 文本、配置和标记格式
+
+| 扩展名 | 用途 |
+|--------|------|
+| `.txt`, `.log` | 纯文本和日志文件 |
+| `.md`, `.markdown`, `.rst` | 文档（Markdown、reStructuredText） |
+| `.tex`, `.ltx`, `.bib` | TeX / LaTeX 文档和参考文献 |
+| `.csv`, `.tsv` | 表格数据（逗号/制表符分隔） |
+| `.json`, `.jsonl` | JSON 和 JSON Lines |
+| `.xml`, `.xsd`, `.xsl`, `.xslt` | XML 及相关模式/转换 |
+| `.yaml`, `.yml` | YAML |
+| `.toml` | TOML |
+| `.ini`, `.cfg`, `.conf`, `.properties` | 配置文件 |
+| `.env` | 环境变量文件 |
+| `.editorconfig` | 编辑器配置 |
+| `.gitignore` | Git忽略列表 |
+| `.dockerfile` | Dockerfile |
+| `.makefile` | Makefile |
+| `.cmake`, `.cmakelists.txt` | CMake构建文件 |
+| `.html`, `.htm`, `.xhtml` | HTML / XHTML |
+| `.css`, `.scss`, `.sass`, `.less` | 样式表 |
+| `.rss`, `.atom` | Web订阅源 |
+
+### 二进制和文档格式
+
+本节中的所有格式在运行时**都会实际被解析**（每个格式在 `getting_text_from_files.py` 中都有专用的提取器）。
+
+| 扩展名 | 类型 | 提取器 |
+|--------|------|--------|
+| `.pdf` | 便携式文档格式 | PyMuPDF |
+| `.docx` | Microsoft Word（Office Open XML） | `docx2txt` |
+| `.word` | 遗留别名 — 作为纯文本打开 | plain read |
+| `.odf` | OpenDocument格式 | `odfdo` |
+| `.pptx` | PowerPoint演示文稿 | `pptx2txt2` |
+| `.xlsx`, `.xls` | Microsoft Excel 电子表格 | MarkItDown |
+| `.epub` | EPUB 电子书 | `epub2txt` |
+| `.mobi` | Mobipocket 电子书 | `mobi` |
+| `.fb2` | FictionBook 2 | `fb2reader` |
+
+### 图像格式（OCR）
+
+图像通过 OCR 流水线处理（`EasyOCR` 或 `DeepSeek OCR`，取决于设置）。
+
+| 扩展名 | 类型 |
+|--------|------|
+| `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.webp`, `.tiff`, `.tif` | 栅格图像 |
+
+---
+
+## 结构良好的提示词示例
+
+**弱提示词：**  
+> *“为网页爬虫编写代码。”*
+
+**强提示词：**  
+> *“开发一个 Python 3.11 脚本，使用 BeautifulSoup 4 和 Requests 2.31，从 https://example.com/products 抓取产品名称和价格。脚本应接受 URL 作为命令行参数，将结果输出为包含 ‘name’ 和 ‘price’ 列的 CSV 文件，并通过跟随 ‘Next’ 链接处理分页。包括对网络超时和缺失元素的错误处理。”*
+
+这个提示词具体、可操作，并包含所有必要的上下文。
+
+---
+
+## 最后建议
+
+- **简洁而完整** – 避免无关背景，但不要遗漏关键细节。
+- **对复杂要求使用项目符号** – 这可以提高可读性。
+- **指定输出格式** – 告诉AI您是需要纯代码、带注释的代码，还是完整的解释。
+- **提及约束条件** – 例如，“必须在Windows上运行”、“必须兼容Python 3.8+”、“不得使用外部库”。
+
+遵循这些指南，您将充分利用AI助手的潜力，节省时间并获得高质量、量身定制的解决方案。
+
+</details>

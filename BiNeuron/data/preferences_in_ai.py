@@ -1,0 +1,21 @@
+PREFERENCES_IN_AI_LIST = [
+    "deepseek",
+    "qwen",
+    "minimax",
+    "code_llama",
+    "mellum",
+    "wizard",
+    "starcoder",
+    "yi_coder",
+    "codegemma",
+    "devstral",
+    "granite",
+    "codestral",
+    "codegeex4",
+    "opencode_interpreter",
+    "ornith_1_0",
+    "kat_dev",
+    "magistral_small",
+    "laguna_xs",
+    "breeze"
+]

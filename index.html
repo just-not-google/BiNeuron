@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BiNeuron</title>
+<link rel="stylesheet" href="website/style.css">
+<script>
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+(function forceTop() {
+  if (window.location.hash) {
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+  window.scrollTo(0, 0);
+  window.addEventListener("load", function () {
+    window.scrollTo(0, 0);
+  });
+})();
+</script>
+</head>
+<body>
+
+<div class="bg-binary" aria-hidden="true">
+  <canvas id="binaryCanvas"></canvas>
+</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="/" class="logo">BiNeuron</a>
+    <nav class="nav-links">
+      <a href="#about" data-i18n="nav_about">About</a>
+      <a href="#download" data-i18n="nav_download">Download</a>
+      <a href="/hub/" data-i18n="nav_hub">Hub</a>
+      <a href="/docs/" data-i18n="nav_docs">Docs</a>
+    </nav>
+    <div class="nav-right">
+      <div class="lang-switch">
+        <button data-lang="en" class="active">EN</button>
+        <button data-lang="ru">RU</button>
+        <button data-lang="zh">中文</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="container">
+      <h1 data-i18n="hero_title">Code at the speed of thought</h1>
+      <p class="hero-sub" data-i18n="hero_sub">
+        BiNeuron is a fully local AI assistant for code. Reads your project files, detects the programming language, picks the right model, and generates code, docs, or analysis. Everything stays on your machine.
+      </p>
+      <div class="hero-actions">
+        <a href="#download" class="btn btn-primary" data-i18n="btn_download">Download for free</a>
+        <a href="https://github.com/just-not-google/BiNeuron" class="btn btn-secondary" data-i18n="btn_github">View on GitHub</a>
+      </div>
+      <div class="hero-image">
+        <img src="img_files/gui_screenshot_2.png" alt="BiNeuron">
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="section">
+    <div class="container">
+      <h2 class="section-title" data-i18n="about_title">Why BiNeuron</h2>
+      <p class="section-sub" data-i18n="about_text">
+        A local first AI assistant built for developers who care about privacy, speed, and control.
+      </p>
+
+      <div class="features">
+        <div class="feature">
+          <h3 data-i18n="f1_title">100% Local</h3>
+          <p data-i18n="f1_text">Runs models on your machine. No API keys, no subscriptions, no data leaks.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f2_title">Multi-Language</h3>
+          <p data-i18n="f2_text">Detects over 25 programming languages and picks a specialized model for each.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f3_title">File Editing</h3>
+          <p data-i18n="f3_text">Reads and modifies files directly via a two stage AI pipeline.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f4_title">OCR and Documents</h3>
+          <p data-i18n="f4_text">Extracts text from PDF, DOCX, PPTX, and images via built in OCR.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f5_title">Proxy Support</h3>
+          <p data-i18n="f5_text">Works behind restrictions with automatic proxy and mirror fallback.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f6_title">Agent Hub</h3>
+          <p data-i18n="f6_text">Browse ready to use model and prompt pairs for specific coding tasks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="download" class="section section-alt">
+    <div class="container">
+      <h2 class="section-title" data-i18n="download_title">Download BiNeuron</h2>
+      <p class="section-sub" data-i18n="download_text">
+        Completely free and open source. No accounts, no sign ups, no hidden fees. Pick your platform and start coding with a local AI in under five minutes.
+      </p>
+
+      <div class="download-grid">
+        <div class="download-card">
+          <div class="os-name">Windows</div>
+          <div class="os-note" data-i18n="dl_win">.exe installer</div>
+          <div class="os-desc" data-i18n="dl_win_desc">Windows 10 / 11 · 64 bit</div>
+          <a href="https://github.com/just-not-google/BiNeuron/releases/download/v0.0.4/BiNeuron-Web-Windows.zip" class="btn btn-primary download-btn" data-i18n="dl_btn">Download</a>
+        </div>
+        <div class="download-card">
+          <div class="os-name">macOS</div>
+          <div class="os-note" data-i18n="dl_mac">.dmg package</div>
+          <div class="os-desc" data-i18n="dl_mac_desc">Apple Silicon · Intel</div>
+          <a href="https://github.com/just-not-google/BiNeuron/releases/download/v0.0.4/BiNeuron-Web-MacOS.zip" class="btn btn-primary download-btn" data-i18n="dl_btn">Download</a>
+        </div>
+        <div class="download-card">
+          <div class="os-name">Linux</div>
+          <div class="os-note" data-i18n="dl_linux">.AppImage / .deb</div>
+          <div class="os-desc" data-i18n="dl_linux_desc">Debian · Ubuntu · Arch</div>
+          <a href="https://github.com/just-not-google/BiNeuron/releases/download/v0.0.4/BiNeuron-Web-Linux.zip" class="btn btn-primary download-btn" data-i18n="dl_btn">Download</a>
+        </div>
+      </div>
+
+      <p class="download-foot" data-i18n="download_note">
+        Every release is built automatically from source and signed. Choose the format that fits your workflow: a one click installer for Windows, a native package for macOS, or a portable AppImage for Linux.
+      </p>
+
+      <div class="download-help">
+        <p data-i18n="download_help_text">
+          If a file does not download or you get an error, open the official releases page on GitHub and pick the right build for your platform manually.
+        </p>
+        <a href="https://github.com/just-not-google/BiNeuron/releases" target="_blank" rel="noopener" class="download-help-link" data-i18n="download_help_link">
+          Open releases on GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">BiNeuron</div>
+        <div class="footer-tag" data-i18n="footer_tag">Local AI for developers</div>
+      </div>
+      <div class="social-links">
+        <a href="https://github.com/just-not-google/BiNeuron" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+            <path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 016 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/>
+          </svg>
+        </a>
+        <a href="https://x.com/BiNeuron123" target="_blank" rel="noopener" aria-label="X (Twitter)" title="X (Twitter)">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+            <path d="M18.9 2h3.7l-8.1 9.2L24 22h-7.4l-5.8-7.6L3.9 22H.2l8.6-9.8L0 2h7.6l5.3 6.9L18.9 2zm-1.3 18h2L6.5 3.9H4.4L17.6 20z"/>
+          </svg>
+        </a>
+        <a href="https://www.youtube.com/@bineuron" target="_blank" rel="noopener" aria-label="YouTube" title="YouTube">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+            <path d="M23.5 6.5a3 3 0 00-2.1-2.1C19.5 3.9 12 3.9 12 3.9s-7.5 0-9.4.5A3 3 0 00.5 6.5C0 8.4 0 12 0 12s0 3.6.5 5.5a3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1c.5-1.9.5-5.5.5-5.5s0-3.6-.5-5.5zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-copy">© 2026 BiNeuron · MIT License</div>
+  </div>
+</footer>
+
+<script>
+const TRANSLATIONS = {
+  en: {
+    nav_about: "About",
+    nav_download: "Download",
+    nav_hub: "Hub",
+    nav_docs: "Docs",
+    hero_title: "Code at the speed of thought",
+    hero_sub: "BiNeuron is a fully local AI assistant for code. Reads your project files, detects the programming language, picks the right model, and generates code, docs, or analysis. Everything stays on your machine.",
+    btn_download: "Download for free",
+    btn_github: "View on GitHub",
+    about_title: "Why BiNeuron",
+    about_text: "A local first AI assistant built for developers who care about privacy, speed, and control.",
+    f1_title: "100% Local",
+    f1_text: "Runs models on your machine. No API keys, no subscriptions, no data leaks.",
+    f2_title: "Multi-Language",
+    f2_text: "Detects over 25 programming languages and picks a specialized model for each.",
+    f3_title: "File Editing",
+    f3_text: "Reads and modifies files directly via a two stage AI pipeline.",
+    f4_title: "OCR and Documents",
+    f4_text: "Extracts text from PDF, DOCX, PPTX, and images via built in OCR.",
+    f5_title: "Proxy Support",
+    f5_text: "Works behind restrictions with automatic proxy and mirror fallback.",
+    f6_title: "Agent Hub",
+    f6_text: "Browse ready to use model and prompt pairs for specific coding tasks.",
+    download_title: "Download BiNeuron",
+    download_text: "Completely free and open source. No accounts, no sign ups, no hidden fees. Pick your platform and start coding with a local AI in under five minutes.",
+    download_note: "Every release is built automatically from source and signed. Choose the format that fits your workflow: a one click installer for Windows, a native package for macOS, or a portable AppImage for Linux.",
+    download_help_text: "If a file does not download or you get an error, open the official releases page on GitHub and pick the right build for your platform manually.",
+    download_help_link: "Open releases on GitHub",
+    dl_win: ".exe installer",
+    dl_win_desc: "Windows 10 / 11 · 64 bit",
+    dl_mac: ".dmg package",
+    dl_mac_desc: "Apple Silicon · Intel",
+    dl_linux: ".AppImage / .deb",
+    dl_linux_desc: "Debian · Ubuntu · Arch",
+    dl_btn: "Download",
+    footer_tag: "Local AI for developers"
+  },
+  ru: {
+    nav_about: "О проекте",
+    nav_download: "Скачать",
+    nav_hub: "Хаб",
+    nav_docs: "Документация",
+    hero_title: "Код на скорости мысли",
+    hero_sub: "BiNeuron это полностью локальный ИИ ассистент для кода. Читает файлы проекта, определяет язык программирования, подбирает нужную модель и генерирует код, документацию или анализ. Всё остаётся на вашей машине.",
+    btn_download: "Скачать бесплатно",
+    btn_github: "Открыть на GitHub",
+    about_title: "Почему BiNeuron",
+    about_text: "Локальный ИИ ассистент для разработчиков, которым важны приватность, скорость и контроль.",
+    f1_title: "Полностью локально",
+    f1_text: "Модели запускаются на вашей машине. Без API ключей, без подписок, без утечек.",
+    f2_title: "Мультиязычность",
+    f2_text: "Определяет более 25 языков программирования и подбирает модель под каждый.",
+    f3_title: "Редактирование файлов",
+    f3_text: "Читает и изменяет файлы напрямую через двухэтапный ИИ пайплайн.",
+    f4_title: "OCR и документы",
+    f4_text: "Извлекает текст из PDF, DOCX, PPTX и изображений через встроенный OCR.",
+    f5_title: "Поддержка прокси",
+    f5_text: "Работает в условиях ограничений с автоматическим подбором прокси и зеркал.",
+    f6_title: "Хаб агентов",
+    f6_text: "Готовые связки модели и промпта для конкретных задач разработки.",
+    download_title: "Скачать BiNeuron",
+    download_text: "Полностью бесплатный проект с открытым исходным кодом. Без регистрации, без подписок, без скрытых платежей. Выберите платформу и начните писать код с локальным ИИ меньше чем за пять минут.",
+    download_note: "Каждый релиз собирается автоматически из исходников и подписывается. Выберите подходящий формат: установщик в один клик для Windows, нативный пакет для macOS или портативный AppImage для Linux.",
+    download_help_text: "Если файл не скачивается или появляется ошибка, откройте официальную страницу релизов на GitHub и выберите сборку для вашей платформы вручную.",
+    download_help_link: "Открыть релизы на GitHub",
+    dl_win: ".exe установщик",
+    dl_win_desc: "Windows 10 / 11 · 64 бита",
+    dl_mac: ".dmg пакет",
+    dl_mac_desc: "Apple Silicon · Intel",
+    dl_linux: ".AppImage / .deb",
+    dl_linux_desc: "Debian · Ubuntu · Arch",
+    dl_btn: "Скачать",
+    footer_tag: "Локальный ИИ для разработчиков"
+  },
+  zh: {
+    nav_about: "关于",
+    nav_download: "下载",
+    nav_hub: "中心",
+    nav_docs: "文档",
+    hero_title: "以思维的速度编写代码",
+    hero_sub: "BiNeuron 是一个完全本地的代码 AI 助手。读取你的项目文件，识别编程语言，选择最合适的模型，并生成代码、文档或分析。一切都在你自己的机器上完成。",
+    btn_download: "免费下载",
+    btn_github: "在 GitHub 上查看",
+    about_title: "为什么选择 BiNeuron",
+    about_text: "为注重隐私、速度和掌控的开发者打造的本地优先 AI 助手。",
+    f1_title: "完全本地",
+    f1_text: "模型在你自己的机器上运行。无需 API 密钥，无需订阅，没有数据泄露。",
+    f2_title: "多语言支持",
+    f2_text: "识别 25 种以上编程语言，并为每种语言选择专用模型。",
+    f3_title: "文件编辑",
+    f3_text: "通过两阶段 AI 管线直接读取和修改文件。",
+    f4_title: "OCR 与文档",
+    f4_text: "通过内置 OCR 从 PDF、DOCX、PPTX 和图像中提取文本。",
+    f5_title: "代理支持",
+    f5_text: "在受限环境下自动使用代理和镜像。",
+    f6_title: "智能体中心",
+    f6_text: "浏览针对特定编码任务的模型与提示词组合。",
+    download_title: "下载 BiNeuron",
+    download_text: "完全免费且开源。无需注册，无需订阅，没有隐藏费用。选择你的平台，五分钟内即可开始使用本地 AI 编写代码。",
+    download_note: "每个版本都从源码自动构建并签名。选择适合你工作流的格式：Windows 一键安装包、macOS 原生包，或 Linux 便携 AppImage。",
+    download_help_text: "如果文件无法下载或出现错误，请打开 GitHub 官方发布页面，手动选择适合你平台的版本。",
+    download_help_link: "打开 GitHub 发布页面",
+    dl_win: ".exe 安装包",
+    dl_win_desc: "Windows 10 / 11 · 64 位",
+    dl_mac: ".dmg 包",
+    dl_mac_desc: "Apple Silicon · Intel",
+    dl_linux: ".AppImage / .deb",
+    dl_linux_desc: "Debian · Ubuntu · Arch",
+    dl_btn: "下载",
+    footer_tag: "面向开发者的本地 AI"
+  }
+};
+
+const buttons = document.querySelectorAll(".lang-switch button");
+
+function applyLang(lang) {
+  const dict = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(function (el) {
+    const key = el.dataset.i18n;
+    if (dict[key]) el.textContent = dict[key];
+  });
+  buttons.forEach(function (btn) {
+    btn.classList.toggle("active", btn.dataset.lang === lang);
+  });
+  try { localStorage.setItem("bineuron_lang", lang); } catch (e) {}
+}
+
+buttons.forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    applyLang(btn.dataset.lang);
+  });
+});
+
+(function initLang() {
+  let saved = null;
+  try { saved = localStorage.getItem("bineuron_lang"); } catch (e) {}
+  if (saved && TRANSLATIONS[saved]) return applyLang(saved);
+  const b = (navigator.language || "en").slice(0, 2).toLowerCase();
+  if (b === "ru") applyLang("ru");
+  else if (b === "zh") applyLang("zh");
+  else applyLang("en");
+})();
+
+/* ---------- BINARY RAIN BACKGROUND ---------- */
+
+(function initBinary() {
+  const canvas = document.getElementById("binaryCanvas");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  let width, height, columns, drops;
+  const fontSize = 16;
+  const chars = ["0", "1"];
+
+  function setup() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    columns = Math.floor(width / fontSize);
+    drops = new Array(columns).fill(0).map(function () {
+      return Math.random() * -50;
+    });
+  }
+
+  function draw() {
+    ctx.fillStyle = "rgba(13, 16, 20, 0.08)";
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.font = fontSize + "px monospace";
+    for (let i = 0; i < drops.length; i++) {
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      const x = i * fontSize;
+      const y = drops[i] * fontSize;
+
+      const fade = 1 - (y / height);
+      const alpha = Math.max(0.05, Math.min(0.5, fade * 0.6));
+
+      ctx.fillStyle = "rgba(74, 158, 255, " + alpha + ")";
+      ctx.fillText(char, x, y);
+
+      if (y > height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+
+  setup();
+  window.addEventListener("resize", setup);
+
+  let last = 0;
+  function loop(t) {
+    if (t - last > 55) {
+      draw();
+      last = t;
+    }
+    requestAnimationFrame(loop);
+  }
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) {
+    draw();
+  } else {
+    requestAnimationFrame(loop);
+  }
+})();
+</script>
+
+</body>
+</html>

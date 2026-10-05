@@ -1,0 +1,46 @@
+TYPES_POWER = ["easy", "middle", "hard", "very_hard"]
+TYPE_DEFAULT = "default"
+HTTP_PROTOCOL = "http"
+HTTPS_PROTOCOL = "https"
+MAIN_LANGUAGE = "en"
+MARKER_FOR_FILES = "---file content---\n"
+MARKER_FOR_WEBSITES = "---new information from the website---\n"
+PROJECT_NAME = "biNeuron"
+PROTOCOL_LST = ["http://", "https://"]
+GOOGLE_TRANSLATE_URL = "https://translate.google.ru/?sl=auto&tl=ru&op=translate"
+DEEPL_TRANSLATE_URL = "https://www.deepl.com/en/translator?mb"
+PREFERENCES_IN_AI_LIST = [
+    "DeepSeek", "Qwen", "MiniMax", "CodeLlama",
+    "Mellum", "Wizard", "StarCoder", "YI Coder",
+    "CodeGemma", "Devstral", "Granite", "Codestral",
+    "CodeGEEX4", "OpenCodeInterpreter", "Ornith 1.0",
+    "Kat Dev", "Magistral Small", "Laguna-XS",
+    "Breeze"]
+DETERMINANT_MODE_LIST = ["lite", "full", "auto"]
+TYPE_FORMATS = ["read_files", "unread_files"]
+TINY_TYPE = "tiny"
+LITE_TYPE = "lite"
+DEVICE_OPTIONS = ["cpu", "cuda:0"]
+RETURN_TENSORS = "pt"
+DEEPSEEK_LOCAL_OCR = "deepseek-ai/deepseek-vl2-small"
+HF_MIRROR = "https://hf-mirror.com"
+MAIN_REPO_ID = "Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF"
+MAIN_FILENAME = "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
+NOT_UNREAD_FILES = "There are no unread files, all files have been read and have a context higher in the text."
+EASY_OCR = "easy_ocr"
+DEFINITION_OPTION_LIST = ["easy_ocr", "deepseek_ocr"]
+MODELS_DIR_CONST = "./models"
+API_BASE_URL = "https://api.siliconflow.cn/v1/chat/completions"
+MAX_NEW_TOKENS = 256
+MAX_TIMEOUT = 1000
+POINTS_PER_CORE = 1000000
+REF_POINTS = 5000000
+VERY_HARD_VALUE = 90
+HARD_VALUE = 70
+EASY_VALUE = 30
+MAX_TOKENS = 8192
+MAX_TOKENS_LITE = 256
+MIN_TIMEOUT_FOR_CHECK = 10
+MAX_TIMEOUT_FOR_CHECK = 30
+NUMBER_ATTEMPTS = 5
+MAIN_PROXY_ATTEMPTS = 10
