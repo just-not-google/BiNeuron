@@ -2,8 +2,10 @@ from free_proxy_server import ProxyClient, ProxyFilter
 from typing import List, Optional, Dict
 import httpx
 import random
-from BiNeuron.data.constants_for_functions import (HTTP_PROTOCOL, HTTPS_PROTOCOL, MAX_TIMEOUT,
-                                                    NUMBER_ATTEMPTS, MAIN_PROXY_ATTEMPTS)
+from BiNeuron.data.constants_for_functions import (
+    HTTP_PROTOCOL, HTTPS_PROTOCOL, MAX_TIMEOUT,
+    NUMBER_ATTEMPTS, MAIN_PROXY_ATTEMPTS
+)
 from BiNeuron.additional_functions.proxy_from_raw_github import check_github_proxy
 from BiNeuron.data.links_to_raw_github_proxies import PROXY_LINK_LST
 import logging
@@ -11,10 +13,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def proxy_for_circumventing_restrictions(country: str,
-                                         protocol: str,
-                                         max_timeout: int,
-                                         is_working: bool) -> Optional[List[str]]:
+def proxy_for_circumventing_restrictions(
+        country: str,
+        protocol: str,
+        max_timeout: int,
+        is_working: bool
+) -> Optional[List[str]]:
     """
     Fetches a list of proxy servers matching the given filters.
     :param country: Target country code for proxies.
@@ -44,16 +48,18 @@ def proxy_for_circumventing_restrictions(country: str,
         logger.exception(f"Error when trying to get a list of proxies to bypass - {e}")
         return None
 
-def working_with_proxy(country: Optional[str] = None,
-                       protocol: str = HTTP_PROTOCOL,
-                       max_timeout: int = MAX_TIMEOUT,
-                       is_working: bool = True,
-                       version_1: bool = True,
-                       your_proxies: Optional[List[str]] = None,
-                       github_proxies: bool = False,
-                       url_lst: List[str] = PROXY_LINK_LST,
-                       proxy_retries: int = NUMBER_ATTEMPTS,
-                       main_retries: int = MAIN_PROXY_ATTEMPTS) -> httpx.Client or Dict:
+def working_with_proxy(
+        country: Optional[str] = None,
+        protocol: str = HTTP_PROTOCOL,
+        max_timeout: int = MAX_TIMEOUT,
+        is_working: bool = True,
+        version_1: bool = True,
+        your_proxies: Optional[List[str]] = None,
+        github_proxies: bool = False,
+        url_lst: List[str] = PROXY_LINK_LST,
+        proxy_retries: int = NUMBER_ATTEMPTS,
+        main_retries: int = MAIN_PROXY_ATTEMPTS
+) -> httpx.Client | Dict:
     """
     Returns an httpx client or proxy dictionary configured with a selected proxy.
     :param country: Country code for proxy selection (used when `github_proxies` is False).

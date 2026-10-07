@@ -7,8 +7,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def extraction_all_files(path: str,
-                         ignored_files: Optional[List[str]]) -> List[str]:
+def extraction_all_files(
+        path: str,
+        ignored_files: Optional[List[str]]
+) -> List[str]:
     """
     Retrieves all paths to files located in this folder.
     :param path: The location of your virtual storage.
@@ -33,9 +35,11 @@ def extraction_all_files(path: str,
         logger.exception(f"An error occurred when trying to get file paths in a folder - {e}")
         return []
 
-def logic_virtual_storage(path: Optional[str] = None,
-                          with_ocr: bool = False,
-                          ignored_files: Optional[List[str]] = None) -> Dict:
+def logic_virtual_storage(
+        path: Optional[str] = None,
+        with_ocr: bool = False,
+        ignored_files: Optional[List[str]] = None
+) -> Dict:
     """
     Checking the unsorted list of files for certain conditions.
     :param path: The location of your virtual storage.
@@ -48,8 +52,10 @@ def logic_virtual_storage(path: Optional[str] = None,
         logger.warning("The path to the virtual storage was not specified.")
         return dict()
 
-    file_paths = extraction_all_files(path=path,
-                                      ignored_files=ignored_files)
+    file_paths = extraction_all_files(
+        path=path,
+        ignored_files=ignored_files
+    )
     supported_formats = SUPPORTED_FORMATS_WITHOUT_PHOTO.copy()
 
     if with_ocr:

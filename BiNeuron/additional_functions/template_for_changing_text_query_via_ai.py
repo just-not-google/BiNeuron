@@ -5,16 +5,18 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def template_for_changing_text_query_via_ai(original_text: str,
-                                            template_prompt: str,
-                                            text_for_logger: Optional[List[str]],
-                                            models_dir: str,
-                                            n_gpu_layers: int,
-                                            verbose: bool,
-                                            prefer_mirror: bool,
-                                            repo_id: str,
-                                            filename: str,
-                                            max_tokens: int) -> str:
+def template_for_changing_text_query_via_ai(
+        original_text: str,
+        template_prompt: str,
+        text_for_logger: Optional[List[str]],
+        models_dir: str,
+        n_gpu_layers: int,
+        verbose: bool,
+        prefer_mirror: bool,
+        repo_id: str,
+        filename: str,
+        max_tokens: int
+) -> str:
     """
     Universal template for sending a text-transformation request to a local AI model.
     Used by any function that needs to modify, rewrite, compress, or restructure

@@ -14,15 +14,17 @@ import argostranslate.translate
 logger = logging.getLogger(__name__)
 
 class TranslatorText:
-    def __init__(self,
-                 original_text: str,
-                 determinant_mode: Optional[Literal["lite", "full", "auto"]] = LITE_TYPE,
-                 proxies: Optional[Dict] = None,
-                 accurate_translation: bool = False,
-                 your_key_for_deepl: str = "",
-                 request_language: str = MAIN_LANGUAGE,
-                 local_trans: bool = False,
-                 from_code_lang: str = "") -> None:
+    def __init__(
+            self,
+            original_text: str,
+            determinant_mode: Optional[Literal["lite", "full", "auto"]] = LITE_TYPE,
+            proxies: Optional[Dict] = None,
+            accurate_translation: bool = False,
+            your_key_for_deepl: str = "",
+            request_language: str = MAIN_LANGUAGE,
+            local_trans: bool = False,
+            from_code_lang: str = ""
+    ) -> None:
         """
         Initialize the translator with text and configuration.
         :param original_text: The text to be translated.
@@ -62,9 +64,11 @@ class TranslatorText:
                           and x.to_code == self.request_language,
                 available_packages))
             argostranslate.package.install_from_path(package_to_install.download())
-            translated_text = argostranslate.translate.translate(self.original_text,
-                                                                 from_code=self.from_code_lang,
-                                                                 to_code=self.request_language)
+            translated_text = argostranslate.translate.translate(
+                self.original_text,
+                from_code=self.from_code_lang,
+                to_code=self.request_language
+            )
 
             logger.info("The translated text of the local type was received.")
             return translated_text
@@ -113,19 +117,25 @@ class TranslatorText:
         """
         if self.accurate_translation:
             try:
-                deepl_client = deepl.DeepLClient(auth_key=self.your_key_for_deepl,
-                                                 proxy=self.proxies)
-                result = deepl_client.translate_text(text=self.original_text,
-                                                     target_lang=self.request_language)
+                deepl_client = deepl.DeepLClient(
+                    auth_key=self.your_key_for_deepl,
+                    proxy=self.proxies
+                )
+                result = deepl_client.translate_text(
+                    text=self.original_text,
+                    target_lang=self.request_language
+                )
                 logger.info("The text was translated thanks to DeepL.")
                 return result.text
             except Exception as e:
                 logger.exception(f"Error when trying to translate text (DeepL) - {e}")
 
         try:
-            translator = GoogleTranslator(source="auto",
-                                          target=self.request_language,
-                                          proxies=self.proxies)
+            translator = GoogleTranslator(
+                source="auto",
+                target=self.request_language,
+                proxies=self.proxies
+            )
             logger.info("The text was translated thanks to Google Translator.")
             return translator.translate(text=self.original_text)
         except Exception as e:

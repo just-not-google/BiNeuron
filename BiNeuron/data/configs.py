@@ -25,6 +25,12 @@ class ModelConfig(BaseModel, extra="forbid"):
     :param subdomain: Prefix to add to the model filename during download.
     :param retries: Number of attempts to download the model using a proxy.
     :param prefer_mirror: If True, forces using the mirror endpoint (hf-mirror.com).
+    :param cloud_version: If True, cloud versions of AI or neural networks are used,
+    otherwise local ones.
+    :param automatic_disk_space_check: If True, the program checks the disk for the
+    ability to fit the AI model on it.
+    :param weight_attempts: The number of attempts to get data from the disk and from
+    the weight of the AI model with Hugging Face.
     """
     preferences_in_ai: Literal[
         "deepseek", "qwen", "minimax", "code_llama",
@@ -44,6 +50,9 @@ class ModelConfig(BaseModel, extra="forbid"):
     subdomain: str = ""
     retries: int = Field(default=NUMBER_ATTEMPTS, gt=0)
     prefer_mirror: bool = True
+    cloud_version: bool = False
+    automatic_disk_space_check: bool = True
+    weight_attempts: int = Field(default=NUMBER_ATTEMPTS, gt=0)
 
 class LLMConfig(BaseModel, extra="forbid"):
     """
@@ -54,6 +63,8 @@ class LLMConfig(BaseModel, extra="forbid"):
     :param echo: Whether to echo the prompt in the AI output.
     :param max_tokens: Maximum number of tokens to generate.
     :param temperature: Sampling temperature for generation (0.0 to 1.0).
+    :param key_for_api: The key for requesting a cloud AI or neural network via the API.
+    :param model: A neural network or cloud-type AI that will do text processing.
     """
     verbose: bool = False
     n_ctx: Optional[int] = Field(default=None, gt=0)
@@ -61,6 +72,8 @@ class LLMConfig(BaseModel, extra="forbid"):
     echo: bool = False
     max_tokens: int = Field(default=MAX_TOKENS, gt=0)
     temperature: float = Field(default=0.1, ge=0.1, le=1)
+    key_for_api: Optional[str] = None,
+    model: Optional[str] = None,
 
 class PromptConfig(BaseModel, extra="forbid"):
     """
@@ -108,6 +121,7 @@ class LanguageDetectionConfig(BaseModel, extra="forbid"):
 class ProxyConfig(BaseModel, extra="forbid"):
     """
     Configuration for proxy usage and rotation.
+    :param with_proxy: Whether to use a proxy for a cloud request.
     :param country: Country code for proxy selection (e.g., 'ru', 'us').
     :param protocol: Proxy protocol (default 'http').
     :param max_timeout: Maximum timeout (seconds) for proxy availability checks.
@@ -121,6 +135,7 @@ class ProxyConfig(BaseModel, extra="forbid"):
     :param proxy_retries: Number of attempts per URL when fetching from GitHub.
     :param main_retries: Number of times to retry obtaining a working proxy from GitHub.
     """
+    with_proxy: bool = False
     country: Optional[str] = Field(default=None, min_length=2, max_length=2)
     protocol: Literal["http", "https"] = HTTP_PROTOCOL
     max_timeout: int = Field(default=MAX_TIMEOUT, ge=0)
@@ -178,6 +193,7 @@ class FileConfig(BaseModel, extra="forbid"):
     :param websites_sources_information: The Internet sources from which the text is taken.
     :param compress_text: If True, text compression is used.
     :param ignored_files: A list of files that the program does not need to read.
+    :param main_disk: The path to the main disk where everything will be downloaded.
     """
     virtual_storage: bool = False
     virtual_storage_path: Optional[str] = None
@@ -188,6 +204,7 @@ class FileConfig(BaseModel, extra="forbid"):
     websites_sources_information: Optional[List[str]] = None
     compress_text: bool = False
     ignored_files: Optional[List[str]] = None
+    main_disk: Optional[str] = None
 
 class SafetyConfig(BaseModel, extra="forbid"):
     """

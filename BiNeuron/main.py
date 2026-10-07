@@ -13,10 +13,12 @@ from BiNeuron.additional_functions.checking_and_downloading_ai_model import Mode
 from BiNeuron.additional_functions.launching_ai_model_and_requesting import launching_ai_model_and_requesting
 from BiNeuron.data.variants_industrial_scenarios import ALL_MAIN_PROMPTS
 from BiNeuron.additional_functions.determining_computer_power import determining_type_computer
-from BiNeuron.data.constants_for_functions import (TYPES_POWER, PROJECT_NAME, GOOGLE_TRANSLATE_URL,
-                                                   DEEPL_TRANSLATE_URL, TYPE_FORMATS, MAIN_REPO_ID,
-                                                   MAIN_FILENAME, NOT_UNREAD_FILES, TYPE_DEFAULT,
-                                                   NUMBER_ATTEMPTS)
+from BiNeuron.data.constants_for_functions import (
+    TYPES_POWER, PROJECT_NAME, GOOGLE_TRANSLATE_URL,
+    DEEPL_TRANSLATE_URL, TYPE_FORMATS, MAIN_REPO_ID,
+    MAIN_FILENAME, NOT_UNREAD_FILES, TYPE_DEFAULT,
+    NUMBER_ATTEMPTS
+)
 from BiNeuron.additional_functions.definition_swearing import definition_swearing
 from BiNeuron.data.answer_against_profanity import ANSWER_AGAINST_PROFANITY
 from BiNeuron.additional_functions.checking_site_access import checking_site_access
@@ -25,30 +27,36 @@ from BiNeuron.data.prompt_for_json_formatter import PROMPT_FOR_JSON_FORMATTER
 from BiNeuron.additional_functions.logic_editing_files import logic_editing_files
 from BiNeuron.data.prompt_json_deleting import PROMPT_JSON_DELETING
 from BiNeuron.additional_functions.deleting_files_thanks_to_ai import deleting_files_thanks_to_ai
-from BiNeuron.data.configs import (ModelConfig, LLMConfig, PromptConfig, TranslationConfig,
-                                   LanguageDetectionConfig, ProxyConfig, OCRConfig, FileConfig,
-                                   SafetyConfig)
+from BiNeuron.data.configs import (
+    ModelConfig, LLMConfig, PromptConfig, TranslationConfig,
+    LanguageDetectionConfig, ProxyConfig, OCRConfig, FileConfig,
+    SafetyConfig
+)
 from BiNeuron.additional_functions.logic_text_compression import logic_text_compression
 from BiNeuron.additional_functions.request_anonymization import request_anonymization
 from BiNeuron.additional_functions.improving_user_text_through_ai import improving_user_text_through_ai
+from BiNeuron.additional_functions.request_for_cloud_ai import request_for_cloud_ai
+from BiNeuron.additional_functions.free_space_for_ai_model import free_space_for_ai_model
 from BiNeuron import main_logger
 
 
 logger = logging.getLogger(__name__)
 
 class BiNeuron:
-    def __init__(self,
-                 request: str,
-                 additional_files: Optional[List[str]] = None,
-                 model_conf: Optional[ModelConfig] = None,
-                 llm_conf: Optional[LLMConfig] = None,
-                 prompt_conf: Optional[PromptConfig] = None,
-                 translation_conf: Optional[TranslationConfig] = None,
-                 language_detection_conf: Optional[LanguageDetectionConfig] = None,
-                 proxy_conf: Optional[ProxyConfig] = None,
-                 ocr_conf: Optional[OCRConfig] = None,
-                 file_conf: Optional[FileConfig] = None,
-                 safety_conf: Optional[SafetyConfig] = None) -> None:
+    def __init__(
+            self,
+            request: str,
+            additional_files: Optional[List[str]] = None,
+            model_conf: Optional[ModelConfig] = None,
+            llm_conf: Optional[LLMConfig] = None,
+            prompt_conf: Optional[PromptConfig] = None,
+            translation_conf: Optional[TranslationConfig] = None,
+            language_detection_conf: Optional[LanguageDetectionConfig] = None,
+            proxy_conf: Optional[ProxyConfig] = None,
+            ocr_conf: Optional[OCRConfig] = None,
+            file_conf: Optional[FileConfig] = None,
+            safety_conf: Optional[SafetyConfig] = None
+    ) -> None:
         """
         Initialize a BiNeuron instance with all necessary configuration.
         All configuration is grouped into dataclasses (ModelConfig, LLMConfig, PromptConfig,
@@ -175,8 +183,10 @@ class BiNeuron:
                 request_language=self.translation_conf.request_language
             )
 
-        self.translated_text = TranslatorText(original_text=self.request,
-                                              **self.__settings_for_translator()).main_translater()
+        self.translated_text = TranslatorText(
+            original_text=self.request,
+            **self.__settings_for_translator()
+        ).main_translater()
 
         if self.prompt_conf.improving_user_experience:
             self.translated_text = improving_user_text_through_ai(
@@ -319,14 +329,28 @@ class BiNeuron:
         filename = MODELS_AND_FILE_NAMES[self.model_conf.repo_id]
         full_filename = filename[self.model_conf.type_computer]
 
+        if self.model_conf.automatic_disk_space_check:
+            weight_data = free_space_for_ai_model(
+                repo_id=filename,
+                filename=full_filename,
+                path=self.file_conf.main_disk,
+                attempts=self.model_conf.weight_attempts
+            )
+
+            if not weight_data:
+                raise RuntimeError("There is not enough disk space for this type of model, "
+                                   "choose another model option or another AI model altogether.")
+
         logger.info(f"A model variant file for your type of PC has been selected in the repository.")
         return full_filename
 
     def __settings_for_model_downloader(self) -> Dict:
         """
         Compile all parameters needed for the ModelDownloader into a single dictionary.
-        :return: A dictionary containing keys such as 'repo_id', 'filename', 'cache_dir',
-        'token', proxy settings, timeout values and retry configurations.
+        :return: Dictionary with keys: repo_id, filename, cache_dir, subdomain, token,
+        country, protocol, max_timeout, your_proxies, is_working, auto_proxies,
+        min_timeout_for_checking_availability, max_timeout_for_checking_availability,
+        retries, github_proxies, url_lst, proxy_retries, main_retries, prefer_mirror.
         """
         logger.info("Challenge __settings_for_model_downloader")
         return {
@@ -391,8 +415,8 @@ class BiNeuron:
         Main entry point for downloading the AI model.
         Decides between automatic and non-automatic selection:
         - If both `repo_id` and `filename` are None, runs automatic selection.
+        - If the repository is not a text-generation model, also runs automatic selection.
         - Otherwise, attempts non-automatic; if it fails, falls back to automatic selection.
-        Additionally, checks if the repository is a text-generation model; if not, switches to auto.
         """
         logger.info("Challenge _check_and_download_ai_model")
         if ((self.model_conf.repo_id is None and self.model_conf.filename is None) or
@@ -466,8 +490,8 @@ class BiNeuron:
     def __settings_for_launching_ai_model(self) -> Dict:
         """
         A dictionary of necessary parameters for configuring the Model Launcher.
-        :return: Dictionary of the values 'models_dir', 'n_ctx', 'n_gpu_layers'
-        and similar values needed for the model.
+        :return: Dictionary with keys: models_dir, n_ctx, n_gpu_layers, verbose, echo,
+        max_tokens, temperature, prefer_mirror.
         """
         logger.info("Challenge __settings_for_launching_ai_model")
         return {
@@ -479,6 +503,30 @@ class BiNeuron:
             "max_tokens": self.llm_conf.max_tokens,
             "temperature": self.llm_conf.temperature,
             "prefer_mirror": self.model_conf.prefer_mirror
+        }
+
+    def __settings_for_cloud_ai(self) -> Dict:
+        """
+        A dictionary of necessary parameters for configuring the Cloud AI.
+        :return: Dictionary with keys: key_for_api, model, with_proxy, country, protocol,
+        max_timeout, your_proxies, github_proxies, url_lst, proxy_retries, main_retries,
+        temperature, max_tokens.
+        """
+        logger.info("Challenge __settings_for_cloud_ai")
+        return {
+            "key_for_api": self.llm_conf.key_for_api,
+            "model": self.llm_conf.model,
+            "with_proxy": self.proxy_conf.with_proxy,
+            "country": self.proxy_conf.country,
+            "protocol": self.proxy_conf.protocol,
+            "max_timeout": self.proxy_conf.max_timeout,
+            "your_proxies": self.proxy_conf.your_proxies_dict,
+            "github_proxies": self.proxy_conf.github_proxies,
+            "url_lst": self.proxy_conf.url_lst,
+            "proxy_retries": self.proxy_conf.proxy_retries,
+            "main_retries": self.proxy_conf.main_retries,
+            "temperature": self.llm_conf.temperature,
+            "max_tokens": self.llm_conf.max_tokens
         }
 
     def _send_message(self, user_text: Optional[str] = None) -> str:
@@ -517,13 +565,22 @@ class BiNeuron:
         messages = self._build_messages()
 
         logger.info("Starting the AI response generation.")
-        ai_answer = launching_ai_model_and_requesting(
-            messages=messages,
-            repo_id=self.model_conf.repo_id,
-            filename=self.model_conf.filename,
-            template_prompt=self.prompt_conf.main_prompt,
-            **self.__settings_for_launching_ai_model()
-        )
+        ai_answer = None
+
+        if self.model_conf.cloud_version:
+            ai_answer = request_for_cloud_ai(
+                original_text=messages,
+                **self.__settings_for_cloud_ai()
+            )
+        else:
+            ai_answer = launching_ai_model_and_requesting(
+                messages=messages,
+                repo_id=self.model_conf.repo_id,
+                filename=self.model_conf.filename,
+                template_prompt=self.prompt_conf.main_prompt,
+                **self.__settings_for_launching_ai_model()
+            )
+
         logger.info("AI response received, length: %d characters", len(ai_answer))
 
         self._add_to_history("user", self.translated_text)
@@ -548,7 +605,8 @@ class BiNeuron:
                 f"{'=' * 5}ALL UNREAD FILES{'=' * 5}\n"
                 f"{un_files}\n"
                 f"{'=' * 5}THE FINAL RESPONSE FROM THE AI MODEL{'=' * 5}\n"
-                f"{ai_answer}\n")
+                f"{ai_answer}\n"
+            )
 
             for attempt in range(NUMBER_ATTEMPTS):
                 logger.info(f"Attempt number {attempt} to change files automatically.")
@@ -559,13 +617,22 @@ class BiNeuron:
                 else:
                     template_prompt = PROMPT_FOR_JSON_FORMATTER
 
-                json_answer = launching_ai_model_and_requesting(
-                    messages=final_messages,
-                    repo_id=MAIN_REPO_ID,
-                    filename=MAIN_FILENAME,
-                    template_prompt=template_prompt,
-                    **self.__settings_for_launching_ai_model()
-                )
+                json_answer = None
+
+                if self.model_conf.cloud_version:
+                    json_answer = request_for_cloud_ai(
+                        original_text=messages,
+                        **self.__settings_for_cloud_ai()
+                    )
+                else:
+                    json_answer = launching_ai_model_and_requesting(
+                        messages=final_messages,
+                        repo_id=MAIN_REPO_ID,
+                        filename=MAIN_FILENAME,
+                        template_prompt=template_prompt,
+                        **self.__settings_for_launching_ai_model()
+                    )
+
                 file_answer = logic_editing_files(str_json=json_answer)
 
                 if file_answer is False:

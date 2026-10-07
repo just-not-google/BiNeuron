@@ -41,6 +41,9 @@ jobs:
                       --console `
                       --name BiNeuron-Web-Windows `
                       --icon img_files/logo.ico `
+                      --copy-metadata odfdo `
+                      --copy-metadata transformers `
+                      --copy-metadata torch `
                       --add-data "img_files;img_files" `
                       --add-data "BiNeuron;BiNeuron" `
                       --add-data "templates;templates" `
@@ -89,6 +92,9 @@ jobs:
                       --console \
                       --strip \
                       --name BiNeuron-Web-Linux \
+                      --copy-metadata odfdo \
+                      --copy-metadata transformers \
+                      --copy-metadata torch \
                       --exclude-module torch.cuda \
                       --exclude-module torch.backends.cudnn \
                       --exclude-module torch.backends.cuda \
@@ -189,6 +195,9 @@ jobs:
                       --console \
                       --name BiNeuron-Web-MacOS \
                       --icon img_files/logo.icns \
+                      --copy-metadata odfdo \
+                      --copy-metadata transformers \
+                      --copy-metadata torch \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
                       --add-data "templates:templates" \

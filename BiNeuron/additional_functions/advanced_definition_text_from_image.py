@@ -2,10 +2,12 @@ from deepseek_ocr import DeepSeekOCR as CloudDeepSeek
 import logging
 from typing import Literal, Optional
 import random
-from BiNeuron.data.constants_for_functions import (MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
-                                                   NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
-                                                   RETURN_TENSORS, MAX_NEW_TOKENS, DEEPSEEK_LOCAL_OCR,
-                                                   API_BASE_URL)
+from BiNeuron.data.constants_for_functions import (
+    MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
+    NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
+    RETURN_TENSORS, MAX_NEW_TOKENS, DEEPSEEK_LOCAL_OCR,
+    API_BASE_URL
+)
 from BiNeuron.additional_functions.checking_integer_for_condition import checking_int_and_float
 import torch
 from transformers import AutoProcessor, AutoModelForImageTextToText
@@ -17,16 +19,18 @@ from BiNeuron.data.model_repo_map import MODEL_REPO_MAP
 logger = logging.getLogger(__name__)
 
 class LaunchDeepSeekOCR:
-    def __init__(self,
-                 photo_path: str,
-                 cloud_version: bool = False,
-                 model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE,
-                 device: Literal["cpu", "cuda:0"] = DEVICE_OPTIONS[0],
-                 crop_mode: bool = False,
-                 base_url: str = API_BASE_URL,
-                 api_key_for_deepseek_ocr: Optional[str] = None,
-                 timeout_for_deepseek_ocr: Optional[int] = None,
-                 max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS) -> None:
+    def __init__(
+            self,
+            photo_path: str,
+            cloud_version: bool = False,
+            model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE,
+            device: Literal["cpu", "cuda:0"] = DEVICE_OPTIONS[0],
+            crop_mode: bool = False,
+            base_url: str = API_BASE_URL,
+            api_key_for_deepseek_ocr: Optional[str] = None,
+            timeout_for_deepseek_ocr: Optional[int] = None,
+            max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS
+    ) -> None:
         """
         Initialization of the photo text detection launcher using the DeepSeek AI model.
         :param photo_path: The path to the photo that is being determined.
@@ -58,8 +62,10 @@ class LaunchDeepSeekOCR:
             max_rate_limit_retries = NUMBER_ATTEMPTS
 
         if timeout_for_deepseek_ocr is None:
-            timeout_for_deepseek_ocr = random.randint(MIN_TIMEOUT_FOR_CHECK,
-                                                      MAX_TIMEOUT_FOR_CHECK)
+            timeout_for_deepseek_ocr = random.randint(
+                MIN_TIMEOUT_FOR_CHECK,
+                MAX_TIMEOUT_FOR_CHECK
+            )
 
         self.cloud_settings = {
             "base_url": base_url,
@@ -78,7 +84,10 @@ class LaunchDeepSeekOCR:
             device = self.local_settings["device"]
             dtype = torch.float16 if device == "cuda:0" else torch.float32
             logger.info(f"Loading the local model {self.local_model_repo}.")
-            self.local_processor = AutoProcessor.from_pretrained(self.local_model_repo, trust_remote_code=True)
+            self.local_processor = AutoProcessor.from_pretrained(
+                self.local_model_repo,
+                trust_remote_code=True
+            )
             self.local_model = AutoModelForImageTextToText.from_pretrained(
                 self.local_model_repo,
                 torch_dtype=dtype,

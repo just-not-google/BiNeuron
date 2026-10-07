@@ -8,19 +8,21 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def launching_ai_model_and_requesting(messages: Union[str, List[Dict[str, str]]],
-                                      repo_id: str,
-                                      filename: str,
-                                      models_dir: str,
-                                      template_prompt: str = "",
-                                      n_ctx: Optional[int] = None,
-                                      n_gpu_layers: int = 0,
-                                      verbose: bool = False,
-                                      echo: bool = False,
-                                      max_tokens: int = MAX_TOKENS_LITE,
-                                      temperature: float = 0.1,
-                                      llm: Optional[Llama] = None,
-                                      prefer_mirror: bool = True) -> str:
+def launching_ai_model_and_requesting(
+        messages: Union[str, List[Dict[str, str]]],
+        repo_id: str,
+        filename: str,
+        models_dir: str,
+        template_prompt: str = "",
+        n_ctx: Optional[int] = None,
+        n_gpu_layers: int = 0,
+        verbose: bool = False,
+        echo: bool = False,
+        max_tokens: int = MAX_TOKENS_LITE,
+        temperature: float = 0.1,
+        llm: Optional[Llama] = None,
+        prefer_mirror: bool = True
+) -> str:
     """
     Loads an AI model and sends a request with given messages.
     :param messages: Input text (string) or chat messages (list of dicts).
@@ -50,9 +52,11 @@ def launching_ai_model_and_requesting(messages: Union[str, List[Dict[str, str]]]
             temperature = 0.1
 
         if llm is None:
-            model_downloader = ModelDownloader(repo_id=repo_id,
-                                               filename=filename,
-                                               prefer_mirror=prefer_mirror)
+            model_downloader = ModelDownloader(
+                repo_id=repo_id,
+                filename=filename,
+                prefer_mirror=prefer_mirror
+            )
             model_downloader.auto_manager_for_download()
 
             llm = Llama.from_pretrained(

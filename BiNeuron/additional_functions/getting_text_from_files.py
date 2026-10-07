@@ -9,10 +9,12 @@ import pptx2txt2
 from typing import List, Optional, Literal, Dict
 from pathlib import Path
 from BiNeuron.data.supported_formats import PHOTO_SUPPORTED_FORMATS
-from BiNeuron.data.constants_for_functions import (NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
-                                                   MAIN_LANGUAGE, LITE_TYPE, EASY_OCR,
-                                                   DEFINITION_OPTION_LIST, MARKER_FOR_WEBSITES,
-                                                   API_BASE_URL)
+from BiNeuron.data.constants_for_functions import (
+    NUMBER_ATTEMPTS, TINY_TYPE, DEVICE_OPTIONS,
+    MAIN_LANGUAGE, LITE_TYPE, EASY_OCR,
+    DEFINITION_OPTION_LIST, MARKER_FOR_WEBSITES,
+    API_BASE_URL
+)
 from BiNeuron.additional_functions.advanced_definition_text_from_image import LaunchDeepSeekOCR
 from markitdown import MarkItDown
 from epub2txt import epub2txt
@@ -46,29 +48,31 @@ def handle_errors(func):
     return wrapper
 
 class GettingTextFromFiles:
-    def __init__(self,
-                 file_name: str,
-                 lang_lst: Optional[List[str]] = None,
-                 use_gpu: bool = False,
-                 verbose: bool = False,
-                 determinant_mode: Optional[Literal["lite", "full", "auto"]] = LITE_TYPE,
-                 proxies: Optional[Dict] = None,
-                 accurate_translation: bool = False,
-                 your_key_for_deepl: str = "",
-                 request_language: str = MAIN_LANGUAGE,
-                 local_trans: bool = False,
-                 from_code_lang: str = "",
-                 cloud_version: bool = False,
-                 model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE,
-                 crop_mode: bool = False,
-                 base_url: str = API_BASE_URL,
-                 api_key_for_deepseek_ocr: Optional[str] = None,
-                 timeout_for_deepseek_ocr: Optional[int] = None,
-                 max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS,
-                 use_websites: bool = False,
-                 websites_sources_information: Optional[List[str]] = None,
-                 definition_option: Literal["easy_ocr", "deepseek_ocr"] = EASY_OCR,
-                 anonymize_text: bool = False) -> None:
+    def __init__(
+            self,
+            file_name: str,
+            lang_lst: Optional[List[str]] = None,
+            use_gpu: bool = False,
+            verbose: bool = False,
+            determinant_mode: Optional[Literal["lite", "full", "auto"]] = LITE_TYPE,
+            proxies: Optional[Dict] = None,
+            accurate_translation: bool = False,
+            your_key_for_deepl: str = "",
+            request_language: str = MAIN_LANGUAGE,
+            local_trans: bool = False,
+            from_code_lang: str = "",
+            cloud_version: bool = False,
+            model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE,
+            crop_mode: bool = False,
+            base_url: str = API_BASE_URL,
+            api_key_for_deepseek_ocr: Optional[str] = None,
+            timeout_for_deepseek_ocr: Optional[int] = None,
+            max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS,
+            use_websites: bool = False,
+            websites_sources_information: Optional[List[str]] = None,
+            definition_option: Literal["easy_ocr", "deepseek_ocr"] = EASY_OCR,
+            anonymize_text: bool = False
+    ) -> None:
         """
         Initialization of parameters for getting text from files of different formats.
         :param file_name: The link to the file from which you want to extract the text.
@@ -132,7 +136,8 @@ class GettingTextFromFiles:
         if self.anonymize_text:
             orig_text = request_anonymization(
                 original_text=orig_text,
-                request_language=self.translation_settings["request_language"])
+                request_language=self.translation_settings["request_language"]
+            )
 
         return TranslatorText(orig_text, **self.translation_settings).main_translater()
 
@@ -238,9 +243,11 @@ class GettingTextFromFiles:
         authors = book.get_authors()
         title = book.get_title()
         content = book.get_body()
-        all_text = (f"Authors: {authors}\n"
-                    f"Title: {title}\n"
-                    f"The text of the book itself: {content}\n")
+        all_text = (
+            f"Authors: {authors}\n"
+            f"Title: {title}\n"
+            f"The text of the book itself: {content}\n"
+        )
         logger.info("The text was obtained from an FB2 file.")
         return f"<< {self.trans_text(all_text)} >> - {self.file_name}\n"
 
@@ -263,11 +270,15 @@ class GettingTextFromFiles:
         """
         logger.info("Challenge _easy_ocr_get_text")
         try:
-            reader = easyocr.Reader(lang_list=self.lang_lst,
-                                    gpu=self.use_gpu,
-                                    verbose=self.verbose)
-            result = reader.readtext(image=self.file_name,
-                                     detail=0)
+            reader = easyocr.Reader(
+                lang_list=self.lang_lst,
+                gpu=self.use_gpu,
+                verbose=self.verbose
+            )
+            result = reader.readtext(
+                image=self.file_name,
+                detail=0
+            )
             logger.info("The text was successfully obtained thanks to EasyOCR.")
             return result
         except Exception as e:

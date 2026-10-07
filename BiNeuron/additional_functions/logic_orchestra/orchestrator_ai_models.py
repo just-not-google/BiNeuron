@@ -7,15 +7,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def orchestrator_ai_models(user_prompt: str,
-                           repo_id: str = MAIN_REPO_ID,
-                           filename: str = MAIN_FILENAME,
-                           n_ctx: int = 8192,
-                           n_gpu_layers: int = 0,
-                           verbose: bool = False,
-                           models_dir: str = MODELS_DIR_CONST,
-                           prefer_mirror: bool = True,
-                           template_prompt: str = PROMPT) -> List[str]:
+def orchestrator_ai_models(
+        user_prompt: str,
+        repo_id: str = MAIN_REPO_ID,
+        filename: str = MAIN_FILENAME,
+        n_ctx: int = 8192,
+        n_gpu_layers: int = 0,
+        verbose: bool = False,
+        models_dir: str = MODELS_DIR_CONST,
+        prefer_mirror: bool = True,
+        template_prompt: str = PROMPT
+) -> List[str]:
     """
     Orchestrates AI model to extract programming languages from user prompt.
     :param user_prompt: The user's input text.

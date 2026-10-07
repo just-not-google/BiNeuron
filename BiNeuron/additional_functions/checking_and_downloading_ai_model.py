@@ -1,9 +1,11 @@
 from huggingface_hub import hf_hub_download, set_client_factory
 import os
 from BiNeuron.additional_functions.proxy_for_circumventing_restrictions import working_with_proxy
-from BiNeuron.data.constants_for_functions import (HTTP_PROTOCOL, MAX_TIMEOUT, HF_MIRROR,
-                                                    MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
-                                                    NUMBER_ATTEMPTS, MAIN_PROXY_ATTEMPTS)
+from BiNeuron.data.constants_for_functions import (
+    HTTP_PROTOCOL, MAX_TIMEOUT, HF_MIRROR,
+    MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
+    NUMBER_ATTEMPTS, MAIN_PROXY_ATTEMPTS
+)
 import logging
 from typing import Optional, Dict, List
 import requests
@@ -19,26 +21,28 @@ import time
 logger = logging.getLogger(__name__)
 
 class ModelDownloader:
-    def __init__(self,
-                 repo_id: str,
-                 filename: str,
-                 cache_dir: Optional[str] = None,
-                 subdomain: str = "",
-                 token: Optional[str] = None,
-                 country: Optional[str] = None,
-                 protocol: str = HTTP_PROTOCOL,
-                 max_timeout: int = MAX_TIMEOUT,
-                 your_proxies: Optional[List[str]] = None,
-                 is_working: bool = True,
-                 auto_proxies: bool = True,
-                 min_timeout_for_checking_availability: int = MIN_TIMEOUT_FOR_CHECK,
-                 max_timeout_for_checking_availability: int = MAX_TIMEOUT_FOR_CHECK,
-                 retries: int = NUMBER_ATTEMPTS,
-                 github_proxies: bool = False,
-                 url_lst: List[str] = PROXY_LINK_LST,
-                 proxy_retries: int = NUMBER_ATTEMPTS,
-                 main_retries: int = MAIN_PROXY_ATTEMPTS,
-                 prefer_mirror: bool = True) -> None:
+    def __init__(
+            self,
+            repo_id: str,
+            filename: str,
+            cache_dir: Optional[str] = None,
+            subdomain: str = "",
+            token: Optional[str] = None,
+            country: Optional[str] = None,
+            protocol: str = HTTP_PROTOCOL,
+            max_timeout: int = MAX_TIMEOUT,
+            your_proxies: Optional[List[str]] = None,
+            is_working: bool = True,
+            auto_proxies: bool = True,
+            min_timeout_for_checking_availability: int = MIN_TIMEOUT_FOR_CHECK,
+            max_timeout_for_checking_availability: int = MAX_TIMEOUT_FOR_CHECK,
+            retries: int = NUMBER_ATTEMPTS,
+            github_proxies: bool = False,
+            url_lst: List[str] = PROXY_LINK_LST,
+            proxy_retries: int = NUMBER_ATTEMPTS,
+            main_retries: int = MAIN_PROXY_ATTEMPTS,
+            prefer_mirror: bool = True
+    ) -> None:
         """
         Initializes the downloader with repository and proxy settings.
         :param repo_id: Hugging Face repository ID.
@@ -126,9 +130,11 @@ class ModelDownloader:
         if headers is None:
             headers = random.choice(HEADERS_LIST)
 
-        return requests.get(url=url,
-                            timeout=timeout,
-                            headers=headers)
+        return requests.get(
+            url=url,
+            timeout=timeout,
+            headers=headers
+        )
 
     def _setup_proxy(self) -> None:
         """
@@ -181,7 +187,9 @@ class ModelDownloader:
                     else:
                         logger.warning("Already on mirror, retrying...")
                         time.sleep(5)
-                elif "429" in str(e).lower() or "rate limit" in str(e).lower() or "too many requests" in str(e).lower():
+                elif ("429" in str(e).lower() or
+                      "rate limit" in str(e).lower() or
+                      "too many requests" in str(e).lower()):
                     logger.warning("Rate limit detected – switching to mirror.")
                     if os.environ.get("HF_ENDPOINT") != HF_MIRROR:
                         os.environ["HF_ENDPOINT"] = HF_MIRROR

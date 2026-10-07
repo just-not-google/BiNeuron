@@ -1,20 +1,23 @@
 from BiNeuron.data.prompt_for_compression import PROMPT_FOR_COMPRESSION
 from BiNeuron.additional_functions.template_for_changing_text_query_via_ai import template_for_changing_text_query_via_ai
-from BiNeuron.data.constants_for_functions import (MAIN_REPO_ID, MAIN_FILENAME, MAX_TOKENS_LITE,
-                                                   MODELS_DIR_CONST)
+from BiNeuron.data.constants_for_functions import (
+    MAIN_REPO_ID, MAIN_FILENAME, MAX_TOKENS_LITE, MODELS_DIR_CONST
+)
 import logging
 
 
 logger = logging.getLogger(__name__)
 
-def logic_text_compression(original_text: str,
-                           models_dir: str = MODELS_DIR_CONST,
-                           n_gpu_layers: int = 0,
-                           verbose: bool = False,
-                           prefer_mirror: bool = True,
-                           repo_id: str = MAIN_REPO_ID,
-                           filename: str = MAIN_FILENAME,
-                           max_tokens: int = MAX_TOKENS_LITE) -> str:
+def logic_text_compression(
+        original_text: str,
+        models_dir: str = MODELS_DIR_CONST,
+        n_gpu_layers: int = 0,
+        verbose: bool = False,
+        prefer_mirror: bool = True,
+        repo_id: str = MAIN_REPO_ID,
+        filename: str = MAIN_FILENAME,
+        max_tokens: int = MAX_TOKENS_LITE
+) -> str:
     """
     Compresses text using the same small local model (Qwen).
     Falls back to the original text if compression fails.

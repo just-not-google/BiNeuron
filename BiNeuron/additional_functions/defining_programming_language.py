@@ -3,39 +3,43 @@ from BiNeuron.additional_functions.detect_programming_language import detect_pro
 from typing import List, Optional, Literal, Dict
 from BiNeuron.data.hint_words_for_defining_programming_languages import HINT_WORDS
 from BiNeuron.additional_functions.logic_orchestra.orchestrator_ai_models import orchestrator_ai_models
-from BiNeuron.data.constants_for_functions import (TYPE_DEFAULT, MARKER_FOR_FILES, MAIN_LANGUAGE,
-                                                   LITE_TYPE, TINY_TYPE, NUMBER_ATTEMPTS, EASY_OCR,
-                                                   API_BASE_URL)
+from BiNeuron.data.constants_for_functions import (
+    TYPE_DEFAULT, MARKER_FOR_FILES, MAIN_LANGUAGE,
+    LITE_TYPE, TINY_TYPE, NUMBER_ATTEMPTS, EASY_OCR,
+    API_BASE_URL
+)
 import logging
 
 
 logger = logging.getLogger(__name__)
 
 class DefiningProgrammingLanguage:
-    def __init__(self,
-                 translated_text: str,
-                 unread_files: Optional[List[str]] = None,
-                 additional_files: Optional[List[str]] = None,
-                 with_ai_orchestrator: bool = False,
-                 proprietary_algorithms: bool = False,
-                 lang_lst: Optional[List[str]] = None,
-                 use_gpu: bool = False,
-                 verbose: bool = False,
-                 determinant_mode: Optional[Literal["lite", "full", "auto"]] = LITE_TYPE,
-                 proxies: Optional[Dict] = None,
-                 accurate_translation: bool = False,
-                 your_key_for_deepl: str = "",
-                 request_language: str = MAIN_LANGUAGE,
-                 cloud_version: bool = False,
-                 definition_option: Literal["easy_ocr", "deepseek_ocr"] = EASY_OCR,
-                 model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE,
-                 crop_mode: bool = False,
-                 base_url: str = API_BASE_URL,
-                 api_key_for_deepseek_ocr: Optional[str] = None,
-                 timeout_for_deepseek_ocr: Optional[int] = None,
-                 max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS,
-                 prefer_mirror: bool = True,
-                 anonymize_text: bool = False) -> None:
+    def __init__(
+            self,
+            translated_text: str,
+            unread_files: Optional[List[str]] = None,
+            additional_files: Optional[List[str]] = None,
+            with_ai_orchestrator: bool = False,
+            proprietary_algorithms: bool = False,
+            lang_lst: Optional[List[str]] = None,
+            use_gpu: bool = False,
+            verbose: bool = False,
+            determinant_mode: Optional[Literal["lite", "full", "auto"]] = LITE_TYPE,
+            proxies: Optional[Dict] = None,
+            accurate_translation: bool = False,
+            your_key_for_deepl: str = "",
+            request_language: str = MAIN_LANGUAGE,
+            cloud_version: bool = False,
+            definition_option: Literal["easy_ocr", "deepseek_ocr"] = EASY_OCR,
+            model_size: Literal["tiny", "small", "base", "large", "gundam"] = TINY_TYPE,
+            crop_mode: bool = False,
+            base_url: str = API_BASE_URL,
+            api_key_for_deepseek_ocr: Optional[str] = None,
+            timeout_for_deepseek_ocr: Optional[int] = None,
+            max_rate_limit_retries: Optional[int] = NUMBER_ATTEMPTS,
+            prefer_mirror: bool = True,
+            anonymize_text: bool = False
+    ) -> None:
         """
         Initialize the language detector with all necessary configuration.
         :param translated_text: The already-translated user input.
@@ -140,8 +144,10 @@ class DefiningProgrammingLanguage:
         prog_langs_lst = []
 
         if self.with_ai_orchestrator:
-            prog_langs_lst = orchestrator_ai_models(user_prompt=self.translated_text,
-                                                    prefer_mirror=self.prefer_mirror)
+            prog_langs_lst = orchestrator_ai_models(
+                user_prompt=self.translated_text,
+                prefer_mirror=self.prefer_mirror
+            )
             logger.info("Programming languages have been defined by AI.")
         else:
             if self.proprietary_algorithms:
