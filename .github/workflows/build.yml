@@ -9,92 +9,135 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+env:
+  PYTHON_VERSION: '3.10'
+  PYTHONUNBUFFERED: '1'
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+  PIP_NO_INPUT: '1'
+
 jobs:
   build-windows:
     runs-on: windows-latest
+    timeout-minutes: 90
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-
-      - name: Cache pip packages
-        uses: actions/cache@v3
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
 
       - name: Install Python dependencies
+        shell: pwsh
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip wheel setuptools
           pip install -r requirements.txt
+          $env:CMAKE_ARGS = "-DGGML_CUDA=off -DGGML_NATIVE=off -DGGML_BACKEND_DL=OFF"
+          pip install llama-cpp-python --force-reinstall --no-cache-dir
           pip install flask pyinstaller
 
-      - name: Build with PyInstaller (onefile)
+      - name: Verify llama_cpp layout
+        shell: pwsh
         run: |
-          pyinstaller --onefile `
+          python -c "import llama_cpp, os; p=os.path.dirname(llama_cpp.__file__); print('llama_cpp at:', p); print('root files:', os.listdir(p)); lib=os.path.join(p,'lib'); print('lib exists:', os.path.isdir(lib)); print('lib files:', os.listdir(lib) if os.path.isdir(lib) else None)"
+
+      - name: Build with PyInstaller (onefile)
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile `
                       --console `
                       --name BiNeuron-Web-Windows `
                       --icon img_files/logo.ico `
+                      --additional-hooks-dir=. `
+                      --runtime-hook runtime_hook_llama.py `
+                      --collect-all llama_cpp `
                       --copy-metadata odfdo `
                       --copy-metadata transformers `
                       --copy-metadata torch `
+                      --copy-metadata llama_cpp `
+                      --hidden-import llama_cpp.llama_cpp `
                       --add-data "img_files;img_files" `
                       --add-data "BiNeuron;BiNeuron" `
                       --add-data "templates;templates" `
                       --add-data "static;static" `
                       app.py
 
+      - name: Smoke test
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath "dist\BiNeuron-Web-Windows.exe" -PassThru `
+                             -RedirectStandardOutput "out.log" -RedirectStandardError "err.log"
+          Start-Sleep -Seconds 12
+          if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+          Write-Host "----- STDOUT -----"
+          Get-Content out.log -ErrorAction SilentlyContinue
+          Write-Host "----- STDERR -----"
+          Get-Content err.log -ErrorAction SilentlyContinue
+          if ((Get-Content out.log -Raw -ErrorAction SilentlyContinue) -match "BiNeuron import failed") {
+            Write-Error "BiNeuron import failed inside exe"
+            exit 1
+          }
+
       - name: Upload artifact (Windows)
         uses: actions/upload-artifact@v4
         with:
           name: BiNeuron-Web-Windows
           path: dist/BiNeuron-Web-Windows.exe
+          if-no-files-found: error
 
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
 
-      - name: Cache pip packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install system dependencies (Tkinter)
-        run: sudo apt-get update && sudo apt-get install -y python3-tk
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build git pkg-config \
+            python3-tk libgl1 libglib2.0-0 libgomp1
 
       - name: Install Python dependencies (CPU-only)
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip wheel setuptools
           pip install -r requirements.txt
-          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu --force-reinstall --no-cache-dir
-          CMAKE_ARGS="-DLLAMA_CUDA=off" pip install llama-cpp-python --force-reinstall --no-cache-dir
+          pip install torch torchvision \
+              --index-url https://download.pytorch.org/whl/cpu \
+              --force-reinstall --no-cache-dir
+          CMAKE_ARGS="-DGGML_CUDA=off -DGGML_NATIVE=off -DGGML_BACKEND_DL=OFF" \
+              pip install llama-cpp-python --force-reinstall --no-cache-dir
           pip install flask pyinstaller
 
-      - name: Build with PyInstaller (onefile) - highly optimized
+      - name: Verify llama_cpp layout
         run: |
-          pyinstaller --onefile \
+          python -c "import llama_cpp, os; p=os.path.dirname(llama_cpp.__file__); print('llama_cpp at:', p); print('root files:', os.listdir(p)); lib=os.path.join(p,'lib'); print('lib exists:', os.path.isdir(lib)); print('lib files:', os.listdir(lib) if os.path.isdir(lib) else None)"
+
+      - name: Build with PyInstaller (onefile)
+        run: |
+          pyinstaller --noconfirm --clean --onefile \
                       --console \
                       --strip \
                       --name BiNeuron-Web-Linux \
+                      --additional-hooks-dir=. \
+                      --runtime-hook runtime_hook_llama.py \
+                      --collect-all llama_cpp \
                       --copy-metadata odfdo \
                       --copy-metadata transformers \
                       --copy-metadata torch \
+                      --copy-metadata llama_cpp \
+                      --hidden-import llama_cpp.llama_cpp \
                       --exclude-module torch.cuda \
                       --exclude-module torch.backends.cudnn \
                       --exclude-module torch.backends.cuda \
@@ -114,15 +157,27 @@ jobs:
                       --exclude-module PySide2 \
                       --exclude-module PySide6 \
                       --exclude-module tensorboard \
-                      --exclude-module pandas \
-                      --exclude-module sqlalchemy \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
                       --add-data "templates:templates" \
                       --add-data "static:static" \
                       app.py
 
-      - name: Create .desktop file for Linux
+      - name: Smoke test
+        shell: bash
+        run: |
+          ./dist/BiNeuron-Web-Linux > out.log 2>&1 &
+          PID=$!
+          sleep 12
+          kill -0 $PID 2>/dev/null && kill $PID || true
+          echo "----- OUTPUT -----"
+          cat out.log || true
+          if grep -q "BiNeuron import failed" out.log; then
+            echo "::error::BiNeuron import failed inside binary"
+            exit 1
+          fi
+
+      - name: Create .desktop file
         run: |
           cat > BiNeuron-Web.desktop <<EOF
           [Desktop Entry]
@@ -142,73 +197,96 @@ jobs:
             dist/BiNeuron-Web-Linux
             BiNeuron-Web.desktop
             img_files/logo.ico
+          if-no-files-found: error
 
   build-macos:
-    runs-on: macos-latest
+    runs-on: macos-14
+    timeout-minutes: 120
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
 
-      - name: Cache pip packages
-        uses: actions/cache@v3
-        with:
-          path: ~/Library/Caches/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install system dependencies (Tkinter + ImageMagick for icon conversion)
+      - name: Install system dependencies
         run: |
-          brew untap aws/tap 2>/dev/null || true
-          brew install tcl-tk imagemagick
+          brew update --quiet || true
+          brew install tcl-tk imagemagick cmake ninja pkg-config
 
-      - name: Convert .ico to .icns for macOS
+      - name: Convert .ico → .icns
         run: |
           convert img_files/logo.ico img_files/logo.png
-          mkdir logo.iconset
-          sips -z 16 16     img_files/logo.png --out logo.iconset/icon_16x16.png
-          sips -z 32 32     img_files/logo.png --out logo.iconset/icon_16x16@2x.png
-          sips -z 32 32     img_files/logo.png --out logo.iconset/icon_32x32.png
-          sips -z 64 64     img_files/logo.png --out logo.iconset/icon_32x32@2x.png
-          sips -z 128 128   img_files/logo.png --out logo.iconset/icon_128x128.png
-          sips -z 256 256   img_files/logo.png --out logo.iconset/icon_128x128@2x.png
-          sips -z 256 256   img_files/logo.png --out logo.iconset/icon_256x256.png
-          sips -z 512 512   img_files/logo.png --out logo.iconset/icon_256x256@2x.png
-          sips -z 512 512   img_files/logo.png --out logo.iconset/icon_512x512.png
-          sips -z 1024 1024 img_files/logo.png --out logo.iconset/icon_512x512@2x.png
+          rm -rf logo.iconset
+          mkdir -p logo.iconset
+          sips -z 16    16    img_files/logo.png --out logo.iconset/icon_16x16.png
+          sips -z 32    32    img_files/logo.png --out logo.iconset/icon_16x16@2x.png
+          sips -z 32    32    img_files/logo.png --out logo.iconset/icon_32x32.png
+          sips -z 64    64    img_files/logo.png --out logo.iconset/icon_32x32@2x.png
+          sips -z 128   128   img_files/logo.png --out logo.iconset/icon_128x128.png
+          sips -z 256   256   img_files/logo.png --out logo.iconset/icon_128x128@2x.png
+          sips -z 256   256   img_files/logo.png --out logo.iconset/icon_256x256.png
+          sips -z 512   512   img_files/logo.png --out logo.iconset/icon_256x256@2x.png
+          sips -z 512   512   img_files/logo.png --out logo.iconset/icon_512x512.png
+          sips -z 1024  1024  img_files/logo.png --out logo.iconset/icon_512x512@2x.png
           iconutil -c icns logo.iconset -o img_files/logo.icns
 
       - name: Install Python dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip wheel setuptools
           pip install -r requirements.txt
+          CMAKE_ARGS="-DGGML_METAL=on -DGGML_NATIVE=off" \
+              pip install llama-cpp-python --force-reinstall --no-cache-dir
           pip install flask pyinstaller
+
+      - name: Verify llama_cpp layout
+        run: |
+          python -c "import llama_cpp, os; p=os.path.dirname(llama_cpp.__file__); print('llama_cpp at:', p); print('root files:', os.listdir(p)); lib=os.path.join(p,'lib'); print('lib exists:', os.path.isdir(lib)); print('lib files:', os.listdir(lib) if os.path.isdir(lib) else None)"
 
       - name: Build with PyInstaller (onefile)
         run: |
-          pyinstaller --onefile \
+          pyinstaller --noconfirm --clean --onefile \
                       --console \
                       --name BiNeuron-Web-MacOS \
                       --icon img_files/logo.icns \
+                      --additional-hooks-dir=. \
+                      --runtime-hook runtime_hook_llama.py \
+                      --collect-all llama_cpp \
                       --copy-metadata odfdo \
                       --copy-metadata transformers \
                       --copy-metadata torch \
+                      --copy-metadata llama_cpp \
+                      --hidden-import llama_cpp.llama_cpp \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
                       --add-data "templates:templates" \
                       --add-data "static:static" \
                       app.py
 
+      - name: Smoke test
+        shell: bash
+        run: |
+          ./dist/BiNeuron-Web-MacOS > out.log 2>&1 &
+          PID=$!
+          sleep 12
+          kill -0 $PID 2>/dev/null && kill $PID || true
+          echo "----- OUTPUT -----"
+          cat out.log || true
+          if grep -q "BiNeuron import failed" out.log; then
+            echo "::error::BiNeuron import failed inside binary"
+            exit 1
+          fi
+
       - name: Upload artifact (macOS)
         uses: actions/upload-artifact@v4
         with:
           name: BiNeuron-Web-MacOS
           path: dist/BiNeuron-Web-MacOS
+          if-no-files-found: error
 
   release:
     runs-on: ubuntu-latest
@@ -216,18 +294,19 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
+
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Create ZIP archives for each platform
+      - name: Create ZIP archives
         run: |
           cd artifacts
           zip -r BiNeuron-Web-Windows.zip BiNeuron-Web-Windows/
-          zip -r BiNeuron-Web-Linux.zip BiNeuron-Web-Linux/
-          zip -r BiNeuron-Web-MacOS.zip BiNeuron-Web-MacOS/
+          zip -r BiNeuron-Web-Linux.zip  BiNeuron-Web-Linux/
+          zip -r BiNeuron-Web-MacOS.zip  BiNeuron-Web-MacOS/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
