@@ -38,6 +38,7 @@ if ("scrollRestoration" in history) {
     <a href="#" class="logo">BiNeuron</a>
     <nav class="nav-links">
       <a href="#about" data-i18n="nav_about">About</a>
+      <a href="#features" data-i18n="nav_features">Features</a>
       <a href="#download" data-i18n="nav_download">Download</a>
       <a href="https://github.com/just-not-google/BiNeuron/tree/main/docs" data-i18n="nav_docs">Docs</a>
     </nav>
@@ -57,14 +58,14 @@ if ("scrollRestoration" in history) {
     <div class="container">
       <h1 data-i18n="hero_title">Code at the speed of thought</h1>
       <p class="hero-sub" data-i18n="hero_sub">
-        BiNeuron is a fully local AI assistant for code. Reads your project files, detects the programming language, picks the right model, and generates code, docs, or analysis. Everything stays on your machine.
+        BiNeuron is a fully local AI assistant for code, with optional cloud fallback. Reads your project files, detects the programming language, picks the right model, and generates code, docs, or analysis. Everything stays on your machine by default.
       </p>
       <div class="hero-actions">
         <a href="#download" class="btn btn-primary" data-i18n="btn_download">Download for free</a>
         <a href="https://github.com/just-not-google/BiNeuron" class="btn btn-secondary" data-i18n="btn_github">View on GitHub</a>
       </div>
       <div class="hero-image">
-        <img src="img_files/gui_screenshot_2.png" alt="BiNeuron">
+        <img src="img_files/gui_screenshot_3.png" alt="BiNeuron">
       </div>
     </div>
   </section>
@@ -73,29 +74,57 @@ if ("scrollRestoration" in history) {
     <div class="container">
       <h2 class="section-title" data-i18n="about_title">Why BiNeuron</h2>
       <p class="section-sub" data-i18n="about_text">
-        A local first AI assistant built for developers who care about privacy, speed, and control.
+        A local first AI assistant built for developers who care about privacy, speed, and control, with cloud options when you want them.
       </p>
 
       <div class="features">
         <div class="feature">
-          <h3 data-i18n="f1_title">100% Local</h3>
-          <p data-i18n="f1_text">Runs models on your machine. No API keys, no subscriptions, no data leaks.</p>
+          <h3 data-i18n="f1_title">100% Local by Default</h3>
+          <p data-i18n="f1_text">Runs GGUF models on your machine. No API keys, no subscriptions, no data leaving your computer unless you enable cloud mode.</p>
         </div>
         <div class="feature">
-          <h3 data-i18n="f2_title">Multi-Language</h3>
-          <p data-i18n="f2_text">Detects over 25 programming languages and picks a specialized model for each.</p>
+          <h3 data-i18n="f2_title">Multi Language Detection</h3>
+          <p data-i18n="f2_text">Detects over 25 programming languages and automatically picks a specialised model for each one.</p>
         </div>
         <div class="feature">
-          <h3 data-i18n="f3_title">File Editing</h3>
-          <p data-i18n="f3_text">Reads and modifies files directly via a two stage AI pipeline.</p>
+          <h3 data-i18n="f3_title">Automatic File Editing</h3>
+          <p data-i18n="f3_text">A two stage pipeline where the main AI writes code and a light JSON formatter applies whole file changes on disk.</p>
         </div>
         <div class="feature">
           <h3 data-i18n="f4_title">OCR and Documents</h3>
-          <p data-i18n="f4_text">Extracts text from PDF, DOCX, PPTX, and images via built in OCR.</p>
+          <p data-i18n="f4_text">Extracts text from PDF, DOCX, ODF, PPTX, XLSX, EPUB, MOBI, FB2 and images via EasyOCR or DeepSeek OCR.</p>
         </div>
         <div class="feature">
-          <h3 data-i18n="f5_title">Proxy Support</h3>
-          <p data-i18n="f5_text">Works behind restrictions with automatic proxy and mirror fallback.</p>
+          <h3 data-i18n="f5_title">Virtual Storage Mode</h3>
+          <p data-i18n="f5_text">Point BiNeuron at a folder and it recursively reads every supported file into the analysis context.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f6_title">Cloud AI Fallback</h3>
+          <p data-i18n="f6_text">Optional cloud inference through LiteLLM: switch to any provider by setting a cloud model name and API key.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f7_title">Request Preview</h3>
+          <p data-i18n="f7_text">Inspect the full system prompt, translated request, file context, and attached file list before sending anything to the AI.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f8_title">Chat Encryption</h3>
+          <p data-i18n="f8_text">Protect your conversation history with a master password using Fernet and PBKDF2 with 200,000 iterations.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f9_title">Privacy Controls</h3>
+          <p data-i18n="f9_text">Request anonymization with Microsoft Presidio and an optional profanity filter before anything reaches the model.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f10_title">Proxy and Mirror Support</h3>
+          <p data-i18n="f10_text">Automatic fallback to hf-mirror.com, GitHub proxy lists, and custom proxy settings for restricted networks.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f11_title">Offline Translation</h3>
+          <p data-i18n="f11_text">Google Translate, DeepL, or fully offline ArgosTranslate. Your request is normalised to any target language.</p>
+        </div>
+        <div class="feature">
+          <h3 data-i18n="f12_title">24 Dark Themes</h3>
+          <p data-i18n="f12_text">From Midnight Deep and Dracula Castle to Synthwave 84, Matrix Terminal, and AMOLED Black.</p>
         </div>
       </div>
     </div>
@@ -112,19 +141,19 @@ if ("scrollRestoration" in history) {
         <div class="download-card">
           <div class="os-name">Windows</div>
           <div class="os-note" data-i18n="dl_win">.exe installer</div>
-          <div class="os-desc" data-i18n="dl_win_desc">Windows 10 / 11 · 64 bit</div>
+          <div class="os-desc" data-i18n="dl_win_desc">Windows 10 and 11, 64 bit</div>
           <a href="https://github.com/just-not-google/BiNeuron/releases/download/v0.0.4/BiNeuron-Web-Windows.zip" class="btn btn-primary download-btn" data-i18n="dl_btn">Download</a>
         </div>
         <div class="download-card">
           <div class="os-name">macOS</div>
           <div class="os-note" data-i18n="dl_mac">.dmg package</div>
-          <div class="os-desc" data-i18n="dl_mac_desc">Apple Silicon · Intel</div>
+          <div class="os-desc" data-i18n="dl_mac_desc">Apple Silicon, Intel</div>
           <a href="https://github.com/just-not-google/BiNeuron/releases/download/v0.0.4/BiNeuron-Web-MacOS.zip" class="btn btn-primary download-btn" data-i18n="dl_btn">Download</a>
         </div>
         <div class="download-card">
           <div class="os-name">Linux</div>
-          <div class="os-note" data-i18n="dl_linux">.AppImage / .deb</div>
-          <div class="os-desc" data-i18n="dl_linux_desc">Debian · Ubuntu · Arch</div>
+          <div class="os-note" data-i18n="dl_linux">.AppImage and .deb</div>
+          <div class="os-desc" data-i18n="dl_linux_desc">Debian, Ubuntu, Arch</div>
           <a href="https://github.com/just-not-google/BiNeuron/releases/download/v0.0.4/BiNeuron-Web-Linux.zip" class="btn btn-primary download-btn" data-i18n="dl_btn">Download</a>
         </div>
       </div>
@@ -179,103 +208,148 @@ if ("scrollRestoration" in history) {
 const TRANSLATIONS = {
   en: {
     nav_about: "About",
+    nav_features: "Features",
     nav_download: "Download",
     nav_docs: "Docs",
     hero_title: "Code at the speed of thought",
-    hero_sub: "BiNeuron is a fully local AI assistant for code. Reads your project files, detects the programming language, picks the right model, and generates code, docs, or analysis. Everything stays on your machine.",
+    hero_sub: "BiNeuron is a fully local AI assistant for code, with optional cloud fallback. Reads your project files, detects the programming language, picks the right model, and generates code, docs, or analysis. Everything stays on your machine by default.",
     btn_download: "Download for free",
     btn_github: "View on GitHub",
     about_title: "Why BiNeuron",
-    about_text: "A local first AI assistant built for developers who care about privacy, speed, and control.",
-    f1_title: "100% Local",
-    f1_text: "Runs models on your machine. No API keys, no subscriptions, no data leaks.",
-    f2_title: "Multi-Language",
-    f2_text: "Detects over 25 programming languages and picks a specialized model for each.",
-    f3_title: "File Editing",
-    f3_text: "Reads and modifies files directly via a two stage AI pipeline.",
+    about_text: "A local first AI assistant built for developers who care about privacy, speed, and control, with cloud options when you want them.",
+    f1_title: "100% Local by Default",
+    f1_text: "Runs GGUF models on your machine. No API keys, no subscriptions, no data leaving your computer unless you enable cloud mode.",
+    f2_title: "Multi Language Detection",
+    f2_text: "Detects over 25 programming languages and automatically picks a specialised model for each one.",
+    f3_title: "Automatic File Editing",
+    f3_text: "A two stage pipeline where the main AI writes code and a light JSON formatter applies whole file changes on disk.",
     f4_title: "OCR and Documents",
-    f4_text: "Extracts text from PDF, DOCX, PPTX, and images via built in OCR.",
-    f5_title: "Proxy Support",
-    f5_text: "Works behind restrictions with automatic proxy and mirror fallback.",
+    f4_text: "Extracts text from PDF, DOCX, ODF, PPTX, XLSX, EPUB, MOBI, FB2 and images via EasyOCR or DeepSeek OCR.",
+    f5_title: "Virtual Storage Mode",
+    f5_text: "Point BiNeuron at a folder and it recursively reads every supported file into the analysis context.",
+    f6_title: "Cloud AI Fallback",
+    f6_text: "Optional cloud inference through LiteLLM: switch to any provider by setting a cloud model name and API key.",
+    f7_title: "Request Preview",
+    f7_text: "Inspect the full system prompt, translated request, file context, and attached file list before sending anything to the AI.",
+    f8_title: "Chat Encryption",
+    f8_text: "Protect your conversation history with a master password using Fernet and PBKDF2 with 200,000 iterations.",
+    f9_title: "Privacy Controls",
+    f9_text: "Request anonymization with Microsoft Presidio and an optional profanity filter before anything reaches the model.",
+    f10_title: "Proxy and Mirror Support",
+    f10_text: "Automatic fallback to hf-mirror.com, GitHub proxy lists, and custom proxy settings for restricted networks.",
+    f11_title: "Offline Translation",
+    f11_text: "Google Translate, DeepL, or fully offline ArgosTranslate. Your request is normalised to any target language.",
+    f12_title: "24 Dark Themes",
+    f12_text: "From Midnight Deep and Dracula Castle to Synthwave 84, Matrix Terminal, and AMOLED Black.",
     download_title: "Download BiNeuron",
     download_text: "Completely free and open source. No accounts, no sign ups, no hidden fees. Pick your platform and start coding with a local AI in under five minutes.",
     download_note: "Every release is built automatically from source and signed. Choose the format that fits your workflow: a one click installer for Windows, a native package for macOS, or a portable AppImage for Linux.",
     download_help_text: "If a file does not download or you get an error, open the official releases page on GitHub and pick the right build for your platform manually.",
     download_help_link: "Open releases on GitHub",
     dl_win: ".exe installer",
-    dl_win_desc: "Windows 10 / 11 · 64 bit",
+    dl_win_desc: "Windows 10 and 11, 64 bit",
     dl_mac: ".dmg package",
-    dl_mac_desc: "Apple Silicon · Intel",
-    dl_linux: ".AppImage / .deb",
-    dl_linux_desc: "Debian · Ubuntu · Arch",
+    dl_mac_desc: "Apple Silicon, Intel",
+    dl_linux: ".AppImage and .deb",
+    dl_linux_desc: "Debian, Ubuntu, Arch",
     dl_btn: "Download",
     footer_tag: "Local AI for developers"
   },
   ru: {
     nav_about: "О проекте",
+    nav_features: "Возможности",
     nav_download: "Скачать",
     nav_docs: "Документация",
     hero_title: "Код на скорости мысли",
-    hero_sub: "BiNeuron это полностью локальный ИИ ассистент для кода. Читает файлы проекта, определяет язык программирования, подбирает нужную модель и генерирует код, документацию или анализ. Всё остаётся на вашей машине.",
+    hero_sub: "BiNeuron это полностью локальный ИИ ассистент для кода с опциональным переходом в облако. Читает файлы проекта, определяет язык программирования, подбирает нужную модель и генерирует код, документацию или анализ. По умолчанию всё остаётся на вашей машине.",
     btn_download: "Скачать бесплатно",
     btn_github: "Открыть на GitHub",
     about_title: "Почему BiNeuron",
-    about_text: "Локальный ИИ ассистент для разработчиков, которым важны приватность, скорость и контроль.",
-    f1_title: "Полностью локально",
-    f1_text: "Модели запускаются на вашей машине. Без API ключей, без подписок, без утечек.",
-    f2_title: "Мультиязычность",
-    f2_text: "Определяет более 25 языков программирования и подбирает модель под каждый.",
-    f3_title: "Редактирование файлов",
-    f3_text: "Читает и изменяет файлы напрямую через двухэтапный ИИ пайплайн.",
+    about_text: "Локальный ИИ ассистент для разработчиков, которым важны приватность, скорость и контроль, с облачными возможностями по желанию.",
+    f1_title: "Локально по умолчанию",
+    f1_text: "GGUF модели работают на вашей машине. Без API ключей, без подписок, без передачи данных, пока вы сами не включите облачный режим.",
+    f2_title: "Мультиязычное определение",
+    f2_text: "Определяет более 25 языков программирования и автоматически подбирает специализированную модель под каждый.",
+    f3_title: "Автоматическое редактирование файлов",
+    f3_text: "Двухэтапный пайплайн: основная ИИ модель пишет код, лёгкий JSON форматтер применяет полные замены файлов на диске.",
     f4_title: "OCR и документы",
-    f4_text: "Извлекает текст из PDF, DOCX, PPTX и изображений через встроенный OCR.",
-    f5_title: "Поддержка прокси",
-    f5_text: "Работает в условиях ограничений с автоматическим подбором прокси и зеркал.",
+    f4_text: "Извлекает текст из PDF, DOCX, ODF, PPTX, XLSX, EPUB, MOBI, FB2 и изображений через EasyOCR или DeepSeek OCR.",
+    f5_title: "Режим виртуального хранилища",
+    f5_text: "Укажите папку, и BiNeuron рекурсивно прочитает все поддерживаемые файлы в контекст анализа.",
+    f6_title: "Облачный ИИ как резерв",
+    f6_text: "Опциональный облачный инференс через LiteLLM: переключение на любого провайдера указанием имени модели и API ключа.",
+    f7_title: "Предпросмотр запроса",
+    f7_text: "Просмотр полного системного промпта, переведённого запроса, контекста файлов и списка прикреплённых файлов до отправки в ИИ.",
+    f8_title: "Шифрование чатов",
+    f8_text: "Защита истории диалогов мастер паролем через Fernet и PBKDF2 с 200 000 итераций.",
+    f9_title: "Приватность",
+    f9_text: "Анонимизация запроса через Microsoft Presidio и опциональный фильтр ненормативной лексики перед отправкой в модель.",
+    f10_title: "Прокси и зеркала",
+    f10_text: "Автоматический переход на hf-mirror.com, списки прокси с GitHub и свои прокси для сетей с ограничениями.",
+    f11_title: "Офлайн перевод",
+    f11_text: "Google Translate, DeepL или полностью офлайн ArgosTranslate. Запрос нормализуется на любой целевой язык.",
+    f12_title: "24 тёмные темы",
+    f12_text: "От Midnight Deep и Dracula Castle до Synthwave 84, Matrix Terminal и AMOLED Black.",
     download_title: "Скачать BiNeuron",
     download_text: "Полностью бесплатный проект с открытым исходным кодом. Без регистрации, без подписок, без скрытых платежей. Выберите платформу и начните писать код с локальным ИИ меньше чем за пять минут.",
     download_note: "Каждый релиз собирается автоматически из исходников и подписывается. Выберите подходящий формат: установщик в один клик для Windows, нативный пакет для macOS или портативный AppImage для Linux.",
     download_help_text: "Если файл не скачивается или появляется ошибка, откройте официальную страницу релизов на GitHub и выберите сборку для вашей платформы вручную.",
     download_help_link: "Открыть релизы на GitHub",
     dl_win: ".exe установщик",
-    dl_win_desc: "Windows 10 / 11 · 64 бита",
+    dl_win_desc: "Windows 10 и 11, 64 бита",
     dl_mac: ".dmg пакет",
-    dl_mac_desc: "Apple Silicon · Intel",
-    dl_linux: ".AppImage / .deb",
-    dl_linux_desc: "Debian · Ubuntu · Arch",
+    dl_mac_desc: "Apple Silicon, Intel",
+    dl_linux: ".AppImage и .deb",
+    dl_linux_desc: "Debian, Ubuntu, Arch",
     dl_btn: "Скачать",
     footer_tag: "Локальный ИИ для разработчиков"
   },
   zh: {
     nav_about: "关于",
+    nav_features: "功能",
     nav_download: "下载",
     nav_docs: "文档",
     hero_title: "以思维的速度编写代码",
-    hero_sub: "BiNeuron 是一个完全本地的代码 AI 助手。读取你的项目文件，识别编程语言，选择最合适的模型，并生成代码、文档或分析。一切都在你自己的机器上完成。",
+    hero_sub: "BiNeuron 是一个完全本地的代码 AI 助手，可选择云端回退。读取你的项目文件，识别编程语言，选择最合适的模型，并生成代码、文档或分析。默认情况下一切都在你自己的机器上完成。",
     btn_download: "免费下载",
     btn_github: "在 GitHub 上查看",
     about_title: "为什么选择 BiNeuron",
-    about_text: "为注重隐私、速度和掌控的开发者打造的本地优先 AI 助手。",
-    f1_title: "完全本地",
-    f1_text: "模型在你自己的机器上运行。无需 API 密钥，无需订阅，没有数据泄露。",
-    f2_title: "多语言支持",
-    f2_text: "识别 25 种以上编程语言，并为每种语言选择专用模型。",
-    f3_title: "文件编辑",
-    f3_text: "通过两阶段 AI 管线直接读取和修改文件。",
+    about_text: "为注重隐私、速度和掌控的开发者打造的本地优先 AI 助手，并可按需使用云端功能。",
+    f1_title: "默认完全本地",
+    f1_text: "GGUF 模型在你自己的机器上运行。无需 API 密钥，无需订阅，除非启用云模式，否则数据不会离开你的电脑。",
+    f2_title: "多语言检测",
+    f2_text: "识别 25 种以上编程语言，并为每种语言自动选择专用模型。",
+    f3_title: "自动文件编辑",
+    f3_text: "两阶段流水线：主 AI 编写代码，轻量级 JSON 格式化器在磁盘上应用整文件更改。",
     f4_title: "OCR 与文档",
-    f4_text: "通过内置 OCR 从 PDF、DOCX、PPTX 和图像中提取文本。",
-    f5_title: "代理支持",
-    f5_text: "在受限环境下自动使用代理和镜像。",
+    f4_text: "通过 EasyOCR 或 DeepSeek OCR 从 PDF、DOCX、ODF、PPTX、XLSX、EPUB、MOBI、FB2 和图像中提取文本。",
+    f5_title: "虚拟存储模式",
+    f5_text: "将 BiNeuron 指向一个文件夹，它会递归读取所有受支持的文件到分析上下文中。",
+    f6_title: "云端 AI 回退",
+    f6_text: "通过 LiteLLM 可选云端推理：只需设置云模型名称和 API 密钥即可切换到任意提供商。",
+    f7_title: "请求预览",
+    f7_text: "在将任何内容发送到 AI 之前，检查完整的系统提示、翻译后的请求、文件上下文和附加文件列表。",
+    f8_title: "对话加密",
+    f8_text: "使用主密码保护你的对话历史，采用 Fernet 和 PBKDF2，200,000 次迭代。",
+    f9_title: "隐私控制",
+    f9_text: "在内容到达模型之前，使用 Microsoft Presidio 进行请求匿名化，并可选启用脏话过滤。",
+    f10_title: "代理与镜像支持",
+    f10_text: "在受限网络中自动回退到 hf-mirror.com、GitHub 代理列表和自定义代理设置。",
+    f11_title: "离线翻译",
+    f11_text: "Google Translate、DeepL 或完全离线的 ArgosTranslate。请求会被规范化为任意目标语言。",
+    f12_title: "24 个深色主题",
+    f12_text: "从 Midnight Deep 和 Dracula Castle 到 Synthwave 84、Matrix Terminal 和 AMOLED Black。",
     download_title: "下载 BiNeuron",
     download_text: "完全免费且开源。无需注册，无需订阅，没有隐藏费用。选择你的平台，五分钟内即可开始使用本地 AI 编写代码。",
     download_note: "每个版本都从源码自动构建并签名。选择适合你工作流的格式：Windows 一键安装包、macOS 原生包，或 Linux 便携 AppImage。",
     download_help_text: "如果文件无法下载或出现错误，请打开 GitHub 官方发布页面，手动选择适合你平台的版本。",
     download_help_link: "打开 GitHub 发布页面",
     dl_win: ".exe 安装包",
-    dl_win_desc: "Windows 10 / 11 · 64 位",
+    dl_win_desc: "Windows 10 和 11，64 位",
     dl_mac: ".dmg 包",
-    dl_mac_desc: "Apple Silicon · Intel",
-    dl_linux: ".AppImage / .deb",
-    dl_linux_desc: "Debian · Ubuntu · Arch",
+    dl_mac_desc: "Apple Silicon，Intel",
+    dl_linux: ".AppImage 和 .deb",
+    dl_linux_desc: "Debian，Ubuntu，Arch",
     dl_btn: "下载",
     footer_tag: "面向开发者的本地 AI"
   }

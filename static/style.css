@@ -483,6 +483,37 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:var(--f
 .master-state.off{color:var(--fg-dark);}
 .master-actions{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
 
+.preview-modal{
+  width:min(900px,92vw);
+  max-height:88vh;
+  display:flex;
+  flex-direction:column;
+}
+.preview-body{
+  flex:1;
+  min-height:240px;
+  max-height:65vh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  background:var(--bg-frame);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:10px 12px;
+  font-family:Consolas,"Courier New",monospace;
+  font-size:12px;
+  line-height:1.45;
+  white-space:pre-wrap;
+  word-break:break-word;
+  color:var(--fg-text);
+  margin-bottom:10px;
+}
+.preview-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.preview-actions .btn{width:100%;}
+
 @media (max-width:1200px){
   .app{grid-template-columns:340px 1fr 260px;}
   .row{grid-template-columns:160px 1fr;}

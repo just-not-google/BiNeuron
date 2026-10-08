@@ -18,6 +18,7 @@ const TRANSLATIONS = {
     retries_label:"Retries", github_proxies_label:"Github proxies",
     url_list_label:"URL list", proxy_retries_label:"Proxy retries",
     main_retries_label:"Main retries",
+    with_proxy_label:"With proxy",
     model_frame:"Model", preferences_in_ai_label:"Preferences in AI",
     models_dir_label:"Models dir", with_ai_orchestrator_label:"AI orchestrator",
     proprietary_algorithms_label:"Proprietary algorithms",
@@ -25,6 +26,12 @@ const TRANSLATIONS = {
     token_hf_label:"HF token", subdomain_label:"Subdomain", repo_id_label:"Repo ID",
     filename_label:"Filename", prefer_mirror_label:"Prefer mirror",
     type_computer_label:"Type computer",
+    automatic_disk_space_check_label:"Auto disk check",
+    weight_attempts_label:"Weight attempts",
+    cloud_ai_frame:"Cloud AI",
+    model_cloud_version_label:"Cloud AI",
+    key_for_api_label:"API key",
+    cloud_model_label:"Cloud model",
     prompt_frame:"Prompt",
     main_prompt_mode_label:"Main prompt mode", main_prompt_label:"Main prompt",
     improving_user_experience_label:"Improve user experience",
@@ -48,6 +55,7 @@ const TRANSLATIONS = {
     use_websites_label:"Use websites",
     websites_sources_label:"Website sources",
     ignored_files_label:"Ignored files",
+    main_disk_label:"Main disk",
     anonymize_text_label:"Anonymize text",
     other_frame:"Other", theme_label:"Theme", filter_swearing_label:"Filter swearing",
     verbose_label:"Verbose", echo_label:"Echo",
@@ -98,7 +106,14 @@ const TRANSLATIONS = {
     failed_prefix:"Failed: ", unknown:"unknown",
     disable_encryption_confirm:"Disable encryption? Chats will be stored as plaintext.",
     wipe_confirm_1:"This will PERMANENTLY delete all chats and the master key. Continue?",
-    wipe_confirm_2:"Are you absolutely sure? This cannot be undone."
+    wipe_confirm_2:"Are you absolutely sure? This cannot be undone.",
+    preview_request_label:"Preview request",
+    preview_btn:"Show preview",
+    preview_title:"Request preview",
+    preview_copy:"Copy",
+    preview_close:"Close",
+    preview_empty_request:"Type a request first",
+    preview_failed:"Failed to build preview"
   },
   ru: {
     lang_ok:"OK",
@@ -112,6 +127,7 @@ const TRANSLATIONS = {
     retries_label:"Повторы", github_proxies_label:"GitHub прокси",
     url_list_label:"Список URL", proxy_retries_label:"Повторы прокси",
     main_retries_label:"Основные повторы",
+    with_proxy_label:"С прокси",
     model_frame:"Модель", preferences_in_ai_label:"Предпочтения ИИ",
     models_dir_label:"Папка моделей", with_ai_orchestrator_label:"ИИ-оркестратор",
     proprietary_algorithms_label:"Проприетарные алгоритмы",
@@ -120,6 +136,12 @@ const TRANSLATIONS = {
     token_hf_label:"Токен HF", subdomain_label:"Субдомен", repo_id_label:"ID репозитория",
     filename_label:"Имя файла", prefer_mirror_label:"Предпочитать зеркало",
     type_computer_label:"Тип компьютера",
+    automatic_disk_space_check_label:"Автопроверка диска",
+    weight_attempts_label:"Попытки веса",
+    cloud_ai_frame:"Облачный ИИ",
+    model_cloud_version_label:"Облачный ИИ",
+    key_for_api_label:"API-ключ",
+    cloud_model_label:"Облачная модель",
     prompt_frame:"Промпт",
     main_prompt_mode_label:"Режим промпта", main_prompt_label:"Основной промпт",
     improving_user_experience_label:"Улучшать запрос",
@@ -143,6 +165,7 @@ const TRANSLATIONS = {
     use_websites_label:"Использовать сайты",
     websites_sources_label:"Источники (сайты)",
     ignored_files_label:"Игнорируемые файлы",
+    main_disk_label:"Основной диск",
     anonymize_text_label:"Анонимизировать текст",
     other_frame:"Прочее", theme_label:"Тема", filter_swearing_label:"Фильтр мата",
     verbose_label:"Подробный вывод", echo_label:"Эхо",
@@ -195,7 +218,14 @@ const TRANSLATIONS = {
     failed_prefix:"Ошибка: ", unknown:"неизвестно",
     disable_encryption_confirm:"Отключить шифрование? Чаты будут храниться в открытом виде.",
     wipe_confirm_1:"Это НАВСЕГДА удалит все чаты и мастер-ключ. Продолжить?",
-    wipe_confirm_2:"Вы абсолютно уверены? Это нельзя отменить."
+    wipe_confirm_2:"Вы абсолютно уверены? Это нельзя отменить.",
+    preview_request_label:"Предпросмотр запроса",
+    preview_btn:"Показать",
+    preview_title:"Предпросмотр запроса",
+    preview_copy:"Копировать",
+    preview_close:"Закрыть",
+    preview_empty_request:"Сначала введите запрос",
+    preview_failed:"Не удалось построить предпросмотр"
   },
   zh: {
     lang_ok:"确定",
@@ -209,6 +239,7 @@ const TRANSLATIONS = {
     retries_label:"重试次数", github_proxies_label:"GitHub 代理",
     url_list_label:"URL 列表", proxy_retries_label:"代理重试",
     main_retries_label:"主重试次数",
+    with_proxy_label:"使用代理",
     model_frame:"模型", preferences_in_ai_label:"AI 偏好",
     models_dir_label:"模型目录", with_ai_orchestrator_label:"AI 编排器",
     proprietary_algorithms_label:"专有算法",
@@ -217,6 +248,12 @@ const TRANSLATIONS = {
     token_hf_label:"HF 令牌", subdomain_label:"子域", repo_id_label:"仓库 ID",
     filename_label:"文件名", prefer_mirror_label:"优先使用镜像",
     type_computer_label:"计算机类型",
+    automatic_disk_space_check_label:"自动磁盘检查",
+    weight_attempts_label:"权重尝试次数",
+    cloud_ai_frame:"云 AI",
+    model_cloud_version_label:"云 AI",
+    key_for_api_label:"API 密钥",
+    cloud_model_label:"云模型",
     prompt_frame:"提示",
     main_prompt_mode_label:"主提示模式", main_prompt_label:"主提示",
     improving_user_experience_label:"改进用户请求",
@@ -241,6 +278,7 @@ const TRANSLATIONS = {
     use_websites_label:"使用网站",
     websites_sources_label:"网站来源",
     ignored_files_label:"忽略文件",
+    main_disk_label:"主磁盘",
     anonymize_text_label:"匿名化文本",
     other_frame:"其他", theme_label:"主题", filter_swearing_label:"过滤脏话",
     verbose_label:"详细输出", echo_label:"回显",
@@ -291,7 +329,14 @@ const TRANSLATIONS = {
     failed_prefix:"失败: ", unknown:"未知",
     disable_encryption_confirm:"禁用加密?聊天将以明文存储。",
     wipe_confirm_1:"这将永久删除所有对话和主密钥。继续?",
-    wipe_confirm_2:"您确定吗?此操作无法撤销。"
+    wipe_confirm_2:"您确定吗?此操作无法撤销。",
+    preview_request_label:"预览请求",
+    preview_btn:"显示预览",
+    preview_title:"请求预览",
+    preview_copy:"复制",
+    preview_close:"关闭",
+    preview_empty_request:"请先输入请求",
+    preview_failed:"无法生成预览"
   }
 };
 
@@ -332,6 +377,7 @@ let pollingPaused = false;
 let logLineCount = 0;
 let fullLogBuffer = [];
 let copyResetTimer = null;
+let previewText = "";
 
 const $  = function (sel, root) { return (root || document).querySelector(sel); };
 const $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
@@ -1389,6 +1435,77 @@ if (btnMasterDisable) {
       await refreshMasterStatus();
     } else {
       toast(t("failed_prefix") + (data.error || t("unknown")));
+    }
+  });
+}
+
+const previewBtn      = document.getElementById("btnPreviewRequest");
+const previewModalEl  = document.getElementById("previewModal");
+const previewBody     = document.getElementById("previewBody");
+const previewCopyBtn  = document.getElementById("previewCopy");
+const previewCloseBtn = document.getElementById("previewClose");
+
+function openPreviewModal(text) {
+  previewText = text || "";
+  previewBody.textContent = previewText;
+  previewModalEl.classList.remove("hidden");
+}
+
+function closePreviewModal() {
+  previewModalEl.classList.add("hidden");
+}
+
+if (previewBtn) {
+  previewBtn.addEventListener("click", async function () {
+    const text = requestInput.value.trim();
+    if (!text) { toast(t("preview_empty_request")); return; }
+    previewBtn.disabled = true;
+    const oldLabel = previewBtn.textContent;
+    previewBtn.textContent = t("loading");
+    try {
+      const r = await fetch("/api/preview_request", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          request: text,
+          settings: collectSettings(),
+          attached_files: state.attachedFiles.map(function (f) { return f.path; })
+        })
+      });
+      const data = await r.json();
+      if (!data.ok) {
+        toast(t("preview_failed") + ": " + (data.error || t("unknown")));
+        return;
+      }
+      openPreviewModal(data.preview || "");
+    } catch (e) {
+      toast(t("network_error"));
+    } finally {
+      previewBtn.disabled = false;
+      previewBtn.textContent = oldLabel;
+    }
+  });
+}
+
+if (previewCloseBtn) {
+  previewCloseBtn.addEventListener("click", closePreviewModal);
+}
+
+if (previewCopyBtn) {
+  previewCopyBtn.addEventListener("click", function () {
+    if (!previewText) return;
+    copyToClipboard(previewText);
+    toast(t("chat_copied"));
+  });
+}
+
+if (previewModalEl) {
+  previewModalEl.addEventListener("click", function (e) {
+    if (e.target === previewModalEl) closePreviewModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !previewModalEl.classList.contains("hidden")) {
+      closePreviewModal();
     }
   });
 }

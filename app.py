@@ -492,6 +492,9 @@ def build_bineuron_configs(data: dict) -> dict:
         subdomain=(data.get("subdomain") or "").strip(),
         retries=max(1, _to_int(data.get("retries"), 3) or 3),
         prefer_mirror=_to_bool(data.get("prefer_mirror", True)),
+        cloud_version=_to_bool(data.get("model_cloud_version")),
+        automatic_disk_space_check=_to_bool(data.get("automatic_disk_space_check", True)),
+        weight_attempts=max(1, _to_int(data.get("weight_attempts"), 3) or 3),
     )
 
     n_ctx = _to_int(data.get("n_ctx"))
@@ -507,6 +510,8 @@ def build_bineuron_configs(data: dict) -> dict:
         echo=_to_bool(data.get("echo")),
         max_tokens=max(1, _to_int(data.get("max_tokens"), 4096) or 4096),
         temperature=temperature,
+        key_for_api=(data.get("key_for_api") or "").strip(),
+        model=(data.get("cloud_model") or "").strip(),
     )
 
     mode = (data.get("main_prompt_mode") or "").strip()
@@ -555,6 +560,7 @@ def build_bineuron_configs(data: dict) -> dict:
         protocol = HTTP_PROTOCOL
     out["proxy_conf"] = _build(
         ProxyConfig,
+        with_proxy=_to_bool(data.get("with_proxy")),
         country=country,
         protocol=protocol,
         max_timeout=max(0, _to_int(data.get("max_timeout"), 30) or 30),
@@ -604,6 +610,7 @@ def build_bineuron_configs(data: dict) -> dict:
         websites_sources_information=_to_list(data.get("websites_sources_information")),
         compress_text=_to_bool(data.get("compress_text")),
         ignored_files=_to_list(data.get("ignored_files")),
+        main_disk=(data.get("main_disk") or "").strip() or None,
     )
 
     out["safety_conf"] = _build(
@@ -637,11 +644,17 @@ def default_settings() -> dict:
         "prefer_mirror": True,
         "type_computer": "auto",
         "retries": 3,
+        "model_cloud_version": False,
+        "automatic_disk_space_check": True,
+        "weight_attempts": 3,
+        "key_for_api": "",
+        "cloud_model": "",
         "country": "",
         "protocol": HTTP_PROTOCOL,
         "max_timeout": 30,
         "is_working": False,
         "auto_proxies": False,
+        "with_proxy": False,
         "your_proxies_dict": "",
         "min_timeout_for_checking_availability": 5,
         "max_timeout_for_checking_availability": 15,
@@ -678,6 +691,7 @@ def default_settings() -> dict:
         "websites_sources_information": "",
         "compress_text": False,
         "ignored_files": "",
+        "main_disk": "",
         "theme": "midnight",
     }
 
@@ -915,6 +929,92 @@ def api_chat_task(tid):
     if t is None:
         abort(404)
     return jsonify(t)
+
+
+@app.route("/api/preview_request", methods=["POST"])
+def api_preview_request():
+    body = request.get_json(silent=True) or {}
+    user_text = (body.get("request") or "").strip()
+    if not user_text:
+        return jsonify({"ok": False, "error": "empty request"}), 400
+    if BINEURON_IMPORT_ERROR is not None:
+        return jsonify({"ok": False, "error": f"BiNeuron import failed: {BINEURON_IMPORT_ERROR}"}), 500
+
+    configs = build_bineuron_configs(body.get("settings") or {})
+
+    if configs.get("file_conf") is not None:
+        try:
+            configs["file_conf"].virtual_storage = False
+        except Exception:
+            pass
+    if configs.get("language_detection_conf") is not None:
+        try:
+            configs["language_detection_conf"].with_ai_orchestrator = False
+            configs["language_detection_conf"].proprietary_algorithms = False
+        except Exception:
+            pass
+
+    uploaded = body.get("attached_files") or []
+    additional_files = None
+    if isinstance(uploaded, list) and uploaded:
+        existing = [p for p in uploaded if isinstance(p, str) and os.path.isfile(p)]
+        if existing:
+            additional_files = existing
+
+    try:
+        bi = BiNeuron(request=user_text, additional_files=additional_files, **configs)
+
+        try:
+            bi._defining_prog_lang()
+        except Exception as e:
+            logging.warning(f"preview: _defining_prog_lang failed: {e}")
+            try:
+                bi._BiNeuron__different_translation()
+            except Exception:
+                bi.translated_text = user_text
+
+        try:
+            bi._creating_main_prompt()
+        except Exception as e:
+            logging.warning(f"preview: _creating_main_prompt failed: {e}")
+
+        system_prompt = ""
+        if getattr(bi, "prompt_conf", None) and bi.prompt_conf.main_prompt:
+            system_prompt = bi.prompt_conf.main_prompt
+
+        user_content = bi.translated_text or user_text
+        files_context = bi.files_context or ""
+
+        parts = []
+        parts.append("===== SYSTEM PROMPT =====")
+        parts.append(system_prompt or "(empty)")
+        parts.append("")
+        parts.append("===== USER REQUEST (translated) =====")
+        parts.append(user_content)
+        if files_context:
+            parts.append("")
+            parts.append("===== FILES CONTEXT =====")
+            parts.append(files_context)
+        if additional_files:
+            parts.append("")
+            parts.append("===== ATTACHED FILES =====")
+            for f in additional_files:
+                parts.append("  - " + f)
+
+        preview = "\n".join(parts)
+
+        return jsonify({
+            "ok": True,
+            "preview": preview,
+            "system_prompt": system_prompt,
+            "user_content": user_content,
+            "files_context": files_context,
+            "attached_files": additional_files or [],
+        })
+    except Exception as e:
+        err = f"{type(e).__name__}: {e}"
+        logging.exception(f"preview error: {err}")
+        return jsonify({"ok": False, "error": err}), 500
 
 
 @app.route("/api/upload", methods=["POST"])

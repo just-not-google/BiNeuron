@@ -21,9 +21,6 @@
 **WebSite**: [https://just-not-google.github.io/BiNeuron/](https://just-not-google.github.io/BiNeuron/)  
 This is the official BiNeuron website. There you can download the application for Windows, macOS, and Linux, as well as view the project overview and key features.
 
-**Hub**: [https://just-not-google.github.io/BiNeuron/website/hub.html](https://just-not-google.github.io/BiNeuron/website/hub.html)  
-This is a collection of ready-to-use configurations for local AI models. Each card contains a model, an optimal system prompt, tags, and a direct link to Hugging Face. Currently, the hub has 47 configurations, including specialized models for Python, Java, and other languages.  
-
 ## Intelligent Code Analysis and Generation Platform  
 
 BiNeuron is a sophisticated software solution that bridges the gap between human intent and machine generated code. It unifies advanced natural language processing, optical character recognition, and adaptive model selection into a single, powerful tool designed for developers, researchers, and technical teams.  
@@ -33,30 +30,31 @@ At its core, BiNeuron automatically identifies the programming language of a giv
 ## Key Capabilities  
 
 ### Programming Language Detection  
-* Supports over 25 programming languages, including Python, Java, C/C++, C#, JavaScript, TypeScript, Go, Rust, Swift, Kotlin, Ruby, Dart, Julia, Lua, SQL, MATLAB, R, Pascal, Assembly, Fortran, F#, Ada, Zig, PHP, Shell, Scala, PowerShell, Solidity, OCaml, COBOL, and more.  
+* Supports over 25 programming languages, including Python, Java, C and C++, C#, JavaScript, TypeScript, Go, Rust, Swift, Kotlin, Ruby, Dart, Julia, Lua, SQL, MATLAB, R, Pascal, Assembly, Fortran, F#, Ada, Zig, PHP, Shell, Scala, PowerShell, Solidity, OCaml, COBOL, and more.  
 * Combines heuristic algorithms, proprietary keyword matching, and AI powered orchestration to achieve high detection accuracy.  
 * Analyzes both user supplied text and the content of attached files, or even entire directories.  
 
 ### Comprehensive File Handling  
-* Extracts and translates text from common document formats: PDF, Word (DOCX), ODF, PowerPoint (PPTX), Excel (XLSX/XLS), EPUB, MOBI, and FB2.  
+* Extracts and translates text from common document formats: PDF, Word (DOCX), ODF, PowerPoint (PPTX), Excel (XLSX and XLS), EPUB, MOBI, and FB2.  
 * Processes source code files in nearly all text based formats, from plain text to configuration files.  
 * Integrates two interchangeable OCR engines (EasyOCR and DeepSeek OCR) to read text from images, with optional GPU acceleration, language list selection, and automatic splitting of large images (`crop_mode`) for improved recognition.  
 * Reads text from websites: the built in HTML scraper (`use_websites`) converts pages to clean Markdown and merges them into the request context.  
 
 ### AI Powered File Editing  
-* **Two Stage Pipeline**: The primary AI model generates the code or response. A secondary, lightweight model (e.g., Qwen2.5-Coder-1.5B) then transforms the response into a strict JSON object containing absolute file paths and full new contents.  
-* **Full Context Awareness**: The JSON formatter receives the complete file context (all read files, unread file names, project root, and the primary AI’s answer) to ensure accurate path generation and content mapping.  
+* **Two Stage Pipeline**: The primary AI model generates the code or response. A secondary, lightweight model (for example Qwen2.5-Coder-1.5B) then transforms the response into a strict JSON object containing absolute file paths and full new contents.  
+* **Full Context Awareness**: The JSON formatter receives the complete file context (all read files, unread file names, project root, and the primary AI answer) to ensure accurate path generation and content mapping.  
 * **Robust Retry Mechanism**: If the JSON fails validation, the system automatically re prompts the formatter up to `retries` times, logging each attempt until a valid JSON is produced or the maximum retries are exhausted.  
 * **Safe, Whole File Replacements**: Only whole file replacements are supported (no partial edits) to maintain consistency and safety.  
 * **Optional File Deletion**: When `deleting_files=True` is passed to the `BiNeuron` constructor, the JSON formatter may return `null` for a file path, and the system will safely delete that file. This feature is disabled by default to prevent accidental data loss.  
 
 ### Adaptive Model Selection  
-* Automatically assesses the user’s hardware capabilities (CPU cores, frequency, RAM) and selects the optimal quantized version of the target model (ranging from IQ2 to F16) to balance speed and accuracy.  
+* Automatically assesses the user's hardware capabilities (CPU cores, frequency, RAM) and selects the optimal quantized version of the target model (ranging from IQ2 to F16) to balance speed and accuracy.  
 * Offers a curated repository of specialised models per programming language, ensuring high quality, idiomatic code generation.  
 
 ### Robust Networking  
 * Implements multi layered accessibility to Hugging Face models, including automatic fallback to hf mirror.com, dynamic proxy selection, and support for custom proxy lists.  
 * Fetches and verifies public proxies from GitHub raw lists, with retry mechanisms and connection health checks.  
+* **Cloud AI Support**: Optional `with_proxy`, `model_cloud_version`, `key_for_api`, and `cloud_model` settings allow requests to be routed through cloud providers via LiteLLM instead of local models.
 
 ### Virtual Storage Mode  
 * Allows scanning and processing of entire folders or mounted virtual directories.  
@@ -69,13 +67,18 @@ At its core, BiNeuron automatically identifies the programming language of a giv
 * **Offline Translation**: Optional ArgosTranslate integration (`local_trans=True`, `from_code_lang='en'`) provides fully offline translation without relying on external APIs.  
 
 ### Text Enhancement and Compression  
-* **Request Improvement** (`improving_user_experience=True`): A local small model (Qwen) rewrites the user’s raw request into a clear, structured prompt while preserving all technical details, including file names, code fragments, and error messages.  
+* **Request Improvement** (`improving_user_experience=True`): A local small model (Qwen) rewrites the user's raw request into a clear, structured prompt while preserving all technical details, including file names, code fragments, and error messages.  
 * **Lossless Text Compression** (`compress_text=True`): When a large amount of file context is attached, the same small model compresses it, aggressively reducing token count while preserving every fact, number, and code fragment verbatim.  
 
+### Request Preview  
+* **Preview Request Button**: In the Cloud AI settings group, a Preview Request button opens a modal window over the main interface. It shows the full composed request that would be sent to the AI, including the system prompt, the translated user request, the entire file context, and the list of attached files.  
+* The preview is generated by the backend endpoint `/api/preview_request`, which builds a `BiNeuron` instance with the current settings while temporarily disabling the AI orchestrator and virtual storage scanning, so no models are downloaded and no disk scan is triggered.  
+* This helps verify the exact payload before committing to a long AI call.
+
 ### Privacy and Security  
-* **Request Anonymization** (`anonymize_text=True`): Before being sent to translation services or AI models, the user’s request is processed through Microsoft Presidio, which detects and replaces PII (names, emails, phone numbers, addresses, credit cards, etc.) with placeholder tokens.  
+* **Request Anonymization** (`anonymize_text=True`): Before being sent to translation services or AI models, the user's request is processed through Microsoft Presidio, which detects and replaces PII (names, emails, phone numbers, addresses, credit cards, and so on) with placeholder tokens.  
 * **Profanity Filter** (`filter_for_swearing=True`): Blocks requests containing aggressive language or profanity before they reach the AI.  
-* **Chat Encryption**: Optionally protect all stored conversations with a master password using Fernet (AES 128 CBC + HMAC SHA256) with PBKDF2 HMAC SHA256 key derivation (200,000 iterations). After three failed unlock attempts the entire chat database and master key are permanently wiped.  
+* **Chat Encryption**: Optionally protect all stored conversations with a master password using Fernet (AES 128 CBC plus HMAC SHA256) with PBKDF2 HMAC SHA256 key derivation (200,000 iterations). After three failed unlock attempts the entire chat database and master key are permanently wiped.  
 
 ## Architecture  
 
@@ -84,20 +87,20 @@ BiNeuron is engineered with a modular, separation of concerns design:
 * **Core Engine** orchestrates the entire pipeline: request parsing, language detection, model selection, and response generation.  
 * **OCR Module** handles text extraction from images via two interchangeable engines: EasyOCR and DeepSeek OCR (local HF Transformers or cloud API).  
 * **Model Downloader** manages downloading and caching of Hugging Face models, with built in mirror and proxy support.  
-* **JSON Formatter Module** uses a lightweight model (e.g., Qwen2.5-Coder-1.5B) to convert the primary model’s response into a strict JSON object for file modifications.  
+* **JSON Formatter Module** uses a lightweight model (for example Qwen2.5-Coder-1.5B) to convert the primary model response into a strict JSON object for file modifications.  
 * **File Editing Module** applies JSON based file changes (whole file replacements) with error handling and retry logic. Supports optional file deletion when `deleting_files=True`.  
 * **Text Enhancement Module** handles request improvement (`PROMPT_FOR_IMPROVEMENT`) and lossless compression (`PROMPT_FOR_COMPRESSION`) via the same lightweight model.  
 * **Translation Service** provides language detection and translation utilities, with optional DeepL and ArgosTranslate integration.  
 * **Anonymization Service** integrates Microsoft Presidio for PII detection and masking.  
 * **Network Layer** implements proxy rotation, availability checks, and GitHub proxy fetching for circumventing restrictions.  
-* **Web Interface** is a feature rich web application built with Flask (HTML/CSS/JS), covering every configurable parameter of the nine configuration groups.  
+* **Web Interface** is a feature rich web application built with Flask (HTML, CSS, JS), covering every configurable parameter of the nine configuration groups.  
 
 The architecture emphasises reusability, fault tolerance, and performance, allowing each component to operate independently while seamlessly integrating with the others.  
 
 ## Graphical Interface  
 
 <p align="center">
-  <img src="img_files/gui_screenshot_2.png" width="80%" alt="BiNeuron GUI Screenshot" />
+  <img src="img_files/gui_screenshot_3.png" width="80%" alt="BiNeuron GUI Screenshot" />
 </p>
 
 A modern web application built with Flask, offering:  
@@ -107,9 +110,10 @@ A modern web application built with Flask, offering:
 * **Chat Management**: create, delete, download, and filter conversation history.  
 * **Live Logging**: see what the AI is doing in real time (with spinner, deduplicated progress bars, and one click copy).  
 * **Master Password Encryption**: enable or disable chat encryption directly from the UI.  
-* **24 Dark Themes**: from Midnight Deep and Dracula’s Castle to Synthwave ’84, Matrix Terminal, and AMOLED Black; every theme is tuned for long coding sessions.  
+* **24 Dark Themes**: from Midnight Deep and Dracula Castle to Synthwave 84, Matrix Terminal, and AMOLED Black; every theme is tuned for long coding sessions.  
 * **Session Resume**: if the page is reloaded while a request is running, the client reconnects to the ongoing task automatically.  
 * **Multilingual UI**: English, Russian, and Chinese.  
+* **Request Preview Modal**: a dedicated overlay that displays the full system prompt, user request, file context, and attached file list before sending anything to the AI.  
 
 ## Development  
 
@@ -124,21 +128,21 @@ The platform exposes nine independent configuration groups, all available from t
 
 | Group | Purpose |
 |-------|---------|
-| `ModelConfig` | Model selection, cache directory, HF token, repo/filename overrides, mirror preference |
-| `LLMConfig` | Context size, GPU layers, max tokens, temperature, verbose/echo flags |
-| `PromptConfig` | Main prompt mode (11 pre set scenarios), custom prompt, request improvement |
+| `ModelConfig` | Model selection, cache directory, HF token, repo and filename overrides, mirror preference, cloud version toggle, automatic disk space check, weight attempts |
+| `LLMConfig` | Context size, GPU layers, max tokens, temperature, verbose and echo flags, cloud API key, cloud model name |
+| `PromptConfig` | Main prompt mode (11 preset scenarios), custom prompt, request improvement |
 | `TranslationConfig` | Determinant mode, DeepL, request language, offline Argos translation |
-| `LanguageDetectionConfig` | AI orchestrator vs. proprietary keyword matching |
-| `ProxyConfig` | Country, protocol, timeouts, retries, custom/GitHub proxy lists |
-| `OCRConfig` | Engine selection (Easy/DeepSeek), languages, GPU, crop mode, cloud API key |
-| `FileConfig` | Virtual storage, file editing, file deletion, website scraping, compression, ignored files |
+| `LanguageDetectionConfig` | AI orchestrator vs proprietary keyword matching |
+| `ProxyConfig` | With proxy toggle, country, protocol, timeouts, retries, custom and GitHub proxy lists |
+| `OCRConfig` | Engine selection (Easy or DeepSeek), languages, GPU, crop mode, cloud API key |
+| `FileConfig` | Virtual storage, file editing, file deletion, website scraping, compression, ignored files, main disk |
 | `SafetyConfig` | Profanity filter, request anonymization |
 
 ## Dependencies  
 
 The complete list of libraries used by BiNeuron (exactly as declared in `requirements.txt`).
 
-### Core & AI  
+### Core and AI  
 
 | Library | Purpose | Repository |
 |---------|---------|-----------|
@@ -163,9 +167,9 @@ The complete list of libraries used by BiNeuron (exactly as declared in `require
 | `docx2txt` | Extracting text from `.docx` (Microsoft Word) | [github.com/ankushshah89/python-docx2txt](https://github.com/ankushshah89/python-docx2txt) |
 | `pptx2txt2` | Extracting text from `.pptx` (PowerPoint) | [pypi.org/project/pptx2txt2](https://pypi.org/project/pptx2txt2/) |
 | `odfdo` | Reading OpenDocument (`.odf`) files | [github.com/jdum/odfdo](https://github.com/jdum/odfdo) |
-| `markitdown` | Universal document converter (used for `.xlsx`/`.xls`) | [github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
-| `epub2txt` | Extracting text from EPUB e-books | [pypi.org/project/epub2txt](https://pypi.org/project/epub2txt/) |
-| `mobi` | Extracting text from MOBI e-books | [github.com/iscc/mobi](https://github.com/iscc/mobi) |
+| `markitdown` | Universal document converter (used for `.xlsx` and `.xls`) | [github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
+| `epub2txt` | Extracting text from EPUB e books | [pypi.org/project/epub2txt](https://pypi.org/project/epub2txt/) |
+| `mobi` | Extracting text from MOBI e books | [github.com/iscc/mobi](https://github.com/iscc/mobi) |
 | `fb2reader` | Reading FictionBook 2 (`.fb2`) files | [pypi.org/project/fb2reader](https://pypi.org/project/fb2reader/) |
 | `html2text` | Converting HTML pages to clean Markdown | [github.com/Alir3z4/html2text](https://github.com/Alir3z4/html2text) |
 
@@ -173,13 +177,13 @@ The complete list of libraries used by BiNeuron (exactly as declared in `require
 
 | Library | Purpose | Repository |
 |---------|---------|-----------|
-| `deep-translator` | Free translation via Google Translate (and others) | [github.com/nidhaloff/deep-translator](https://github.com/nidhaloff/deep-translator) |
+| `deep-translator` | Free translation via Google Translate and others | [github.com/nidhaloff/deep-translator](https://github.com/nidhaloff/deep-translator) |
 | `deepl` | Official DeepL API client | [github.com/DeepLcom/deepl-python](https://github.com/DeepLcom/deepl-python) |
 | `argostranslate` | Fully offline translation via Argos Translate | [github.com/argosopentech/argos-translate](https://github.com/argosopentech/argos-translate) |
 | `langdetect` | Language detection (fallback algorithm) | [github.com/Mimino666/langdetect](https://github.com/Mimino666/langdetect) |
 | `fast-langdetect` | Fast language detection (primary algorithm) | [github.com/LlmKira/fast-langdetect](https://github.com/LlmKira/fast-langdetect) |
 
-### Language & Code Detection  
+### Language and Code Detection  
 
 | Library | Purpose | Repository |
 |---------|---------|-----------|
@@ -187,22 +191,23 @@ The complete list of libraries used by BiNeuron (exactly as declared in `require
 | `whats_that_code` | Independent programming language detection | [github.com/matthewdeanmartin/whats_that_code](https://github.com/matthewdeanmartin/whats_that_code) |
 | `badwords-py` | Profanity filtering (imports as `badwords`) | [pypi.org/project/badwords-py](https://pypi.org/project/badwords-py/) |
 
-### Privacy & Anonymization  
+### Privacy and Anonymization  
 
 | Library | Purpose | Repository |
 |---------|---------|-----------|
 | `presidio-analyzer` | PII detection engine (Microsoft Presidio) | [github.com/microsoft/presidio](https://github.com/microsoft/presidio) |
 | `presidio-anonymizer` | Anonymization engine for detected PII | [github.com/microsoft/presidio](https://github.com/microsoft/presidio) |
 
-### Networking & Proxies  
+### Networking and Proxies  
 
 | Library | Purpose | Repository |
 |---------|---------|-----------|
 | `requests` | HTTP client for REST calls and proxy checks | [github.com/psf/requests](https://github.com/psf/requests) |
 | `httpx` | Async capable HTTP client used with proxies | [github.com/encode/httpx](https://github.com/encode/httpx) |
 | `free-proxy-server` | Fetching and filtering free proxy lists | [pypi.org/project/free-proxy-server](https://pypi.org/project/free-proxy-server/) |
+| `litellm` | Unified interface for cloud AI providers (OpenAI, Anthropic, and others) | [github.com/BerriAI/litellm](https://github.com/BerriAI/litellm) |
 
-### Web & System  
+### Web and System  
 
 | Library | Purpose | Repository |
 |---------|---------|-----------|
@@ -210,7 +215,7 @@ The complete list of libraries used by BiNeuron (exactly as declared in `require
 | `psutil` | Reading system info (CPU, RAM) for benchmarking | [github.com/giampaolo/psutil](https://github.com/giampaolo/psutil) |
 | `cryptography` | Encrypting chats with a master password (Fernet) | [github.com/pyca/cryptography](https://github.com/pyca/cryptography) |
 
-### CLI, Testing & Packaging  
+### CLI, Testing and Packaging  
 
 | Library | Purpose | Repository |
 |---------|---------|-----------|
@@ -219,7 +224,7 @@ The complete list of libraries used by BiNeuron (exactly as declared in `require
 
 ## Model Repository  
 
-BiNeuron leverages a hand picked collection of open source code generation models, each fine tuned for specific programming languages. The repository includes models from DeepSeek, Qwen, MiniMax, CodeLlama, Mellum, Wizard, and others. The system automatically fetches the appropriate model based on the detected language and the user’s hardware profile, ensuring optimal performance for every session.  
+BiNeuron leverages a hand picked collection of open source code generation models, each fine tuned for specific programming languages. The repository includes models from DeepSeek, Qwen, MiniMax, CodeLlama, Mellum, Wizard, and others. The system automatically fetches the appropriate model based on the detected language and the user hardware profile, ensuring optimal performance for every session.  
 
 > BiNeuron represents a fusion of cutting edge AI, robust software engineering, and practical usability, empowering developers to focus on creativity and problem solving while the platform handles the complexities of language detection, file processing, and model orchestration.
 
@@ -233,9 +238,6 @@ BiNeuron leverages a hand picked collection of open source code generation model
 **ВебСайт**: [https://just-not-google.github.io/BiNeuron/](https://just-not-google.github.io/BiNeuron/)  
 Это официальный сайт BiNeuron. Там можно скачать приложение для Windows, macOS и Linux, а также посмотреть обзор проекта и ключевые возможности.   
 
-**Хаб**: [https://just-not-google.github.io/BiNeuron/website/hub.html](https://just-not-google.github.io/BiNeuron/website/hub.html)  
-Это коллекция готовых конфигураций для локальных ИИ моделей. Каждая карточка содержит модель, оптимальный системный промпт, теги и прямую ссылку на Hugging Face. Сейчас в хабе 47 конфигураций, включая специализированные модели для Python, Java и других языков.  
-
 ## Интеллектуальная платформа для анализа и генерации кода
 
 BiNeuron представляет собой сложное программное решение, которое устраняет разрыв между намерениями человека и машинным кодом. Он объединяет продвинутую обработку естественного языка, оптическое распознавание символов и адаптивный выбор модели в единый мощный инструмент, предназначенный для разработчиков, исследователей и технических групп.  
@@ -245,18 +247,18 @@ BiNeuron представляет собой сложное программно
 ## Ключевые возможности  
 
 ### Определение языка программирования  
-* Поддерживает более 25 языков программирования, включая Python, Java, C/C++, C#, JavaScript, TypeScript, Go, Rust, Swift, Kotlin, Ruby, Dart, Julia, Lua, SQL, MATLAB, R, Pascal, Assembly, Fortran, F#, Ada, Zig, PHP, Shell, Scala, PowerShell, Solidity, OCaml, COBOL и другие.  
+* Поддерживает более 25 языков программирования, включая Python, Java, C и C++, C#, JavaScript, TypeScript, Go, Rust, Swift, Kotlin, Ruby, Dart, Julia, Lua, SQL, MATLAB, R, Pascal, Assembly, Fortran, F#, Ada, Zig, PHP, Shell, Scala, PowerShell, Solidity, OCaml, COBOL и другие.  
 * Объединяет эвристические алгоритмы, фирменный поиск по ключевым словам и ИИ управляемую оркестрацию для высокой точности определения.  
 * Анализирует как текст, введённый пользователем, так и содержимое прикреплённых файлов или даже целых каталогов.  
 
 ### Всесторонняя обработка файлов  
-* Извлекает и преобразует текст из распространённых форматов документов: PDF, Word (DOCX), ODF, PowerPoint (PPTX), Excel (XLSX/XLS), EPUB, MOBI и FB2.  
+* Извлекает и преобразует текст из распространённых форматов документов: PDF, Word (DOCX), ODF, PowerPoint (PPTX), Excel (XLSX и XLS), EPUB, MOBI и FB2.  
 * Обрабатывает файлы исходного кода почти во всех текстовых форматах, от обычного текста до конфигурационных файлов.  
 * Интегрирует два взаимозаменяемых OCR движка (EasyOCR и DeepSeek OCR) для чтения текста из изображений, с опциональным ускорением на GPU, выбором списка языков и автоматическим разбиением больших изображений (`crop_mode`) для улучшенного распознавания.  
 * Читает текст с сайтов: встроенный HTML скрапер (`use_websites`) конвертирует страницы в чистый Markdown и добавляет их в контекст запроса.  
 
 ### Изменение файлов с помощью ИИ  
-* **Двухэтапный пайплайн**: Основная ИИ модель генерирует код или ответ. Вторичная лёгкая модель (например, Qwen2.5-Coder-1.5B) преобразует этот ответ в строгий JSON объект, содержащий абсолютные пути к файлам и новое полное содержимое.  
+* **Двухэтапный пайплайн**: Основная ИИ модель генерирует код или ответ. Вторичная лёгкая модель (например Qwen2.5-Coder-1.5B) преобразует этот ответ в строгий JSON объект, содержащий абсолютные пути к файлам и новое полное содержимое.  
 * **Полный контекст**: Форматтер JSON получает весь контекст файлов (все прочитанные файлы, имена непрочитанных файлов, корень проекта и ответ основной ИИ модели) для точной генерации путей и содержимого.  
 * **Надёжный механизм повторных попыток**: Если JSON не проходит валидацию, система автоматически перезапрашивает форматтер до `retries` раз, логируя каждую попытку, пока не будет получен валидный JSON или не будут исчерпаны все попытки.  
 * **Безопасная замена целых файлов**: Поддерживается только полная замена файлов (не частичное редактирование) для обеспечения согласованности и безопасности.  
@@ -269,6 +271,7 @@ BiNeuron представляет собой сложное программно
 ### Надёжные сетевые возможности  
 * Реализует многоуровневый доступ к моделям Hugging Face, включая автоматическое переключение на hf mirror.com, динамический выбор прокси и поддержку пользовательских списков прокси.  
 * Загружает и проверяет публичные прокси из списков GitHub, с повторными попытками и проверкой работоспособности соединений.  
+* **Поддержка облачных ИИ**: Опциональные настройки `with_proxy`, `model_cloud_version`, `key_for_api` и `cloud_model` позволяют направлять запросы через облачных провайдеров с использованием LiteLLM вместо локальных моделей.
 
 ### Режим виртуального хранилища  
 * Позволяет сканировать и обрабатывать целые папки или смонтированные виртуальные директории.  
@@ -284,10 +287,15 @@ BiNeuron представляет собой сложное программно
 * **Улучшение запроса** (`improving_user_experience=True`): Локальная малая модель (Qwen) переписывает исходный запрос пользователя в чёткий структурированный промпт, сохраняя все технические детали, включая имена файлов, фрагменты кода, сообщения об ошибках.  
 * **Без потерь сжатие текста** (`compress_text=True`): Когда к запросу прикреплено много файлов, та же малая модель агрессивно сокращает их объём, сохраняя каждый факт, число и фрагмент кода дословно.  
 
+### Предпросмотр запроса  
+* **Кнопка Показать предпросмотр**: В группе настроек Cloud AI кнопка Show preview открывает модальное окно поверх основного интерфейса. В нём отображается полностью сформированный запрос, который будет отправлен ИИ, включая системный промпт, переведённый запрос пользователя, весь контекст файлов и список прикреплённых файлов.  
+* Предпросмотр формируется на серверном эндпоинте `/api/preview_request`, который создаёт экземпляр `BiNeuron` с текущими настройками, временно отключая ИИ оркестратор и сканирование виртуального хранилища, так что модели не скачиваются и диск не сканируется.  
+* Это помогает проверить точный набор данных перед отправкой длинного запроса в ИИ.
+
 ### Приватность и безопасность  
-* **Анонимизация запроса** (`anonymize_text=True`): Перед отправкой в сервисы перевода или ИИ модели запрос пользователя проходит через Microsoft Presidio, который находит и заменяет PII (имена, email, телефоны, адреса, банковские карты и т. д.) на токены заглушки.  
+* **Анонимизация запроса** (`anonymize_text=True`): Перед отправкой в сервисы перевода или ИИ модели запрос пользователя проходит через Microsoft Presidio, который находит и заменяет PII (имена, email, телефоны, адреса, банковские карты и так далее) на токены заглушки.  
 * **Фильтр ненормативной лексики** (`filter_for_swearing=True`): Блокирует запросы, содержащие агрессию или мат, до их попадания в ИИ.  
-* **Шифрование чатов**: Возможность защитить все сохранённые беседы мастер паролем с использованием Fernet (AES 128 CBC + HMAC SHA256) и PBKDF2 HMAC SHA256 (200 000 итераций). После трёх неудачных попыток разблокировки база чатов и мастер ключ безвозвратно удаляются.  
+* **Шифрование чатов**: Возможность защитить все сохранённые беседы мастер паролем с использованием Fernet (AES 128 CBC плюс HMAC SHA256) и PBKDF2 HMAC SHA256 (200 000 итераций). После трёх неудачных попыток разблокировки база чатов и мастер ключ безвозвратно удаляются.  
 
 ## Архитектура  
 
@@ -296,20 +304,20 @@ BiNeuron спроектирован по модульному принципу �
 * **Основной движок** управляет всем конвейером: разбор запроса, определение языка, выбор модели и генерация ответа.  
 * **Модуль OCR** обрабатывает извлечение текста из изображений через два взаимозаменяемых движка: EasyOCR и DeepSeek OCR (локальные HF Transformers или облачный API).  
 * **Загрузчик моделей** управляет загрузкой и кэшированием моделей Hugging Face со встроенной поддержкой зеркал и прокси.  
-* **Модуль JSON форматтера** использует лёгкую модель (например, Qwen2.5-Coder-1.5B) для преобразования ответа основной модели в строгий JSON для изменения файлов.  
+* **Модуль JSON форматтера** использует лёгкую модель (например Qwen2.5-Coder-1.5B) для преобразования ответа основной модели в строгий JSON для изменения файлов.  
 * **Модуль редактирования файлов** применяет изменения на основе JSON (полная замена файлов) с обработкой ошибок и повторными попытками. Поддерживает опциональное удаление файлов при `deleting_files=True`.  
 * **Модуль улучшения текста** выполняет улучшение запроса (`PROMPT_FOR_IMPROVEMENT`) и сжатие без потерь (`PROMPT_FOR_COMPRESSION`) той же лёгкой моделью.  
 * **Сервис перевода** предоставляет функции определения языка и перевода, с опциональной интеграцией DeepL и ArgosTranslate.  
 * **Сервис анонимизации** интегрирует Microsoft Presidio для обнаружения и маскирования PII.  
 * **Сетевой уровень** реализует ротацию прокси, проверку доступности и получение прокси из GitHub для обхода ограничений.  
-* **Веб интерфейс** это функциональное веб приложение на Flask (HTML/CSS/JS), охватывающее каждый настраиваемый параметр из девяти групп конфигурации.  
+* **Веб интерфейс** это функциональное веб приложение на Flask (HTML, CSS, JS), охватывающее каждый настраиваемый параметр из девяти групп конфигурации.  
 
 Архитектура делает упор на переиспользуемость, отказоустойчивость и производительность, позволяя каждому компоненту работать независимо, но при этом бесшовно интегрироваться с другими.  
 
 ## Графический интерфейс  
 
 <p align="center">
-  <img src="img_files/gui_screenshot_2.png" width="80%" alt="Скриншот GUI BiNeuron" />
+  <img src="img_files/gui_screenshot_3.png" width="80%" alt="Скриншот GUI BiNeuron" />
 </p>
 
 Современное веб приложение на Flask, предлагающее:  
@@ -319,9 +327,10 @@ BiNeuron спроектирован по модульному принципу �
 * **Управление чатами**: создание, удаление, загрузка и фильтрация истории диалогов.  
 * **Live логи**: просмотр действий ИИ в реальном времени (со спиннером, дедуплицированными прогресс барами и копированием в один клик).  
 * **Шифрование мастер паролем**: включение или отключение шифрования чатов прямо из UI.  
-* **24 тёмные темы**: от Midnight Deep и Dracula’s Castle до Synthwave ’84, Matrix Terminal и AMOLED Black; каждая тема оптимизирована для длительных сессий разработки.  
+* **24 тёмные темы**: от Midnight Deep и Dracula Castle до Synthwave 84, Matrix Terminal и AMOLED Black; каждая тема оптимизирована для длительных сессий разработки.  
 * **Возобновление сессии**: при перезагрузке страницы во время выполнения запроса клиент автоматически переподключается к текущей задаче.  
 * **Мультиязычный интерфейс**: English, Русский, 中文.  
+* **Модальное окно предпросмотра запроса**: отдельный оверлей, который показывает полный системный промпт, запрос пользователя, контекст файлов и список прикреплённых файлов перед отправкой в ИИ.
 
 ## Разработка  
 
@@ -336,14 +345,14 @@ BiNeuron спроектирован по модульному принципу �
 
 | Группа | Назначение |
 |--------|-----------|
-| `ModelConfig` | Выбор модели, папка кэша, HF токен, переопределение repo/filename, зеркало |
-| `LLMConfig` | Размер контекста, слои GPU, макс. токенов, температура, verbose/echo |
+| `ModelConfig` | Выбор модели, папка кэша, HF токен, переопределение repo и filename, зеркало, переключатель облачной версии, автопроверка места на диске, попытки получения веса |
+| `LLMConfig` | Размер контекста, слои GPU, макс. токенов, температура, verbose и echo, ключ API облака, имя облачной модели |
 | `PromptConfig` | Режим основного промпта (11 сценариев), пользовательский промпт, улучшение запроса |
 | `TranslationConfig` | Режим определения, DeepL, язык запроса, офлайн перевод Argos |
-| `LanguageDetectionConfig` | ИИ оркестратор vs. проприетарный поиск по ключевым словам |
-| `ProxyConfig` | Страна, протокол, таймауты, повторы, свои/GitHub списки прокси |
-| `OCRConfig` | Движок (Easy/DeepSeek), языки, GPU, crop mode, API ключ облака |
-| `FileConfig` | Виртуальное хранилище, редактирование/удаление файлов, скрапинг сайтов, сжатие, игнорируемые файлы |
+| `LanguageDetectionConfig` | ИИ оркестратор против проприетарного поиска по ключевым словам |
+| `ProxyConfig` | Переключатель with proxy, страна, протокол, таймауты, повторы, свои и GitHub списки прокси |
+| `OCRConfig` | Движок (Easy или DeepSeek), языки, GPU, crop mode, API ключ облака |
+| `FileConfig` | Виртуальное хранилище, редактирование и удаление файлов, скрапинг сайтов, сжатие, игнорируемые файлы, основной диск |
 | `SafetyConfig` | Фильтр ненормативной лексики, анонимизация запроса |
 
 ## Зависимости  
@@ -375,7 +384,7 @@ BiNeuron спроектирован по модульному принципу �
 | `docx2txt` | Извлечение текста из `.docx` (Microsoft Word) | [github.com/ankushshah89/python-docx2txt](https://github.com/ankushshah89/python-docx2txt) |
 | `pptx2txt2` | Извлечение текста из `.pptx` (PowerPoint) | [pypi.org/project/pptx2txt2](https://pypi.org/project/pptx2txt2/) |
 | `odfdo` | Чтение OpenDocument (`.odf`) | [github.com/jdum/odfdo](https://github.com/jdum/odfdo) |
-| `markitdown` | Универсальный конвертер документов (для `.xlsx`/`.xls`) | [github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
+| `markitdown` | Универсальный конвертер документов (для `.xlsx` и `.xls`) | [github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
 | `epub2txt` | Извлечение текста из EPUB | [pypi.org/project/epub2txt](https://pypi.org/project/epub2txt/) |
 | `mobi` | Извлечение текста из MOBI | [github.com/iscc/mobi](https://github.com/iscc/mobi) |
 | `fb2reader` | Чтение FictionBook 2 (`.fb2`) | [pypi.org/project/fb2reader](https://pypi.org/project/fb2reader/) |
@@ -385,7 +394,7 @@ BiNeuron спроектирован по модульному принципу �
 
 | Библиотека | Назначение | Репозиторий |
 |-----------|------------|------------|
-| `deep-translator` | Бесплатный перевод через Google Translate и др. | [github.com/nidhaloff/deep-translator](https://github.com/nidhaloff/deep-translator) |
+| `deep-translator` | Бесплатный перевод через Google Translate и другие | [github.com/nidhaloff/deep-translator](https://github.com/nidhaloff/deep-translator) |
 | `deepl` | Официальный клиент DeepL API | [github.com/DeepLcom/deepl-python](https://github.com/DeepLcom/deepl-python) |
 | `argostranslate` | Полностью офлайн перевод через Argos Translate | [github.com/argosopentech/argos-translate](https://github.com/argosopentech/argos-translate) |
 | `langdetect` | Определение языка (резервный алгоритм) | [github.com/Mimino666/langdetect](https://github.com/Mimino666/langdetect) |
@@ -413,6 +422,7 @@ BiNeuron спроектирован по модульному принципу �
 | `requests` | HTTP клиент для REST запросов и проверки прокси | [github.com/psf/requests](https://github.com/psf/requests) |
 | `httpx` | HTTP клиент с поддержкой async, используется с прокси | [github.com/encode/httpx](https://github.com/encode/httpx) |
 | `free-proxy-server` | Получение и фильтрация списков бесплатных прокси | [pypi.org/project/free-proxy-server](https://pypi.org/project/free-proxy-server/) |
+| `litellm` | Унифицированный интерфейс для облачных ИИ провайдеров (OpenAI, Anthropic и другие) | [github.com/BerriAI/litellm](https://github.com/BerriAI/litellm) |
 
 ### Веб и система  
 
@@ -445,9 +455,6 @@ BiNeuron использует тщательно подобранную колл
 **网站**：[https://just-not-google.github.io/BiNeuron/](https://just-not-google.github.io/BiNeuron/)  
 这是 BiNeuron 的官方网站。您可以在此下载适用于 Windows、macOS 和 Linux 的应用程序，并查看项目概述和主要功能。  
 
-**枢纽**：[https://just-not-google.github.io/BiNeuron/website/hub.html](https://just-not-google.github.io/BiNeuron/website/hub.html)  
-这是本地 AI 模型的即用型配置集合。每张卡片包含一个模型、最佳系统提示、标签以及指向 Hugging Face 的直接链接。目前中心有 47 个配置，包括针对 Python、Java 和其他语言的专用模型。  
-
 ## 智能代码分析与生成平台
 
 BiNeuron 是一个先进的软件解决方案，旨在弥合人类意图与机器生成代码之间的鸿沟。它将先进的自然语言处理、光学字符识别和自适应模型选择整合到一个功能强大的工具中，专为开发者、研究人员和技术团队设计。  
@@ -457,12 +464,12 @@ BiNeuron 是一个先进的软件解决方案，旨在弥合人类意图与机�
 ## 主要功能  
 
 ### 编程语言检测  
-* 支持超过 25 种编程语言，包括 Python、Java、C/C++、C#、JavaScript、TypeScript、Go、Rust、Swift、Kotlin、Ruby、Dart、Julia、Lua、SQL、MATLAB、R、Pascal、Assembly、Fortran、F#、Ada、Zig、PHP、Shell、Scala、PowerShell、Solidity、OCaml、COBOL 等。  
+* 支持超过 25 种编程语言，包括 Python、Java、C 与 C++、C#、JavaScript、TypeScript、Go、Rust、Swift、Kotlin、Ruby、Dart、Julia、Lua、SQL、MATLAB、R、Pascal、Assembly、Fortran、F#、Ada、Zig、PHP、Shell、Scala、PowerShell、Solidity、OCaml、COBOL 等。  
 * 结合启发式算法、专有关键词匹配和 AI 驱动的编排，实现高检测精度。  
 * 分析用户提供的文本以及附加文件内容，甚至整个目录。  
 
 ### 全面的文件处理  
-* 从常见文档格式中提取和转换文本：PDF、Word（DOCX）、ODF、PowerPoint（PPTX）、Excel（XLSX/XLS）、EPUB、MOBI 和 FB2。  
+* 从常见文档格式中提取和转换文本：PDF、Word（DOCX）、ODF、PowerPoint（PPTX）、Excel（XLSX 和 XLS）、EPUB、MOBI 和 FB2。  
 * 处理几乎所有基于文本格式的源代码文件，从纯文本到配置文件。  
 * 集成两个可互换的 OCR 引擎（EasyOCR 和 DeepSeek OCR）从图像中读取文本，支持可选的 GPU 加速、语言列表选择，并可自动分割大图像（`crop_mode`）以提高识别效果。  
 * 读取网站文本：内置 HTML 抓取器（`use_websites`）将页面转换为干净的 Markdown 并合并到请求上下文中。  
@@ -481,6 +488,7 @@ BiNeuron 是一个先进的软件解决方案，旨在弥合人类意图与机�
 ### 强大的网络功能  
 * 实现对 Hugging Face 模型的多层访问，包括自动回退到 hf mirror.com、动态代理选择以及自定义代理列表支持。  
 * 从 GitHub 原始列表中获取并验证公共代理，具有重试机制和连接健康检查。  
+* **云端 AI 支持**：可选的 `with_proxy`、`model_cloud_version`、`key_for_api` 和 `cloud_model` 设置允许通过 LiteLLM 将请求路由到云端提供商，而不是本地模型。
 
 ### 虚拟存储模式  
 * 允许扫描和处理整个文件夹或挂载的虚拟目录。  
@@ -496,10 +504,15 @@ BiNeuron 是一个先进的软件解决方案，旨在弥合人类意图与机�
 * **请求改进**（`improving_user_experience=True`）：本地小型模型（Qwen）将用户的原始请求重写为清晰、结构化的提示，同时保留所有技术细节，包括文件名、代码片段、错误消息。  
 * **无损文本压缩**（`compress_text=True`）：当附加大量文件上下文时，同一个轻量模型会对其进行压缩，在逐字保留每个事实、数字和代码片段的同时大幅减少 token 数量。  
 
+### 请求预览  
+* **预览请求按钮**：在 Cloud AI 设置组中，Show preview 按钮会在主界面上方打开一个模态窗口。它显示将发送给 AI 的完整请求，包括系统提示、翻译后的用户请求、整个文件上下文以及附加文件列表。  
+* 预览由后端端点 `/api/preview_request` 生成，该端点使用当前设置构建一个 `BiNeuron` 实例，同时临时禁用 AI 编排器和虚拟存储扫描，因此不会下载任何模型，也不会触发磁盘扫描。  
+* 这有助于在提交长时间 AI 调用之前验证确切的载荷。
+
 ### 隐私与安全  
 * **请求匿名化**（`anonymize_text=True`）：在发送到翻译服务或 AI 模型之前，用户请求会经过 Microsoft Presidio 处理，该工具会检测并将 PII（姓名、电子邮件、电话号码、地址、信用卡等）替换为占位符标记。  
 * **脏话过滤器**（`filter_for_swearing=True`）：在请求到达 AI 之前阻止包含攻击性语言或脏话的请求。  
-* **对话加密**：可选择使用主密码保护所有存储的对话，使用 Fernet（AES 128 CBC + HMAC SHA256）和 PBKDF2 HMAC SHA256（200,000 次迭代）。三次解锁失败后，整个对话数据库和主密钥将被永久删除。  
+* **对话加密**：可选择使用主密码保护所有存储的对话，使用 Fernet（AES 128 CBC 加 HMAC SHA256）和 PBKDF2 HMAC SHA256（200,000 次迭代）。三次解锁失败后，整个对话数据库和主密钥将被永久删除。  
 
 ## 架构  
 
@@ -514,14 +527,14 @@ BiNeuron 采用模块化、关注点分离的设计：
 * **翻译服务**提供语言检测和翻译工具，可选集成 DeepL 和 ArgosTranslate。  
 * **匿名化服务**集成 Microsoft Presidio 进行 PII 检测和屏蔽。  
 * **网络层**实现代理轮换、可用性检查以及从 GitHub 获取代理以规避限制。  
-* **Web 界面**是使用 Flask（HTML/CSS/JS）构建的功能丰富的 Web 应用程序，涵盖九个配置组中的每一个可配置参数。  
+* **Web 界面**是使用 Flask（HTML、CSS、JS）构建的功能丰富的 Web 应用程序，涵盖九个配置组中的每一个可配置参数。  
 
 该架构强调可重用性、容错性和性能，允许每个组件独立运行，同时与其他组件无缝集成。  
 
 ## 图形界面  
 
 <p align="center">
-  <img src="img_files/gui_screenshot_2.png" width="80%" alt="BiNeuron GUI 截图" />
+  <img src="img_files/gui_screenshot_3.png" width="80%" alt="BiNeuron GUI 截图" />
 </p>
 
 使用 Flask 构建的现代 Web 应用程序，提供：  
@@ -531,16 +544,17 @@ BiNeuron 采用模块化、关注点分离的设计：
 * **聊天管理**：创建、删除、下载和筛选对话历史。  
 * **实时日志**：实时查看 AI 的操作（带加载动画、去重的进度条和一键复制）。  
 * **主密码加密**：可直接从 UI 启用或禁用对话加密。  
-* **24 个深色主题**：从 Midnight Deep 和 Dracula’s Castle 到 Synthwave ’84、Matrix Terminal 和 AMOLED Black；每个主题都针对长时间编码会话进行了优化。  
+* **24 个深色主题**：从 Midnight Deep 和 Dracula Castle 到 Synthwave 84、Matrix Terminal 和 AMOLED Black；每个主题都针对长时间编码会话进行了优化。  
 * **会话恢复**：如果在请求运行期间重新加载页面，客户端会自动重新连接到正在进行的任务。  
 * **多语言界面**：English、Русский、中文。  
+* **请求预览模态窗口**：一个专用覆盖层，在将任何内容发送到 AI 之前显示完整的系统提示、用户请求、文件上下文和附加文件列表。
 
 ## 开发  
 
 只有界面和与界面的交互是在 **DeepSeek Coder** 的帮助下开发的。这包括基于 Flask 的 Web UI、JavaScript 前端以及用户交互逻辑。所有其他组件，包括核心引擎、OCR 模块、模型下载器、JSON 格式化器、文件编辑模块、翻译服务、匿名化服务、网络层以及整体架构，均为独立设计和编写。  
 
-* **模型集合**: [deepseek-ai/deepseek-coder](https://huggingface.co/collections/deepseek-ai/deepseek-coder)  
-* **示例模型**: [deepseek-ai/deepseek-coder-6.7b-instruct](https://huggingface.co/deepseek-ai/deepseek-coder-6.7b-instruct)  
+* **模型集合**：[deepseek-ai/deepseek-coder](https://huggingface.co/collections/deepseek-ai/deepseek-coder)  
+* **示例模型**：[deepseek-ai/deepseek-coder-6.7b-instruct](https://huggingface.co/deepseek-ai/deepseek-coder-6.7b-instruct)  
 
 ## 配置组  
 
@@ -548,14 +562,14 @@ BiNeuron 采用模块化、关注点分离的设计：
 
 | 组 | 用途 |
 |----|------|
-| `ModelConfig` | 模型选择、缓存目录、HF 令牌、repo/filename 覆盖、镜像偏好 |
-| `LLMConfig` | 上下文大小、GPU 层数、最大 token、温度、verbose/echo |
+| `ModelConfig` | 模型选择、缓存目录、HF 令牌、repo 与 filename 覆盖、镜像偏好、云版本开关、自动磁盘空间检查、权重尝试次数 |
+| `LLMConfig` | 上下文大小、GPU 层数、最大 token、温度、verbose 与 echo、云 API 密钥、云模型名称 |
 | `PromptConfig` | 主提示模式（11 个预设场景）、自定义提示、请求改进 |
 | `TranslationConfig` | 检测模式、DeepL、请求语言、离线 Argos 翻译 |
-| `LanguageDetectionConfig` | AI 编排器 vs. 专有关键词匹配 |
-| `ProxyConfig` | 国家、协议、超时、重试、自定义/GitHub 代理列表 |
-| `OCRConfig` | 引擎选择（Easy/DeepSeek）、语言、GPU、裁剪模式、云 API 密钥 |
-| `FileConfig` | 虚拟存储、文件编辑/删除、网站抓取、压缩、忽略文件 |
+| `LanguageDetectionConfig` | AI 编排器与专有关键词匹配 |
+| `ProxyConfig` | with proxy 开关、国家、协议、超时、重试、自定义与 GitHub 代理列表 |
+| `OCRConfig` | 引擎选择（Easy 或 DeepSeek）、语言、GPU、裁剪模式、云 API 密钥 |
+| `FileConfig` | 虚拟存储、文件编辑与删除、网站抓取、压缩、忽略文件、主磁盘 |
 | `SafetyConfig` | 脏话过滤、请求匿名化 |
 
 ## 依赖项  
@@ -586,11 +600,11 @@ BiNeuron 使用的完整库列表（与 `requirements.txt` 中声明的完全一
 | `PyMuPDF` | 从 PDF 中读取文本 | [github.com/pymupdf/PyMuPDF](https://github.com/pymupdf/PyMuPDF) |
 | `docx2txt` | 从 `.docx`（Microsoft Word）中提取文本 | [github.com/ankushshah89/python-docx2txt](https://github.com/ankushshah89/python-docx2txt) |
 | `pptx2txt2` | 从 `.pptx`（PowerPoint）中提取文本 | [pypi.org/project/pptx2txt2](https://pypi.org/project/pptx2txt2/) |
-| `odfdo` | 读取 OpenDocument (`.odf`) | [github.com/jdum/odfdo](https://github.com/jdum/odfdo) |
-| `markitdown` | 通用文档转换器（用于 `.xlsx`/`.xls`） | [github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
+| `odfdo` | 读取 OpenDocument（`.odf`） | [github.com/jdum/odfdo](https://github.com/jdum/odfdo) |
+| `markitdown` | 通用文档转换器（用于 `.xlsx` 和 `.xls`） | [github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
 | `epub2txt` | 从 EPUB 电子书中提取文本 | [pypi.org/project/epub2txt](https://pypi.org/project/epub2txt/) |
 | `mobi` | 从 MOBI 电子书中提取文本 | [github.com/iscc/mobi](https://github.com/iscc/mobi) |
-| `fb2reader` | 读取 FictionBook 2 (`.fb2`) | [pypi.org/project/fb2reader](https://pypi.org/project/fb2reader/) |
+| `fb2reader` | 读取 FictionBook 2（`.fb2`） | [pypi.org/project/fb2reader](https://pypi.org/project/fb2reader/) |
 | `html2text` | 将 HTML 页面转换为干净的 Markdown | [github.com/Alir3z4/html2text](https://github.com/Alir3z4/html2text) |
 
 ### 翻译  
@@ -625,6 +639,7 @@ BiNeuron 使用的完整库列表（与 `requirements.txt` 中声明的完全一
 | `requests` | 用于 REST 调用和代理检查的 HTTP 客户端 | [github.com/psf/requests](https://github.com/psf/requests) |
 | `httpx` | 支持异步的 HTTP 客户端，用于代理 | [github.com/encode/httpx](https://github.com/encode/httpx) |
 | `free-proxy-server` | 获取和过滤免费代理列表 | [pypi.org/project/free-proxy-server](https://pypi.org/project/free-proxy-server/) |
+| `litellm` | 云端 AI 提供商的统一接口（OpenAI、Anthropic 等） | [github.com/BerriAI/litellm](https://github.com/BerriAI/litellm) |
 
 ### Web 与系统  
 

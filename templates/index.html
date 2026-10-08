@@ -37,6 +37,17 @@
   </div>
 </div>
 
+<div class="modal-overlay hidden" id="previewModal">
+  <div class="modal preview-modal">
+    <h3 data-i18n="preview_title">Request preview</h3>
+    <div class="preview-body" id="previewBody"></div>
+    <div class="preview-actions">
+      <button class="btn small" id="previewCopy" data-i18n="preview_copy">Copy</button>
+      <button class="btn small" id="previewClose" data-i18n="preview_close">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="import-warning" id="importWarning" style="display:none"></div>
 
 <div class="app">
@@ -54,6 +65,8 @@
 
       <fieldset class="fieldset">
         <legend data-i18n="network_frame">Network</legend>
+        <div class="row check-row"><label data-i18n="with_proxy_label">With proxy</label>
+          <input class="check" type="checkbox" data-setting="with_proxy"></div>
         <div class="row"><label data-i18n="country_label">Country</label>
           <input class="input" type="text" data-setting="country"></div>
         <div class="row"><label data-i18n="protocol_label">Protocol</label>
@@ -152,6 +165,27 @@
           <input class="check" type="checkbox" data-setting="prefer_mirror"></div>
         <div class="row"><label data-i18n="type_computer_label">Type computer</label>
           <select class="select" data-setting="type_computer" id="typeComputerSelect"></select></div>
+        <div class="row check-row"><label data-i18n="automatic_disk_space_check_label">Auto disk check</label>
+          <input class="check" type="checkbox" data-setting="automatic_disk_space_check"></div>
+        <div class="row"><label data-i18n="weight_attempts_label">Weight attempts</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="weight_attempts" value="3">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="cloud_ai_frame">Cloud AI</legend>
+        <div class="row check-row"><label data-i18n="model_cloud_version_label">Cloud AI</label>
+          <input class="check" type="checkbox" data-setting="model_cloud_version"></div>
+        <div class="row"><label data-i18n="key_for_api_label">API key</label>
+          <input class="input" type="text" data-setting="key_for_api"></div>
+        <div class="row"><label data-i18n="cloud_model_label">Cloud model</label>
+          <input class="input" type="text" data-setting="cloud_model"
+                 placeholder="gpt-4o-mini, claude-3-5-sonnet..."></div>
+        <div class="row"><label data-i18n="preview_request_label">Preview request</label>
+          <button class="btn small" id="btnPreviewRequest" data-i18n="preview_btn">Show preview</button></div>
       </fieldset>
 
       <fieldset class="fieldset">
@@ -235,6 +269,9 @@
         <div class="row top"><label data-i18n="ignored_files_label">Ignored files</label>
           <textarea class="textarea" rows="3" data-setting="ignored_files"
                     placeholder="path/to/file (one per line)"></textarea></div>
+        <div class="row"><label data-i18n="main_disk_label">Main disk</label>
+          <input class="input" type="text" data-setting="main_disk"
+                 placeholder="C:\\ or /home/user"></div>
       </fieldset>
 
       <fieldset class="fieldset">
