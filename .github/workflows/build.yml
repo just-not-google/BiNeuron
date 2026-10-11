@@ -164,7 +164,6 @@ jobs:
         run: |
           pyinstaller --noconfirm --clean --onefile \
                       --console \
-                      --strip \
                       --name BiNeuron-Web-Linux \
                       --additional-hooks-dir=. \
                       --runtime-hook runtime_hook_llama.py \
