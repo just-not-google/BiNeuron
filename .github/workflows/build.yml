@@ -57,7 +57,6 @@ jobs:
                       --copy-metadata odfdo `
                       --copy-metadata transformers `
                       --copy-metadata torch `
-                      --copy-metadata llama_cpp `
                       --hidden-import llama_cpp.llama_cpp `
                       --add-data "img_files;img_files" `
                       --add-data "BiNeuron;BiNeuron" `
@@ -136,7 +135,6 @@ jobs:
                       --copy-metadata odfdo \
                       --copy-metadata transformers \
                       --copy-metadata torch \
-                      --copy-metadata llama_cpp \
                       --hidden-import llama_cpp.llama_cpp \
                       --exclude-module torch.cuda \
                       --exclude-module torch.backends.cudnn \
@@ -218,7 +216,7 @@ jobs:
           brew update --quiet || true
           brew install tcl-tk imagemagick cmake ninja pkg-config
 
-      - name: Convert .ico → .icns
+      - name: Convert .ico to .icns
         run: |
           convert img_files/logo.ico img_files/logo.png
           rm -rf logo.iconset
@@ -259,7 +257,6 @@ jobs:
                       --copy-metadata odfdo \
                       --copy-metadata transformers \
                       --copy-metadata torch \
-                      --copy-metadata llama_cpp \
                       --hidden-import llama_cpp.llama_cpp \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
