@@ -39,6 +39,14 @@ jobs:
           pip install llama-cpp-python --force-reinstall --no-cache-dir
           pip install flask pyinstaller
 
+      - name: Verify numpy and critical imports
+        shell: pwsh
+        run: |
+          python -c "import numpy; print('numpy', numpy.__version__, numpy.__file__)"
+          python -c "import torch; print('torch', torch.__version__)"
+          python -c "import transformers; print('transformers', transformers.__version__)"
+          python -c "import llama_cpp; print('llama_cpp ok')"
+
       - name: Verify llama_cpp layout
         shell: pwsh
         run: |
@@ -53,11 +61,33 @@ jobs:
                       --icon img_files/logo.ico `
                       --additional-hooks-dir=. `
                       --runtime-hook runtime_hook_llama.py `
+                      --collect-all numpy `
                       --collect-all llama_cpp `
+                      --collect-all transformers `
                       --copy-metadata odfdo `
                       --copy-metadata transformers `
                       --copy-metadata torch `
+                      --copy-metadata tokenizers `
+                      --hidden-import numpy `
+                      --hidden-import numpy.core._multiarray_umath `
+                      --hidden-import numpy.core._multiarray_tests `
+                      --hidden-import torch `
+                      --hidden-import torch._C `
+                      --hidden-import torch.backends.cudnn `
+                      --hidden-import transformers `
+                      --hidden-import tokenizers `
                       --hidden-import llama_cpp.llama_cpp `
+                      --hidden-import fitz `
+                      --hidden-import pymupdf `
+                      --hidden-import docx `
+                      --hidden-import pptx `
+                      --hidden-import openpyxl `
+                      --hidden-import lxml `
+                      --hidden-import bs4 `
+                      --hidden-import requests `
+                      --hidden-import pydantic `
+                      --hidden-import pydantic_core `
+                      --hidden-import huggingface_hub `
                       --add-data "img_files;img_files" `
                       --add-data "BiNeuron;BiNeuron" `
                       --add-data "templates;templates" `
@@ -119,6 +149,13 @@ jobs:
               pip install llama-cpp-python --force-reinstall --no-cache-dir
           pip install flask pyinstaller
 
+      - name: Verify numpy and critical imports
+        run: |
+          python -c "import numpy; print('numpy', numpy.__version__, numpy.__file__)"
+          python -c "import torch; print('torch', torch.__version__)"
+          python -c "import transformers; print('transformers', transformers.__version__)"
+          python -c "import llama_cpp; print('llama_cpp ok')"
+
       - name: Verify llama_cpp layout
         run: |
           python -c "import llama_cpp, os; p=os.path.dirname(llama_cpp.__file__); print('llama_cpp at:', p); print('root files:', os.listdir(p)); lib=os.path.join(p,'lib'); print('lib exists:', os.path.isdir(lib)); print('lib files:', os.listdir(lib) if os.path.isdir(lib) else None)"
@@ -131,11 +168,33 @@ jobs:
                       --name BiNeuron-Web-Linux \
                       --additional-hooks-dir=. \
                       --runtime-hook runtime_hook_llama.py \
+                      --collect-all numpy \
                       --collect-all llama_cpp \
+                      --collect-all transformers \
                       --copy-metadata odfdo \
                       --copy-metadata transformers \
                       --copy-metadata torch \
+                      --copy-metadata tokenizers \
+                      --hidden-import numpy \
+                      --hidden-import numpy.core._multiarray_umath \
+                      --hidden-import numpy.core._multiarray_tests \
+                      --hidden-import torch \
+                      --hidden-import torch._C \
+                      --hidden-import torch.backends.cudnn \
+                      --hidden-import transformers \
+                      --hidden-import tokenizers \
                       --hidden-import llama_cpp.llama_cpp \
+                      --hidden-import fitz \
+                      --hidden-import pymupdf \
+                      --hidden-import docx \
+                      --hidden-import pptx \
+                      --hidden-import openpyxl \
+                      --hidden-import lxml \
+                      --hidden-import bs4 \
+                      --hidden-import requests \
+                      --hidden-import pydantic \
+                      --hidden-import pydantic_core \
+                      --hidden-import huggingface_hub \
                       --exclude-module torch.cuda \
                       --exclude-module torch.backends.cudnn \
                       --exclude-module torch.backends.cuda \
@@ -241,6 +300,13 @@ jobs:
               pip install llama-cpp-python --force-reinstall --no-cache-dir
           pip install flask pyinstaller
 
+      - name: Verify numpy and critical imports
+        run: |
+          python -c "import numpy; print('numpy', numpy.__version__, numpy.__file__)"
+          python -c "import torch; print('torch', torch.__version__)"
+          python -c "import transformers; print('transformers', transformers.__version__)"
+          python -c "import llama_cpp; print('llama_cpp ok')"
+
       - name: Verify llama_cpp layout
         run: |
           python -c "import llama_cpp, os; p=os.path.dirname(llama_cpp.__file__); print('llama_cpp at:', p); print('root files:', os.listdir(p)); lib=os.path.join(p,'lib'); print('lib exists:', os.path.isdir(lib)); print('lib files:', os.listdir(lib) if os.path.isdir(lib) else None)"
@@ -253,11 +319,33 @@ jobs:
                       --icon img_files/logo.icns \
                       --additional-hooks-dir=. \
                       --runtime-hook runtime_hook_llama.py \
+                      --collect-all numpy \
                       --collect-all llama_cpp \
+                      --collect-all transformers \
                       --copy-metadata odfdo \
                       --copy-metadata transformers \
                       --copy-metadata torch \
+                      --copy-metadata tokenizers \
+                      --hidden-import numpy \
+                      --hidden-import numpy.core._multiarray_umath \
+                      --hidden-import numpy.core._multiarray_tests \
+                      --hidden-import torch \
+                      --hidden-import torch._C \
+                      --hidden-import torch.backends.cudnn \
+                      --hidden-import transformers \
+                      --hidden-import tokenizers \
                       --hidden-import llama_cpp.llama_cpp \
+                      --hidden-import fitz \
+                      --hidden-import pymupdf \
+                      --hidden-import docx \
+                      --hidden-import pptx \
+                      --hidden-import openpyxl \
+                      --hidden-import lxml \
+                      --hidden-import bs4 \
+                      --hidden-import requests \
+                      --hidden-import pydantic \
+                      --hidden-import pydantic_core \
+                      --hidden-import huggingface_hub \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
                       --add-data "templates:templates" \

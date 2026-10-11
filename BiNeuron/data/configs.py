@@ -72,8 +72,8 @@ class LLMConfig(BaseModel, extra="forbid"):
     echo: bool = False
     max_tokens: int = Field(default=MAX_TOKENS, gt=0)
     temperature: float = Field(default=0.1, ge=0.1, le=1)
-    key_for_api: Optional[str] = None,
-    model: Optional[str] = None,
+    key_for_api: Optional[str] = None
+    model: Optional[str] = None
 
 class PromptConfig(BaseModel, extra="forbid"):
     """
@@ -170,7 +170,7 @@ class OCRConfig(BaseModel, extra="forbid"):
     cloud_version: bool = False
     definition_option: Literal[
         "easy_ocr", "deepseek_ocr"
-    ] = EASY_OCR,
+    ] = EASY_OCR
     model_size: Literal[
         "tiny", "small", "base",
         "large", "gundam"
