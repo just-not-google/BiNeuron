@@ -1,4 +1,4 @@
-name: Build BiNeuron Web (Windows, Linux, macOS)
+name: Build BiNeuron (Windows, Linux, macOS)
 
 on:
   push:
@@ -37,26 +37,23 @@ jobs:
           pip install -r requirements.txt
           $env:CMAKE_ARGS = "-DGGML_CUDA=off -DGGML_NATIVE=off -DGGML_BACKEND_DL=OFF"
           pip install llama-cpp-python --force-reinstall --no-cache-dir
-          pip install flask pyinstaller
+          pip install flask pyinstaller pywebview
 
-      - name: Verify numpy and critical imports
+      - name: Verify critical imports
         shell: pwsh
         run: |
-          python -c "import numpy; print('numpy', numpy.__version__, numpy.__file__)"
+          python -c "import numpy; print('numpy', numpy.__version__)"
           python -c "import torch; print('torch', torch.__version__)"
           python -c "import transformers; print('transformers', transformers.__version__)"
           python -c "import llama_cpp; print('llama_cpp ok')"
+          python -c "import webview; print('webview ok')"
+          python -c "from all_logic_interface.app import app; print('app ok')"
 
-      - name: Verify llama_cpp layout
-        shell: pwsh
-        run: |
-          python -c "import llama_cpp, os; p=os.path.dirname(llama_cpp.__file__); print('llama_cpp at:', p); print('root files:', os.listdir(p)); lib=os.path.join(p,'lib'); print('lib exists:', os.path.isdir(lib)); print('lib files:', os.listdir(lib) if os.path.isdir(lib) else None)"
-
-      - name: Build with PyInstaller (onefile)
+      - name: Build with PyInstaller
         shell: pwsh
         run: |
           pyinstaller --noconfirm --clean --onefile `
-                      --console `
+                      --windowed `
                       --name BiNeuron-Web-Windows `
                       --icon img_files/logo.ico `
                       --additional-hooks-dir=pyinstaller_hooks `
@@ -66,6 +63,7 @@ jobs:
                       --collect-all llama_cpp `
                       --collect-all transformers `
                       --collect-all torch `
+                      --collect-all webview `
                       --copy-metadata odfdo `
                       --copy-metadata transformers `
                       --copy-metadata torch `
@@ -95,27 +93,26 @@ jobs:
                       --hidden-import deepseek_ocr `
                       --hidden-import markitdown `
                       --hidden-import argostranslate `
+                      --hidden-import webview `
+                      --hidden-import webview.platforms.edgechromium `
+                      --hidden-import all_logic_interface.app `
                       --add-data "img_files;img_files" `
-                      --add-data "BiNeuron;BiNeuron" `
+                      --add-data "all_logic_interface;all_logic_interface" `
                       --add-data "templates;templates" `
                       --add-data "static;static" `
-                      app.py
+                      launcher.py
 
       - name: Smoke test
         shell: pwsh
         run: |
-          $p = Start-Process -FilePath "dist\BiNeuron-Web-Windows.exe" -PassThru `
-                             -RedirectStandardOutput "out.log" -RedirectStandardError "err.log"
-          Start-Sleep -Seconds 12
-          if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
-          Write-Host "----- STDOUT -----"
-          Get-Content out.log -ErrorAction SilentlyContinue
-          Write-Host "----- STDERR -----"
-          Get-Content err.log -ErrorAction SilentlyContinue
-          if ((Get-Content out.log -Raw -ErrorAction SilentlyContinue) -match "BiNeuron import failed") {
-            Write-Error "BiNeuron import failed inside exe"
+          $p = Start-Process -FilePath "dist\BiNeuron-Web-Windows.exe" -PassThru
+          Start-Sleep -Seconds 15
+          if ($p.HasExited) {
+            Write-Error "App exited early with code $($p.ExitCode)"
             exit 1
           }
+          Stop-Process -Id $p.Id -Force
+          Write-Host "App stayed alive for 15s - OK"
 
       - name: Upload artifact (Windows)
         uses: actions/upload-artifact@v4
@@ -143,7 +140,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             build-essential cmake ninja-build git pkg-config \
-            python3-tk libgl1 libglib2.0-0 libgomp1
+            python3-tk libgl1 libglib2.0-0 libgomp1 \
+            python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-webkit2-4.0 \
+            libgirepository1.0-dev libcairo2-dev \
+            xvfb dbus-x11
 
       - name: Install Python dependencies (CPU-only)
         run: |
@@ -154,23 +154,21 @@ jobs:
               --force-reinstall --no-cache-dir
           CMAKE_ARGS="-DGGML_CUDA=off -DGGML_NATIVE=off -DGGML_BACKEND_DL=OFF" \
               pip install llama-cpp-python --force-reinstall --no-cache-dir
-          pip install flask pyinstaller
+          pip install pygobject flask pyinstaller pywebview
 
-      - name: Verify numpy and critical imports
+      - name: Verify critical imports
         run: |
-          python -c "import numpy; print('numpy', numpy.__version__, numpy.__file__)"
+          python -c "import numpy; print('numpy', numpy.__version__)"
           python -c "import torch; print('torch', torch.__version__)"
           python -c "import transformers; print('transformers', transformers.__version__)"
           python -c "import llama_cpp; print('llama_cpp ok')"
+          python -c "import webview; print('webview ok')"
+          python -c "from all_logic_interface.app import app; print('app ok')"
 
-      - name: Verify llama_cpp layout
-        run: |
-          python -c "import llama_cpp, os; p=os.path.dirname(llama_cpp.__file__); print('llama_cpp at:', p); print('root files:', os.listdir(p)); lib=os.path.join(p,'lib'); print('lib exists:', os.path.isdir(lib)); print('lib files:', os.listdir(lib) if os.path.isdir(lib) else None)"
-
-      - name: Build with PyInstaller (onefile)
+      - name: Build with PyInstaller
         run: |
           pyinstaller --noconfirm --clean --onefile \
-                      --console \
+                      --windowed \
                       --name BiNeuron-Web-Linux \
                       --additional-hooks-dir=pyinstaller_hooks \
                       --runtime-hook pyinstaller_hooks/runtime_hook_llama.py \
@@ -179,6 +177,7 @@ jobs:
                       --collect-all llama_cpp \
                       --collect-all transformers \
                       --collect-all torch \
+                      --collect-all webview \
                       --copy-metadata odfdo \
                       --copy-metadata transformers \
                       --copy-metadata torch \
@@ -208,38 +207,40 @@ jobs:
                       --hidden-import deepseek_ocr \
                       --hidden-import markitdown \
                       --hidden-import argostranslate \
+                      --hidden-import webview \
+                      --hidden-import webview.platforms.gtk \
+                      --hidden-import gi \
+                      --hidden-import gi.repository.Gtk \
+                      --hidden-import gi.repository.WebKit2 \
+                      --hidden-import all_logic_interface.app \
                       --exclude-module torch.distributed \
                       --exclude-module torch.testing \
                       --exclude-module triton \
                       --exclude-module nvidia \
-                      --exclude-module matplotlib \
                       --exclude-module IPython \
                       --exclude-module jupyter \
                       --exclude-module notebook \
                       --exclude-module pytest \
                       --exclude-module sphinx \
-                      --exclude-module PyQt5 \
-                      --exclude-module PyQt6 \
-                      --exclude-module PySide2 \
-                      --exclude-module PySide6 \
                       --exclude-module tensorboard \
                       --add-data "img_files:img_files" \
-                      --add-data "BiNeuron:BiNeuron" \
+                      --add-data "all_logic_interface:all_logic_interface" \
                       --add-data "templates:templates" \
                       --add-data "static:static" \
-                      app.py
+                      launcher.py
 
-      - name: Smoke test
+      - name: Smoke test (xvfb)
         shell: bash
         run: |
-          ./dist/BiNeuron-Web-Linux > out.log 2>&1 &
-          PID=$!
-          sleep 12
-          kill -0 $PID 2>/dev/null && kill $PID || true
+          timeout --signal=TERM 15 xvfb-run -a --server-args="-screen 0 1400x900x24" \
+              ./dist/BiNeuron-Web-Linux > out.log 2>&1
+          RC=$?
           echo "----- OUTPUT -----"
           cat out.log || true
-          if grep -q "BiNeuron import failed" out.log; then
-            echo "::error::BiNeuron import failed inside binary"
+          if [ $RC -eq 124 ] || [ $RC -eq 143 ]; then
+            echo "App stayed alive for 15s - OK"
+          else
+            echo "::error::App crashed with exit code $RC"
             exit 1
           fi
 
@@ -247,12 +248,12 @@ jobs:
         run: |
           cat > BiNeuron-Web.desktop <<EOF
           [Desktop Entry]
-          Name=BiNeuron Web
+          Name=BiNeuron
           Exec=$PWD/dist/BiNeuron-Web-Linux
           Icon=$PWD/img_files/logo.ico
           Type=Application
           Categories=Utility;
-          Terminal=true;
+          Terminal=false;
           EOF
 
       - name: Upload artifact (Linux)
@@ -307,23 +308,21 @@ jobs:
           pip install -r requirements.txt
           CMAKE_ARGS="-DGGML_METAL=on -DGGML_NATIVE=off" \
               pip install llama-cpp-python --force-reinstall --no-cache-dir
-          pip install flask pyinstaller
+          pip install flask pyinstaller pywebview
 
-      - name: Verify numpy and critical imports
+      - name: Verify critical imports
         run: |
-          python -c "import numpy; print('numpy', numpy.__version__, numpy.__file__)"
+          python -c "import numpy; print('numpy', numpy.__version__)"
           python -c "import torch; print('torch', torch.__version__)"
           python -c "import transformers; print('transformers', transformers.__version__)"
           python -c "import llama_cpp; print('llama_cpp ok')"
+          python -c "import webview; print('webview ok')"
+          python -c "from all_logic_interface.app import app; print('app ok')"
 
-      - name: Verify llama_cpp layout
-        run: |
-          python -c "import llama_cpp, os; p=os.path.dirname(llama_cpp.__file__); print('llama_cpp at:', p); print('root files:', os.listdir(p)); lib=os.path.join(p,'lib'); print('lib exists:', os.path.isdir(lib)); print('lib files:', os.listdir(lib) if os.path.isdir(lib) else None)"
-
-      - name: Build with PyInstaller (onefile)
+      - name: Build with PyInstaller
         run: |
           pyinstaller --noconfirm --clean --onefile \
-                      --console \
+                      --windowed \
                       --name BiNeuron-Web-MacOS \
                       --icon img_files/logo.icns \
                       --additional-hooks-dir=pyinstaller_hooks \
@@ -333,6 +332,7 @@ jobs:
                       --collect-all llama_cpp \
                       --collect-all transformers \
                       --collect-all torch \
+                      --collect-all webview \
                       --copy-metadata odfdo \
                       --copy-metadata transformers \
                       --copy-metadata torch \
@@ -362,23 +362,26 @@ jobs:
                       --hidden-import deepseek_ocr \
                       --hidden-import markitdown \
                       --hidden-import argostranslate \
+                      --hidden-import webview \
+                      --hidden-import webview.platforms.cocoa \
+                      --hidden-import all_logic_interface.app \
                       --add-data "img_files:img_files" \
-                      --add-data "BiNeuron:BiNeuron" \
+                      --add-data "all_logic_interface:all_logic_interface" \
                       --add-data "templates:templates" \
                       --add-data "static:static" \
-                      app.py
+                      launcher.py
 
       - name: Smoke test
         shell: bash
         run: |
-          ./dist/BiNeuron-Web-MacOS > out.log 2>&1 &
-          PID=$!
-          sleep 12
-          kill -0 $PID 2>/dev/null && kill $PID || true
+          timeout --signal=TERM 15 ./dist/BiNeuron-Web-MacOS.app/Contents/MacOS/BiNeuron-Web-MacOS > out.log 2>&1
+          RC=$?
           echo "----- OUTPUT -----"
           cat out.log || true
-          if grep -q "BiNeuron import failed" out.log; then
-            echo "::error::BiNeuron import failed inside binary"
+          if [ $RC -eq 124 ] || [ $RC -eq 143 ]; then
+            echo "App stayed alive for 15s - OK"
+          else
+            echo "::error::App crashed with exit code $RC"
             exit 1
           fi
 
@@ -386,7 +389,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: BiNeuron-Web-MacOS
-          path: dist/BiNeuron-Web-MacOS
+          path: dist/BiNeuron-Web-MacOS.app
           if-no-files-found: error
 
   release:
