@@ -59,11 +59,13 @@ jobs:
                       --console `
                       --name BiNeuron-Web-Windows `
                       --icon img_files/logo.ico `
-                      --additional-hooks-dir=. `
-                      --runtime-hook runtime_hook_llama.py `
+                      --additional-hooks-dir=pyinstaller_hooks `
+                      --runtime-hook pyinstaller_hooks/runtime_hook_llama.py `
+                      --runtime-hook pyinstaller_hooks/runtime_hook_torch_cuda.py `
                       --collect-all numpy `
                       --collect-all llama_cpp `
                       --collect-all transformers `
+                      --collect-all torch `
                       --copy-metadata odfdo `
                       --copy-metadata transformers `
                       --copy-metadata torch `
@@ -74,6 +76,7 @@ jobs:
                       --hidden-import torch `
                       --hidden-import torch._C `
                       --hidden-import torch.backends.cudnn `
+                      --hidden-import torch.cuda `
                       --hidden-import transformers `
                       --hidden-import tokenizers `
                       --hidden-import llama_cpp.llama_cpp `
@@ -88,6 +91,10 @@ jobs:
                       --hidden-import pydantic `
                       --hidden-import pydantic_core `
                       --hidden-import huggingface_hub `
+                      --hidden-import easyocr `
+                      --hidden-import deepseek_ocr `
+                      --hidden-import markitdown `
+                      --hidden-import argostranslate `
                       --add-data "img_files;img_files" `
                       --add-data "BiNeuron;BiNeuron" `
                       --add-data "templates;templates" `
@@ -165,11 +172,13 @@ jobs:
           pyinstaller --noconfirm --clean --onefile \
                       --console \
                       --name BiNeuron-Web-Linux \
-                      --additional-hooks-dir=. \
-                      --runtime-hook runtime_hook_llama.py \
+                      --additional-hooks-dir=pyinstaller_hooks \
+                      --runtime-hook pyinstaller_hooks/runtime_hook_llama.py \
+                      --runtime-hook pyinstaller_hooks/runtime_hook_torch_cuda.py \
                       --collect-all numpy \
                       --collect-all llama_cpp \
                       --collect-all transformers \
+                      --collect-all torch \
                       --copy-metadata odfdo \
                       --copy-metadata transformers \
                       --copy-metadata torch \
@@ -180,6 +189,7 @@ jobs:
                       --hidden-import torch \
                       --hidden-import torch._C \
                       --hidden-import torch.backends.cudnn \
+                      --hidden-import torch.cuda \
                       --hidden-import transformers \
                       --hidden-import tokenizers \
                       --hidden-import llama_cpp.llama_cpp \
@@ -194,12 +204,12 @@ jobs:
                       --hidden-import pydantic \
                       --hidden-import pydantic_core \
                       --hidden-import huggingface_hub \
-                      --exclude-module torch.cuda \
-                      --exclude-module torch.backends.cudnn \
-                      --exclude-module torch.backends.cuda \
+                      --hidden-import easyocr \
+                      --hidden-import deepseek_ocr \
+                      --hidden-import markitdown \
+                      --hidden-import argostranslate \
                       --exclude-module torch.distributed \
                       --exclude-module torch.testing \
-                      --exclude-module torchvision.cuda \
                       --exclude-module triton \
                       --exclude-module nvidia \
                       --exclude-module matplotlib \
@@ -316,11 +326,13 @@ jobs:
                       --console \
                       --name BiNeuron-Web-MacOS \
                       --icon img_files/logo.icns \
-                      --additional-hooks-dir=. \
-                      --runtime-hook runtime_hook_llama.py \
+                      --additional-hooks-dir=pyinstaller_hooks \
+                      --runtime-hook pyinstaller_hooks/runtime_hook_llama.py \
+                      --runtime-hook pyinstaller_hooks/runtime_hook_torch_cuda.py \
                       --collect-all numpy \
                       --collect-all llama_cpp \
                       --collect-all transformers \
+                      --collect-all torch \
                       --copy-metadata odfdo \
                       --copy-metadata transformers \
                       --copy-metadata torch \
@@ -331,6 +343,7 @@ jobs:
                       --hidden-import torch \
                       --hidden-import torch._C \
                       --hidden-import torch.backends.cudnn \
+                      --hidden-import torch.cuda \
                       --hidden-import transformers \
                       --hidden-import tokenizers \
                       --hidden-import llama_cpp.llama_cpp \
@@ -345,6 +358,10 @@ jobs:
                       --hidden-import pydantic \
                       --hidden-import pydantic_core \
                       --hidden-import huggingface_hub \
+                      --hidden-import easyocr \
+                      --hidden-import deepseek_ocr \
+                      --hidden-import markitdown \
+                      --hidden-import argostranslate \
                       --add-data "img_files:img_files" \
                       --add-data "BiNeuron:BiNeuron" \
                       --add-data "templates:templates" \
