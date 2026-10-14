@@ -15,9 +15,12 @@ from .model_repo_map import MODEL_REPO_MAP
 from .prompt_for_json_formatter import PROMPT_FOR_JSON_FORMATTER
 from .supported_formats_and_writemode import SUPPORTED_FORMATS_W
 from .prompt_json_deleting import PROMPT_JSON_DELETING
-from .configs import (ModelConfig, LLMConfig, PromptConfig, TranslationConfig,
-                      LanguageDetectionConfig, ProxyConfig, OCRConfig, FileConfig,
-                      SafetyConfig)
+from .configs import (
+    ModelConfig, LLMConfig, PromptConfig, TranslationConfig,
+    LanguageDetectionConfig, ProxyConfig, OCRConfig, FileConfig,
+    SafetyConfig
+)
 from .constants_for_functions import *
 from .prompt_for_compression import PROMPT_FOR_COMPRESSION
 from .prompt_for_improvement import PROMPT_FOR_IMPROVEMENT
+from .response_pattern_for_injection_detection import ANSWER_INJECTION_DETECTION

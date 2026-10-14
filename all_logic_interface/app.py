@@ -1,6 +1,7 @@
 # This code was made entirely using DeepSeek Coder.
 # Link to the model: https://huggingface.co/collections/deepseek-ai/deepseek-coder
 
+
 import os
 import sys
 import json
@@ -37,6 +38,9 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
+INJECTION_DETECT_MODELS_FALLBACK = ["deberta", "distilbert", "onnx"]
+DEFAULT_INJECTION_DETECT_MODEL = "deberta"
+
 BINEURON_IMPORT_ERROR = None
 try:
     from BiNeuron import BiNeuron
@@ -44,6 +48,7 @@ try:
         HTTP_PROTOCOL, HTTPS_PROTOCOL, TYPES_POWER,
         PREFERENCES_IN_AI_LIST, DETERMINANT_MODE_LIST,
         DEFINITION_OPTION_LIST,
+        DEBERTA_CONST,
     )
     from BiNeuron.data.variants_industrial_scenarios import ALL_MAIN_PROMPTS
     from BiNeuron.data.configs import (
@@ -52,6 +57,7 @@ try:
         SafetyConfig,
     )
     BINEURON_CONFIGS_AVAILABLE = True
+    DEFAULT_INJECTION_DETECT_MODEL = DEBERTA_CONST
 except Exception as e:
     BINEURON_IMPORT_ERROR = f"{type(e).__name__}: {e}"
     HTTP_PROTOCOL, HTTPS_PROTOCOL = "http", "https"
@@ -63,7 +69,6 @@ except Exception as e:
     BINEURON_CONFIGS_AVAILABLE = False
     ModelConfig = LLMConfig = PromptConfig = TranslationConfig = None
     LanguageDetectionConfig = ProxyConfig = OCRConfig = FileConfig = SafetyConfig = None
-
 
 class CryptoManager:
     def __init__(self, base_dir: str):
@@ -239,7 +244,6 @@ class CryptoManager:
 
 crypto = CryptoManager(BASE_DIR)
 
-
 def _wrap_init_with_kwargs_filter(cls, logger):
     orig_init = cls.__init__
     try:
@@ -264,7 +268,6 @@ def _wrap_init_with_kwargs_filter(cls, logger):
     cls.__init__ = _patched_init
     print(f"[compat] {cls.__name__} patched")
 
-
 def _apply_bineuron_compat_patches():
     logger = logging.getLogger(__name__)
     try:
@@ -285,9 +288,15 @@ def _apply_bineuron_compat_patches():
             pass
 
 _apply_bineuron_compat_patches()
-app = Flask(__name__, static_folder="static", template_folder="templates")
-app.config["MAX_CONTENT_LENGTH"] = 512 * 1024 * 1024
+USER_INTERFACE_DIR = os.path.join(BASE_DIR, "user_interface")
+USER_INTERFACE_TEMPLATE = "user_interface.html"
 
+app = Flask(
+    __name__,
+    template_folder=USER_INTERFACE_DIR,
+    static_folder=None,
+)
+app.config["MAX_CONTENT_LENGTH"] = 512 * 1024 * 1024
 
 class TaskManager:
     def __init__(self, max_tasks: int = 200):
@@ -349,7 +358,6 @@ class TaskManager:
 task_manager = TaskManager()
 _task_lock = threading.Lock()
 
-
 class TaskLogHandler(logging.Handler):
     def __init__(self, tm: TaskManager, tid: str):
         super().__init__()
@@ -361,7 +369,6 @@ class TaskLogHandler(logging.Handler):
             self.tm.log(self.tid, self.format(record))
         except Exception:
             pass
-
 
 class _StdStreamCapture:
     def __init__(self, tm: TaskManager, tid: str, original):
@@ -413,7 +420,6 @@ class _StdStreamCapture:
                 pass
         raise OSError("fileno not available")
 
-
 def _to_int(v, default=None):
     if v in (None, ""):
         return default
@@ -421,7 +427,6 @@ def _to_int(v, default=None):
         return int(float(v))
     except (TypeError, ValueError):
         return default
-
 
 def _to_float(v, default=0.1):
     if v in (None, ""):
@@ -431,14 +436,12 @@ def _to_float(v, default=0.1):
     except (TypeError, ValueError):
         return default
 
-
 def _to_bool(v):
     if isinstance(v, bool):
         return v
     if v is None:
         return False
     return str(v).strip().lower() in ("1", "true", "yes", "on")
-
 
 def _to_list(v):
     if not v:
@@ -449,7 +452,6 @@ def _to_list(v):
     items = [line.strip() for line in str(v).splitlines() if line.strip()]
     return items or None
 
-
 def _short_str(v, min_len=None, max_len=None, allow_empty=True):
     s = (v or "").strip() if isinstance(v, str) else ""
     if not s:
@@ -459,7 +461,6 @@ def _short_str(v, min_len=None, max_len=None, allow_empty=True):
     if max_len is not None and len(s) > max_len:
         s = s[:max_len]
     return s
-
 
 def build_bineuron_configs(data: dict) -> dict:
     if not BINEURON_CONFIGS_AVAILABLE:
@@ -613,21 +614,26 @@ def build_bineuron_configs(data: dict) -> dict:
         main_disk=(data.get("main_disk") or "").strip() or None,
     )
 
+    injection_model = (data.get("injection_detect_model") or "").strip().lower()
+    if injection_model not in INJECTION_DETECT_MODELS_FALLBACK:
+        injection_model = DEFAULT_INJECTION_DETECT_MODEL
     out["safety_conf"] = _build(
         SafetyConfig,
         filter_for_swearing=_to_bool(data.get("filter_for_swearing")),
         anonymize_text=_to_bool(data.get("anonymize_text")),
+        prompt_injection=_to_bool(data.get("prompt_injection")),
+        injection_detect_model=injection_model,
     )
 
     return out
-
-
 
 def default_settings() -> dict:
     return {
         "preferences_in_ai": PREFERENCES_IN_AI_LIST[0] if PREFERENCES_IN_AI_LIST else "deepseek",
         "filter_for_swearing": False,
         "anonymize_text": False,
+        "prompt_injection": False,
+        "injection_detect_model": DEFAULT_INJECTION_DETECT_MODEL,
         "models_dir": "./models",
         "with_ai_orchestrator": True,
         "proprietary_algorithms": False,
@@ -695,7 +701,6 @@ def default_settings() -> dict:
         "theme": "midnight",
     }
 
-
 def load_json(path, default):
     if not os.path.exists(path):
         return default
@@ -705,7 +710,6 @@ def load_json(path, default):
     except Exception:
         return default
 
-
 def save_json(path, data):
     try:
         with open(path, "w", encoding="utf-8") as f:
@@ -713,23 +717,19 @@ def save_json(path, data):
     except Exception as e:
         logging.error(f"Failed to save {path}: {e}")
 
-
 def _get_chats_or_401():
     data = crypto.load_chats()
     if data is None:
         abort(401, description="chats_locked")
     return data
 
-
 @app.errorhandler(401)
 def _handle_401(e):
     return jsonify({"locked": True, "error": "chats_locked"}), 401
 
-
 @app.route("/")
 def index():
-    return render_template("index.html")
-
+    return render_template(USER_INTERFACE_TEMPLATE)
 
 @app.route("/api/meta")
 def api_meta():
@@ -741,28 +741,25 @@ def api_meta():
         "main_prompt_modes": list(ALL_MAIN_PROMPTS.keys()),
         "model_sizes": ["tiny", "small", "base", "large", "gundam"],
         "definition_options": DEFINITION_OPTION_LIST,
+        "injection_detect_models": INJECTION_DETECT_MODELS_FALLBACK,
         "import_error": BINEURON_IMPORT_ERROR,
     })
-
 
 @app.route("/api/settings", methods=["GET"])
 def api_get_settings():
     data = load_json(SETTINGS_FILE, None)
     return jsonify(data if data is not None else default_settings())
 
-
 @app.route("/api/settings", methods=["POST"])
 def api_save_settings():
     save_json(SETTINGS_FILE, request.get_json(silent=True) or {})
     return jsonify({"ok": True})
-
 
 @app.route("/api/settings/reset", methods=["POST"])
 def api_reset_settings():
     data = default_settings()
     save_json(SETTINGS_FILE, data)
     return jsonify({"ok": True, "settings": data})
-
 
 @app.route("/api/master/status", methods=["GET"])
 def api_master_status():
@@ -773,7 +770,6 @@ def api_master_status():
         "attempts_left": crypto.attempts_left(),
         "max_attempts": MAX_ATTEMPTS,
     })
-
 
 @app.route("/api/master/setup", methods=["POST"])
 def api_master_setup():
@@ -787,7 +783,6 @@ def api_master_setup():
         return jsonify({"ok": False, "error": "password too short (min 4)"}), 400
     ok = crypto.setup(pwd)
     return jsonify({"ok": ok})
-
 
 @app.route("/api/master/unlock", methods=["POST"])
 def api_master_unlock():
@@ -804,7 +799,6 @@ def api_master_unlock():
         return jsonify({"ok": False, "wiped": True, "attempts_left": 0}), 410
     return jsonify({"ok": False, "error": status}), 400
 
-
 @app.route("/api/master/disable", methods=["POST"])
 def api_master_disable():
     if not crypto.is_enabled():
@@ -812,11 +806,9 @@ def api_master_disable():
     ok = crypto.disable()
     return jsonify({"ok": ok})
 
-
 @app.route("/api/chats", methods=["GET"])
 def api_list_chats():
     return jsonify(_get_chats_or_401())
-
 
 @app.route("/api/chats", methods=["POST"])
 def api_create_chat():
@@ -829,7 +821,6 @@ def api_create_chat():
     crypto.save_chats(chats)
     return jsonify({"id": new_id, "chat": chats[new_id]})
 
-
 @app.route("/api/chats/<chat_id>", methods=["GET"])
 def api_get_chat(chat_id):
     chats = _get_chats_or_401()
@@ -837,14 +828,12 @@ def api_get_chat(chat_id):
         abort(404)
     return jsonify(chats[chat_id])
 
-
 @app.route("/api/chats/<chat_id>", methods=["DELETE"])
 def api_delete_chat(chat_id):
     chats = _get_chats_or_401()
     chats.pop(chat_id, None)
     crypto.save_chats(chats)
     return jsonify({"ok": True})
-
 
 @app.route("/api/chats/<chat_id>/messages", methods=["POST"])
 def api_append_message(chat_id):
@@ -864,7 +853,6 @@ def api_append_message(chat_id):
     })
     crypto.save_chats(chats)
     return jsonify({"ok": True})
-
 
 def _run_bi_neuron_task(tid, configs, request_text, additional_files):
     with _task_lock:
@@ -901,7 +889,6 @@ def _run_bi_neuron_task(tid, configs, request_text, additional_files):
             root.removeHandler(handler)
             root.setLevel(old_level)
 
-
 @app.route("/api/chat", methods=["POST"])
 def api_chat():
     body = request.get_json(silent=True) or {}
@@ -921,7 +908,6 @@ def api_chat():
                      daemon=True).start()
     return jsonify({"task_id": tid})
 
-
 @app.route("/api/chat/task/<tid>", methods=["GET"])
 def api_chat_task(tid):
     since = _to_int(request.args.get("since"), 0)
@@ -929,7 +915,6 @@ def api_chat_task(tid):
     if t is None:
         abort(404)
     return jsonify(t)
-
 
 @app.route("/api/preview_request", methods=["POST"])
 def api_preview_request():
@@ -1016,7 +1001,6 @@ def api_preview_request():
         logging.exception(f"preview error: {err}")
         return jsonify({"ok": False, "error": err}), 500
 
-
 @app.route("/api/upload", methods=["POST"])
 def api_upload():
     files = request.files.getlist("files")
@@ -1033,7 +1017,6 @@ def api_upload():
         saved.append(dest)
     return jsonify({"ok": True, "paths": saved})
 
-
 @app.route("/api/models", methods=["GET"])
 def api_list_models():
     models_dir = request.args.get("dir") or "./models"
@@ -1045,7 +1028,6 @@ def api_list_models():
             if name.lower().endswith(".gguf"):
                 gguf.append(os.path.relpath(os.path.join(root, name), models_dir))
     return jsonify({"ok": True, "models": sorted(gguf)})
-
 
 @app.route("/api/storage/tree", methods=["POST"])
 def api_storage_tree():
@@ -1073,7 +1055,6 @@ def api_storage_tree():
         "path": path, "type": "dir", "children": build(path),
     }})
 
-
 @app.route("/api/storage/open", methods=["POST"])
 def api_storage_open():
     path = (request.get_json(silent=True) or {}).get("path") or ""
@@ -1098,12 +1079,4 @@ if __name__ == "__main__":
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
-    print("=" * 60)
-    print("BiNeuron Web UI  ->  http://127.0.0.1:5000")
-    if BINEURON_IMPORT_ERROR:
-        print(f"BiNeuron import failed: {BINEURON_IMPORT_ERROR}")
-    if not CRYPTO_AVAILABLE:
-        print("WARNING: cryptography not installed. Encryption disabled.")
-        print("Install with: pip install cryptography")
-    print("=" * 60)
     app.run(host="127.0.0.1", port=5000, debug=False, threaded=True)

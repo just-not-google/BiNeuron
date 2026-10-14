@@ -1,0 +1,2858 @@
+<!--This code was made entirely using DeepSeek Coder.-->
+<!--Link to the model: https://huggingface.co/collections/deepseek-ai/deepseek-coder-->
+
+
+<!DOCTYPE html>
+<html lang="en" data-theme="github-noir">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BiNeuron</title>
+<script>
+(function(){
+  try {
+    var saved = localStorage.getItem("bineuron_theme");
+    if (saved) document.documentElement.setAttribute("data-theme", saved);
+  } catch(e){}
+})();
+</script>
+<style>
+:root,
+[data-theme="github-noir"]{
+  --bg-main:#0d1117; --bg-frame:#161b22; --bg-entry:#21262d;
+  --bg-bubble-u:#1f6feb; --bg-bubble-a:#21262d;
+  --fg-bubble-u:#ffffff;
+  --fg-text:#c9d1d9; --fg-dark:#8b949e;
+  --border:#30363d; --accent:#58a6ff; --accent-hover:#79b8ff;
+  --font-main:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-small:11px; --font-title:15px; --font-bold:600;
+  --radius:4px;
+}
+[data-theme="midnight"]{
+  --bg-main:#1e1e1e; --bg-frame:#252526; --bg-entry:#3c3c3c;
+  --bg-bubble-u:#0e639c; --bg-bubble-a:#2d2d30;
+  --fg-bubble-u:#ffffff;
+  --fg-text:#d4d4d4; --fg-dark:#808080;
+  --border:#3f3f46; --accent:#007acc; --accent-hover:#1a8cff;
+}
+[data-theme="monokai"]{
+  --bg-main:#272822; --bg-frame:#3e3d32; --bg-entry:#49483e;
+  --bg-bubble-u:#75715e; --bg-bubble-a:#3e3d32;
+  --fg-bubble-u:#f8f8f2;
+  --fg-text:#f8f8f2; --fg-dark:#a6a68a;
+  --border:#4e4e42; --accent:#f92672; --accent-hover:#fd5c94;
+}
+[data-theme="dracula"]{
+  --bg-main:#282a36; --bg-frame:#343746; --bg-entry:#44475a;
+  --bg-bubble-u:#6272a4; --bg-bubble-a:#3a3d4d;
+  --fg-bubble-u:#f8f8f2;
+  --fg-text:#f8f8f2; --fg-dark:#6272a4;
+  --border:#44475a; --accent:#bd93f9; --accent-hover:#cba6ff;
+}
+[data-theme="nord"]{
+  --bg-main:#2e3440; --bg-frame:#3b4252; --bg-entry:#434c5e;
+  --bg-bubble-u:#5e81ac; --bg-bubble-a:#3b4252;
+  --fg-bubble-u:#eceff4;
+  --fg-text:#eceff4; --fg-dark:#8fbcbb;
+  --border:#4c566a; --accent:#88c0d0; --accent-hover:#8fbcbb;
+}
+[data-theme="solar-flare"]{
+  --bg-main:#002b36; --bg-frame:#073642; --bg-entry:#0a4450;
+  --bg-bubble-u:#268bd2; --bg-bubble-a:#073642;
+  --fg-bubble-u:#fdf6e3;
+  --fg-text:#93a1a1; --fg-dark:#586e75;
+  --border:#0f4d5a; --accent:#268bd2; --accent-hover:#2aa198;
+}
+[data-theme="one-dark"]{
+  --bg-main:#282c34; --bg-frame:#21252b; --bg-entry:#2c313a;
+  --bg-bubble-u:#3b5b87; --bg-bubble-a:#21252b;
+  --fg-bubble-u:#ffffff;
+  --fg-text:#abb2bf; --fg-dark:#5c6370;
+  --border:#3a3f4b; --accent:#61afef; --accent-hover:#82c1ff;
+}
+[data-theme="catppuccin"]{
+  --bg-main:#1e1e2e; --bg-frame:#181825; --bg-entry:#313244;
+  --bg-bubble-u:#89b4fa; --bg-bubble-a:#313244;
+  --fg-bubble-u:#1e1e2e;
+  --fg-text:#cdd6f4; --fg-dark:#7f849c;
+  --border:#45475a; --accent:#89b4fa; --accent-hover:#b4befe;
+}
+[data-theme="tokyo-night"]{
+  --bg-main:#1a1b26; --bg-frame:#16161e; --bg-entry:#24283b;
+  --bg-bubble-u:#7aa2f7; --bg-bubble-a:#24283b;
+  --fg-bubble-u:#1a1b26;
+  --fg-text:#c0caf5; --fg-dark:#565f89;
+  --border:#292e42; --accent:#7aa2f7; --accent-hover:#bb9af7;
+}
+[data-theme="gruvbox"]{
+  --bg-main:#282828; --bg-frame:#1d2021; --bg-entry:#3c3836;
+  --bg-bubble-u:#d79921; --bg-bubble-a:#3c3836;
+  --fg-bubble-u:#282828;
+  --fg-text:#ebdbb2; --fg-dark:#928374;
+  --border:#504945; --accent:#d79921; --accent-hover:#fabd2f;
+}
+[data-theme="ayu-mirage"]{
+  --bg-main:#1f2430; --bg-frame:#171b24; --bg-entry:#242936;
+  --bg-bubble-u:#ffcc66; --bg-bubble-a:#242936;
+  --fg-bubble-u:#1f2430;
+  --fg-text:#cbccc6; --fg-dark:#707a8c;
+  --border:#2d3343; --accent:#ffcc66; --accent-hover:#ffd173;
+}
+[data-theme="material-ocean"]{
+  --bg-main:#0f111a; --bg-frame:#090b10; --bg-entry:#1a1f2e;
+  --bg-bubble-u:#84ffff; --bg-bubble-a:#1a1f2e;
+  --fg-bubble-u:#0f111a;
+  --fg-text:#a6accd; --fg-dark:#464b5d;
+  --border:#1f2335; --accent:#84ffff; --accent-hover:#89ddff;
+}
+[data-theme="cobalt"]{
+  --bg-main:#193549; --bg-frame:#122738; --bg-entry:#1f4662;
+  --bg-bubble-u:#ffc600; --bg-bubble-a:#1f4662;
+  --fg-bubble-u:#193549;
+  --fg-text:#ffffff; --fg-dark:#8ba0ab;
+  --border:#234e6b; --accent:#ffc600; --accent-hover:#ffd452;
+}
+[data-theme="synthwave"]{
+  --bg-main:#262335; --bg-frame:#1e1b2b; --bg-entry:#34294f;
+  --bg-bubble-u:#ff7edb; --bg-bubble-a:#34294f;
+  --fg-bubble-u:#262335;
+  --fg-text:#f92aad; --fg-dark:#848bbd;
+  --border:#495495; --accent:#f92aad; --accent-hover:#ff7edb;
+}
+[data-theme="everforest"]{
+  --bg-main:#2d353b; --bg-frame:#232a2e; --bg-entry:#343f44;
+  --bg-bubble-u:#a7c080; --bg-bubble-a:#343f44;
+  --fg-bubble-u:#2d353b;
+  --fg-text:#d3c6aa; --fg-dark:#859289;
+  --border:#3d484d; --accent:#a7c080; --accent-hover:#83c092;
+}
+[data-theme="rose-pine"]{
+  --bg-main:#191724; --bg-frame:#1f1d2e; --bg-entry:#26233a;
+  --bg-bubble-u:#ebbcba; --bg-bubble-a:#26233a;
+  --fg-bubble-u:#191724;
+  --fg-text:#e0def4; --fg-dark:#6e6a86;
+  --border:#403d52; --accent:#ebbcba; --accent-hover:#f6c177;
+}
+[data-theme="kanagawa"]{
+  --bg-main:#1f1f28; --bg-frame:#16161d; --bg-entry:#2a2a37;
+  --bg-bubble-u:#7e9cd8; --bg-bubble-a:#2a2a37;
+  --fg-bubble-u:#1f1f28;
+  --fg-text:#dcd7ba; --fg-dark:#727169;
+  --border:#2d4f67; --accent:#7e9cd8; --accent-hover:#957fb8;
+}
+[data-theme="cyberpunk"]{
+  --bg-main:#0d0d1a; --bg-frame:#141428; --bg-entry:#1f1f3a;
+  --bg-bubble-u:#fcee0a; --bg-bubble-a:#1f1f3a;
+  --fg-bubble-u:#0d0d1a;
+  --fg-text:#00f0ff; --fg-dark:#6a6a9a;
+  --border:#2a2a5a; --accent:#ff003c; --accent-hover:#fcee0a;
+}
+[data-theme="matrix"]{
+  --bg-main:#000000; --bg-frame:#0a0f0a; --bg-entry:#0d140d;
+  --bg-bubble-u:#00ff41; --bg-bubble-a:#0a0f0a;
+  --fg-bubble-u:#000000;
+  --fg-text:#00ff41; --fg-dark:#0a5a1a;
+  --border:#0a3a0a; --accent:#00ff41; --accent-hover:#33ff66;
+}
+[data-theme="vaporwave"]{
+  --bg-main:#2d1b69; --bg-frame:#1f1147; --bg-entry:#3a2080;
+  --bg-bubble-u:#ff71ce; --bg-bubble-a:#3a2080;
+  --fg-bubble-u:#2d1b69;
+  --fg-text:#01cdfe; --fg-dark:#8a7db0;
+  --border:#4a2a9a; --accent:#ff71ce; --accent-hover:#05ffa1;
+}
+[data-theme="obsidian"]{
+  --bg-main:#0f0f14; --bg-frame:#1a1a22; --bg-entry:#22222c;
+  --bg-bubble-u:#7c3aed; --bg-bubble-a:#1a1a22;
+  --fg-bubble-u:#ffffff;
+  --fg-text:#e0e0e8; --fg-dark:#6a6a7a;
+  --border:#2a2a38; --accent:#a78bfa; --accent-hover:#c4b5fd;
+}
+[data-theme="oceanic"]{
+  --bg-main:#0b1622; --bg-frame:#12212e; --bg-entry:#1a2d3e;
+  --bg-bubble-u:#2a9d8f; --bg-bubble-a:#12212e;
+  --fg-bubble-u:#ffffff;
+  --fg-text:#a8dadc; --fg-dark:#457b9d;
+  --border:#1d3557; --accent:#2a9d8f; --accent-hover:#4ecdc4;
+}
+[data-theme="forest"]{
+  --bg-main:#0f1a10; --bg-frame:#162418; --bg-entry:#1e3020;
+  --bg-bubble-u:#4ade80; --bg-bubble-a:#162418;
+  --fg-bubble-u:#0f1a10;
+  --fg-text:#d1e7d0; --fg-dark:#5a7a5c;
+  --border:#2a4530; --accent:#4ade80; --accent-hover:#86efac;
+}
+[data-theme="amoled"]{
+  --bg-main:#000000; --bg-frame:#0a0a0a; --bg-entry:#151515;
+  --bg-bubble-u:#1e88e5; --bg-bubble-a:#0f0f0f;
+  --fg-bubble-u:#ffffff;
+  --fg-text:#e8e8e8; --fg-dark:#666666;
+  --border:#1a1a1a; --accent:#2196f3; --accent-hover:#42a5f5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg-main);
+  color:var(--fg-text);font-family:var(--font-main);font-size:13px;
+  overflow:hidden;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:var(--fg-text)}
+button{-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg-main)}
+::-webkit-scrollbar-thumb{background:var(--bg-frame);border:2px solid var(--bg-main);border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:var(--border)}
+.icon{
+  width:16px;height:16px;flex:0 0 auto;
+  stroke:currentColor;fill:none;
+  stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;
+  vertical-align:middle;pointer-events:none;
+  transition:color .18s ease, stroke .18s ease;
+}
+.icon.sm{width:14px;height:14px;stroke-width:1.9}
+.icon.lg{width:18px;height:18px;stroke-width:1.7}
+.icon.xl{width:22px;height:22px;stroke-width:1.6}
+.icon-spin{animation:spin 1s linear infinite}
+.panel-title .icon,
+.chat-title .icon,
+.logs-title .icon,
+.modal h3 .icon,
+.master-title .icon,
+.vs-label .icon,
+.drop-hint .icon,
+.import-warning .icon,
+.mobile-tabs .mob-tab.active .icon{color:var(--accent);}
+.btn .icon,
+.logs-copy .icon,
+.logs-chevron .icon,
+.mobile-tabs .mob-tab .icon,
+.file-chip .remove .icon{color:inherit;}
+.app{
+  display:grid;
+  grid-template-columns:clamp(300px,26vw,400px) minmax(0,1fr) clamp(220px,20vw,300px);
+  height:100vh;width:100%;
+}
+.panel{display:flex;flex-direction:column;min-width:0;min-height:0;padding:10px;}
+.settings-panel{border-right:1px solid var(--border)}
+.history-panel{border-left:1px solid var(--border)}
+.panel-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:var(--font-title);font-weight:var(--font-bold);
+  margin:2px 0 10px 2px;flex-shrink:0;
+}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  background:var(--bg-frame);border:1px solid var(--border);border-radius:var(--radius);
+  padding:6px 10px;cursor:pointer;transition:background .12s,border-color .12s,color .12s;
+  white-space:nowrap;user-select:none;color:var(--fg-text);min-height:30px;line-height:1;
+}
+.btn:hover{background:var(--accent-hover);border-color:var(--accent-hover);color:#fff}
+.btn:active{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.small{padding:4px 8px;font-size:12px;min-height:26px;gap:5px}
+.btn.small .icon{width:13px;height:13px;stroke-width:2}
+.input,.select,.textarea{
+  width:100%;background:var(--bg-entry);border:1px solid var(--border);
+  border-radius:var(--radius);padding:5px 8px;outline:none;
+  transition:border-color .12s,box-shadow .12s;color:var(--fg-text);min-height:28px;
+}
+.input:focus,.select:focus,.textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 22%,transparent);
+}
+.select{cursor:pointer}
+.textarea{resize:vertical;min-height:48px;font-size:12px;line-height:1.35}
+.check{
+  appearance:none;-webkit-appearance:none;width:18px;height:18px;
+  background:var(--bg-entry);border:1px solid var(--border);border-radius:4px;
+  cursor:pointer;position:relative;vertical-align:middle;flex-shrink:0;
+  transition:background .12s,border-color .12s;
+}
+.check:checked{background:var(--accent);border-color:var(--accent)}
+.check:checked::after{
+  content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)
+}
+.spin{position:relative;display:block;width:100%}
+.spin .input{padding-right:26px;-moz-appearance:textfield;}
+.spin .input::-webkit-outer-spin-button,
+.spin .input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.spin-btn{
+  position:absolute;right:2px;width:22px;height:44%;padding:0;border:none;
+  background:transparent;color:var(--fg-dark);font-size:8px;line-height:1;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  border-radius:3px;transition:background .12s,color .12s;user-select:none;
+}
+.spin-btn.up{top:2px;}
+.spin-btn.down{bottom:2px;}
+.spin-btn:hover{background:var(--accent);color:#fff;}
+.spin-btn:active{background:var(--accent-hover);}
+.fieldset{
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:10px 12px 8px;margin:8px 0;background:transparent;
+}
+.fieldset > legend{
+  font-size:11px;color:var(--fg-dark);padding:0 6px;margin-left:-6px;
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.row{
+  display:grid;grid-template-columns:minmax(120px,45%) 1fr;gap:10px;align-items:center;
+  margin-bottom:7px;min-height:28px;
+}
+.row > label{
+  color:var(--fg-text);font-size:12px;line-height:1.3;
+  overflow-wrap:anywhere;word-break:break-word;hyphens:auto;
+}
+.row.top{align-items:start}
+.row.top > label{padding-top:5px}
+.row.check-row > .check{justify-self:start}
+.settings-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-right:4px;min-height:0}
+.top-buttons{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:5px;margin-bottom:8px;
+}
+.top-buttons .btn{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.top-buttons .btn span{overflow:hidden;text-overflow:ellipsis}
+.chat-panel{align-items:stretch;min-height:0;}
+.chat-title{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:var(--font-title);font-weight:var(--font-bold);
+  margin:2px 0 6px;flex-shrink:0;
+}
+.status-bar{
+  min-height:18px;font-size:var(--font-small);color:var(--fg-dark);
+  padding:0 4px;flex-shrink:0;margin-bottom:4px;
+  display:flex;align-items:center;gap:6px;
+}
+.resume-btn{display:none;width:100%;margin-bottom:6px;flex-shrink:0}
+.resume-btn.visible{display:inline-flex}
+.logs-panel{
+  flex-shrink:0;display:flex;flex-direction:column;
+  background:var(--bg-frame);border:1px solid var(--border);border-radius:var(--radius);
+  margin-bottom:6px;overflow:hidden;max-height:min(240px,32vh);
+  transition:max-height .18s ease;
+}
+.logs-panel.collapsed{max-height:32px;}
+.logs-header{
+  display:flex;align-items:center;gap:6px;width:100%;
+  padding:6px 10px;background:transparent;border:none;
+  color:var(--fg-dark);font-size:12px;text-align:left;cursor:pointer;
+  user-select:none;flex-shrink:0;
+}
+.logs-header:hover{color:var(--fg-text);}
+.logs-chevron{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:14px;height:14px;transition:transform .15s ease;
+}
+.logs-panel:not(.collapsed) .logs-chevron{transform:rotate(90deg);}
+.logs-title{font-weight:600;display:inline-flex;align-items:center;gap:6px;}
+.logs-count{
+  margin-left:auto;font-size:10px;padding:1px 7px;
+  background:var(--bg-entry);border:1px solid var(--border);border-radius:10px;
+  min-width:22px;text-align:center;color:var(--fg-dark);
+}
+.logs-spinner{
+  width:10px;height:10px;margin-left:4px;
+  border:2px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+.logs-spinner[hidden]{display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.logs-copy{
+  margin-left:6px;width:24px;height:22px;padding:0;
+  background:transparent;border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--fg-dark);
+  line-height:1;display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .12s,color .12s,border-color .12s;
+}
+.logs-copy:hover{background:var(--accent-hover);border-color:var(--accent-hover);color:#fff;}
+.logs-copy:active{background:var(--accent);border-color:var(--accent);}
+.logs-copy.copied{background:#1f7a3f;border-color:#1f7a3f;color:#fff;}
+.logs-body{
+  flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+  padding:4px 10px 8px;border-top:1px solid var(--border);
+  font-family:Consolas,"Courier New",monospace;font-size:11.5px;
+  color:var(--fg-dark);line-height:1.4;
+}
+.logs-panel.collapsed .logs-body{display:none;}
+.log-line{white-space:pre-wrap;word-break:break-word;padding:1px 0;}
+.log-line.progress{white-space:pre;overflow-x:auto;overflow-y:hidden;font-size:11px;}
+.log-line.progress::-webkit-scrollbar{height:6px;}
+.messages-wrap{
+  flex:1;min-height:0;
+  background:var(--bg-frame);border:1px solid var(--border);
+  border-radius:var(--radius);overflow-y:auto;
+  padding:8px;display:flex;flex-direction:column;gap:8px;
+}
+.welcome{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  text-align:center;color:var(--fg-dark);font-size:14px;
+  padding:30px;line-height:1.6;
+}
+.msg{
+  background:var(--bg-bubble-a);border-radius:8px;
+  padding:8px 12px 6px;max-width:min(85%,640px);
+  align-self:flex-start;word-wrap:break-word;overflow-wrap:anywhere;
+  color:var(--fg-text);
+}
+.msg.user{background:var(--bg-bubble-u);align-self:flex-end;color:var(--fg-bubble-u);}
+.msg .text{white-space:pre-wrap;line-height:1.5;color:inherit;}
+.msg .meta{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:10px;}
+.msg .time{
+  font-size:11px;color:#ffffff;opacity:.65;
+  font-family:Consolas,"Courier New",monospace;
+  letter-spacing:.3px;user-select:text;
+}
+.msg.user .time{color:#ffffff;opacity:.85;}
+.msg.user .btn.small{color:var(--fg-text);}
+.attached-box{margin-top:6px;flex-shrink:0;}
+.drop-zone{
+  position:relative;border:2px dashed var(--border);border-radius:var(--radius);
+  padding:10px;transition:border-color .15s,background .15s;
+  cursor:pointer;min-height:64px;
+}
+.drop-zone:hover{border-color:var(--accent);}
+.drop-zone.drag-over{border-color:var(--accent);background:rgba(0,122,204,.08);}
+.drop-zone .drop-hint{
+  font-size:11px;color:var(--fg-dark);text-align:center;
+  margin-bottom:6px;user-select:none;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.file-chips{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;}
+.file-chips:empty{display:none;}
+.file-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--bg-entry);border:1px solid var(--border);border-radius:12px;
+  padding:2px 4px 2px 10px;font-size:11px;color:var(--fg-text);
+  max-width:100%;transition:border-color .12s;
+}
+.file-chip:hover{border-color:var(--accent);}
+.file-chip .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;}
+.file-chip .remove{
+  background:transparent;border:none;color:var(--fg-dark);cursor:pointer;
+  font-size:13px;font-weight:700;line-height:1;width:18px;height:18px;padding:0;
+  border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  transition:background .12s,color .12s;
+}
+.file-chip .remove:hover{background:#c0392b;color:#fff;}
+.input-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;
+  gap:6px;margin-top:8px;margin-bottom:4px;flex-shrink:0;
+}
+.input-row .btn{min-width:0}
+.input-row .btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-header{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:8px;margin-bottom:8px;flex-shrink:0;
+}
+.history-header .panel-title{margin:0;flex-shrink:0;}
+.vs-label{
+  display:flex;align-items:center;justify-content:flex-end;gap:6px;
+  font-size:11px;color:var(--fg-dark);cursor:pointer;white-space:nowrap;
+  flex:1;min-width:0;overflow:hidden;
+}
+.vs-label .vs-text{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  min-width:0;text-align:right;
+}
+.vs-label .vs-check{flex-shrink:0;}
+.history-controls{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:5px;
+  margin-bottom:6px;flex-shrink:0;
+}
+.history-controls .search{grid-column:1/-1;}
+.storage-controls{
+  display:none;grid-template-columns:1fr 1fr;gap:5px;
+  margin-bottom:6px;flex-shrink:0;
+}
+.storage-controls .input{grid-column:1/-1;}
+.storage-controls.visible{display:grid;}
+.history-controls.hidden{display:none;}
+.history-list,.tree-view{
+  flex:1;min-height:0;overflow-y:auto;
+  background:var(--bg-frame);border:1px solid var(--border);
+  border-radius:var(--radius);padding:4px;
+}
+.tree-view{display:none;}
+.chat-item{
+  display:block;width:100%;text-align:left;background:transparent;border:none;
+  color:var(--fg-text);padding:8px 10px;border-radius:var(--radius);cursor:pointer;
+  font-size:12px;line-height:1.3;margin-bottom:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.chat-item:hover{background:var(--accent-hover);color:#fff;}
+.chat-item.active{background:var(--accent);color:#fff;}
+.tree-view ul{list-style:none;margin:0;padding-left:14px;}
+.tree-view > ul{padding-left:0;}
+.tree-view li{padding:3px 4px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;}
+.tree-view li:hover{background:var(--accent-hover);color:#fff;}
+.tree-view li::before{content:"[D] ";color:var(--fg-dark);}
+.tree-view li.file::before{content:"[F] ";color:var(--fg-dark);}
+.models-box{flex-shrink:0;height:180px;display:flex;flex-direction:column;margin-top:8px;}
+.models-list{
+  flex:1;overflow-y:auto;background:var(--bg-entry);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:4px;font-size:12px;
+}
+.models-list div{padding:3px 4px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.models-list div:hover{background:var(--accent-hover);color:#fff;}
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);
+  display:flex;align-items:center;justify-content:center;z-index:1000;
+  padding:16px;backdrop-filter:blur(2px);
+}
+.modal-overlay.hidden{display:none;}
+.modal{
+  background:var(--bg-main);border:1px solid var(--border);border-radius:10px;
+  padding:20px 24px;width:min(360px,100%);
+  box-shadow:0 12px 48px rgba(0,0,0,.7);
+}
+.modal h3{
+  margin:0 0 14px;font-size:15px;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.modal .select{margin-bottom:14px;}
+.modal .btn{width:100%;}
+.lang-check-row{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-bottom:14px;font-size:12px;color:var(--fg-dark);
+  cursor:pointer;user-select:none;transition:color .12s ease;
+}
+.lang-check-row:hover{color:var(--fg-text);}
+.unlock-hint{color:var(--fg-dark);font-size:12px;margin:0 0 10px;text-align:center;}
+.unlock-attempts{color:#e0a050;font-size:11px;text-align:center;margin-top:6px;min-height:14px;}
+.unlock-attempts.danger{color:#e74c3c;font-weight:600;}
+.import-warning{
+  background:#5b1d1d;color:#ffd0d0;padding:8px 14px;
+  border-bottom:1px solid #7a2a2a;font-size:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.import-warning .icon{color:#ffd0d0;}
+.master-box{
+  margin-top:12px;padding:10px 12px;
+  border:1px dashed var(--border);border-radius:var(--radius);
+  background:rgba(0,0,0,.08);
+}
+.master-title{
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:600;margin-bottom:6px;
+}
+.master-state{font-size:11px;color:var(--fg-dark);margin-bottom:8px;min-height:14px;}
+.master-state.on{color:#3ecf6a;}
+.master-state.off{color:var(--fg-dark);}
+.master-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.preview-modal{width:min(900px,94vw);max-height:88vh;display:flex;flex-direction:column;}
+.preview-body{
+  flex:1;min-height:200px;max-height:65vh;overflow-y:auto;overflow-x:hidden;
+  background:var(--bg-frame);border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px 12px;
+  font-family:Consolas,"Courier New",monospace;font-size:12px;
+  line-height:1.45;white-space:pre-wrap;word-break:break-word;
+  color:var(--fg-text);margin-bottom:10px;
+}
+.preview-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.preview-actions .btn{width:100%;}
+.mobile-tabs{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  height:56px;background:var(--bg-frame);border-top:1px solid var(--border);
+  z-index:500;padding-bottom:env(safe-area-inset-bottom);
+}
+.mobile-tabs .mob-tab{
+  flex:1;display:inline-flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;
+  background:transparent;border:none;color:var(--fg-dark);
+  font-size:10px;cursor:pointer;padding:6px;
+  transition:color .12s,background .12s;
+}
+.mobile-tabs .mob-tab .icon{width:20px;height:20px;stroke-width:1.75}
+.mobile-tabs .mob-tab.active{color:var(--accent);}
+.mobile-tabs .mob-tab:hover{background:var(--bg-entry);}
+@media (max-width:1100px){
+  .app{grid-template-columns:minmax(260px,300px) minmax(0,1fr) 240px;}
+  .row{grid-template-columns:minmax(100px,42%) 1fr;}
+}
+@media (max-width:900px){
+  .mobile-tabs{display:flex;}
+  .app{
+    grid-template-columns:1fr;grid-template-rows:1fr;
+    height:calc(100vh - 56px);
+    height:calc(100dvh - 56px - env(safe-area-inset-bottom));
+  }
+  .app > .panel{display:none;}
+  .app[data-mobile-tab="settings"] .settings-panel{display:flex;}
+  .app[data-mobile-tab="chat"]     .chat-panel{display:flex;}
+  .app[data-mobile-tab="history"]  .history-panel{display:flex;}
+  .settings-panel,.history-panel{border:none;max-height:none;}
+  .panel{padding:12px;}
+  .row{grid-template-columns:minmax(130px,46%) 1fr;}
+  .row.top{grid-template-columns:1fr;}
+  .row.top > label{padding-top:0;margin-bottom:4px;}
+}
+@media (max-width:700px){
+  .row{grid-template-columns:1fr;gap:4px;min-height:0;margin-bottom:10px;}
+  .row > label{margin-bottom:0;}
+  .row.check-row{grid-template-columns:1fr auto;align-items:center;}
+  .top-buttons{grid-template-columns:repeat(2,1fr);}
+  .input-row{
+    grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto;
+  }
+  .input-row #requestInput{grid-column:1/-1;}
+  .input-row .btn{min-height:38px;}
+  .settings-scroll{padding-right:0;}
+  .msg{max-width:92%;}
+  .modal{padding:18px;width:min(340px,100%);}
+}
+@media (max-width:480px){
+  .panel{padding:10px 8px;}
+  .fieldset{padding:10px;}
+  .top-buttons{grid-template-columns:repeat(4,1fr);gap:4px;}
+  .top-buttons .btn.small{padding:6px 4px;font-size:11px}
+  .history-controls{grid-template-columns:repeat(3,1fr);}
+  .input-row{grid-template-columns:1fr 1fr;}
+  .input-row #requestInput{grid-column:1/-1;}
+  .input-row #copyBtn{grid-column:1/-1;}
+  .chat-title{font-size:14px;}
+  .logs-panel{max-height:40vh;}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-settings" viewBox="0 0 24 24">
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24">
+      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+    </symbol>
+    <symbol id="i-history" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24">
+      <polyline points="4 17 10 11 4 5"/>
+      <line x1="12" y1="19" x2="20" y2="19"/>
+    </symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24">
+      <path d="m9 18 6-6-6-6"/>
+    </symbol>
+    <symbol id="i-send" viewBox="0 0 24 24">
+      <path d="m22 2-7 20-4-9-9-4Z"/>
+      <path d="M22 2 11 13"/>
+    </symbol>
+    <symbol id="i-paperclip" viewBox="0 0 24 24">
+      <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+    </symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24">
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+    </symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24">
+      <path d="M3 6h18"/>
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+    </symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24">
+      <path d="M5 12h14"/>
+      <path d="M12 5v14"/>
+    </symbol>
+    <symbol id="i-save" viewBox="0 0 24 24">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" x2="12" y1="15" y2="3"/>
+    </symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24">
+      <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+    </symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24">
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+      <path d="M21 3v5h-5"/>
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+      <path d="M8 16H3v5"/>
+    </symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24">
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </symbol>
+    <symbol id="i-unlock" viewBox="0 0 24 24">
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+    </symbol>
+    <symbol id="i-key" viewBox="0 0 24 24">
+      <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/>
+      <path d="m21 2-9.6 9.6"/>
+      <circle cx="7.5" cy="15.5" r="5.5"/>
+    </symbol>
+    <symbol id="i-x" viewBox="0 0 24 24">
+      <path d="M18 6 6 18"/>
+      <path d="m6 6 12 12"/>
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24">
+      <path d="M20 6 9 17l-5-5"/>
+    </symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24">
+      <path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/>
+      <circle cx="12" cy="12" r="3"/>
+    </symbol>
+    <symbol id="i-play" viewBox="0 0 24 24">
+      <polygon points="6 3 20 12 6 21 6 3"/>
+    </symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" x2="12" y1="8" y2="12"/>
+      <line x1="12" x2="12.01" y1="16" y2="16"/>
+    </symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" x2="12" y1="3" y2="15"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="modal-overlay" id="langModal">
+  <div class="modal">
+    <h3>BiNeuron</h3>
+    <select class="select" id="langSelect">
+      <option value="en">English</option>
+      <option value="ru">Русский</option>
+      <option value="zh">中文</option>
+    </select>
+    <label class="lang-check-row">
+      <input type="checkbox" class="check" id="langDontShow">
+      <span data-i18n="lang_dont_show">Don't show this again</span>
+    </label>
+    <button class="btn" id="langOk">
+      <span data-i18n="lang_ok">OK</span>
+    </button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="unlockModal">
+  <div class="modal">
+    <h3>
+      <svg class="icon lg"><use href="#i-lock"/></svg>
+      <span data-i18n="unlock_title">BiNeuron is locked</span>
+    </h3>
+    <p class="unlock-hint" id="unlockHint" data-i18n="unlock_hint">Enter your master password</p>
+    <input class="input" type="password" id="unlockPassword" autocomplete="off">
+    <div class="unlock-attempts" id="unlockAttempts"></div>
+    <button class="btn" id="unlockOk" style="margin-top:10px;">
+      <svg class="icon"><use href="#i-unlock"/></svg>
+      <span data-i18n="unlock_btn">Unlock</span>
+    </button>
+    <button class="btn small" id="unlockWipeHint"
+            style="margin-top:6px;background:transparent;border:none;color:var(--fg-dark);"
+            data-i18n="unlock_forgot">Forgot password? (data will be wiped)</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="previewModal">
+  <div class="modal preview-modal">
+    <h3>
+      <svg class="icon lg"><use href="#i-eye"/></svg>
+      <span data-i18n="preview_title">Request preview</span>
+    </h3>
+    <div class="preview-body" id="previewBody"></div>
+    <div class="preview-actions">
+      <button class="btn small" id="previewCopy">
+        <svg class="icon"><use href="#i-copy"/></svg>
+        <span data-i18n="preview_copy">Copy</span>
+      </button>
+      <button class="btn small" id="previewClose">
+        <svg class="icon"><use href="#i-x"/></svg>
+        <span data-i18n="preview_close">Close</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="import-warning" id="importWarning" style="display:none"></div>
+
+<nav class="mobile-tabs" role="tablist" aria-label="Sections">
+  <button class="mob-tab" data-tab="settings" type="button">
+    <svg class="icon"><use href="#i-settings"/></svg>
+    <span data-i18n="settings_title">Settings</span>
+  </button>
+  <button class="mob-tab active" data-tab="chat" type="button">
+    <svg class="icon"><use href="#i-chat"/></svg>
+    <span data-i18n="chat_title">Chat</span>
+  </button>
+  <button class="mob-tab" data-tab="history" type="button">
+    <svg class="icon"><use href="#i-history"/></svg>
+    <span data-i18n="history_title">History</span>
+  </button>
+</nav>
+
+<div class="app" id="appRoot" data-mobile-tab="chat">
+
+  <aside class="panel settings-panel">
+    <div class="panel-title">
+      <svg class="icon lg"><use href="#i-settings"/></svg>
+      <span data-i18n="settings_title">Settings</span>
+    </div>
+
+    <div class="settings-scroll">
+      <div class="top-buttons">
+        <button class="btn small" id="btnReset"><span data-i18n="reset_btn">Reset</span></button>
+        <button class="btn small" id="btnExport"><span data-i18n="export_all_btn">Export</span></button>
+        <button class="btn small" id="btnDelete"><span data-i18n="delete_all_btn">Delete</span></button>
+        <button class="btn small" id="btnApply"><span data-i18n="apply_settings_btn">Apply</span></button>
+      </div>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="network_frame">Network</legend>
+        <div class="row check-row"><label data-i18n="with_proxy_label">With proxy</label>
+          <input class="check" type="checkbox" data-setting="with_proxy"></div>
+        <div class="row"><label data-i18n="country_label">Country</label>
+          <input class="input" type="text" data-setting="country"></div>
+        <div class="row"><label data-i18n="protocol_label">Protocol</label>
+          <select class="select" data-setting="protocol" id="protocolSelect"></select></div>
+        <div class="row"><label data-i18n="max_timeout_label">Max timeout</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="max_timeout" value="30">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row check-row"><label data-i18n="is_working_label">Is working</label>
+          <input class="check" type="checkbox" data-setting="is_working"></div>
+        <div class="row check-row"><label data-i18n="auto_proxies_label">Auto proxies</label>
+          <input class="check" type="checkbox" data-setting="auto_proxies"></div>
+        <div class="row top"><label data-i18n="your_proxies_label">Your proxies</label>
+          <textarea class="textarea" rows="3" data-setting="your_proxies_dict"></textarea></div>
+        <div class="row"><label data-i18n="min_timeout_check_label">Min timeout check</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="min_timeout_for_checking_availability" value="5">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="max_timeout_check_label">Max timeout check</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="max_timeout_for_checking_availability" value="15">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="retries_label">Retries</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="retries" value="3">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row check-row"><label data-i18n="github_proxies_label">Github proxies</label>
+          <input class="check" type="checkbox" data-setting="github_proxies"></div>
+        <div class="row top"><label data-i18n="url_list_label">URL list</label>
+          <textarea class="textarea" rows="3" data-setting="url_lst"></textarea></div>
+        <div class="row"><label data-i18n="proxy_retries_label">Proxy retries</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="proxy_retries" value="3">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="main_retries_label">Main retries</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="main_retries" value="3">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="model_frame">Model</legend>
+        <div class="row"><label data-i18n="preferences_in_ai_label">Preferences in AI</label>
+          <select class="select" data-setting="preferences_in_ai" id="prefsSelect"></select></div>
+        <div class="row"><label data-i18n="models_dir_label">Models dir</label>
+          <input class="input" type="text" data-setting="models_dir" value="./models"></div>
+        <div class="row check-row"><label data-i18n="with_ai_orchestrator_label">AI orchestrator</label>
+          <input class="check" type="checkbox" data-setting="with_ai_orchestrator"></div>
+        <div class="row check-row"><label data-i18n="proprietary_algorithms_label">Proprietary algorithms</label>
+          <input class="check" type="checkbox" data-setting="proprietary_algorithms"></div>
+        <div class="row"><label data-i18n="n_ctx_label">n_ctx</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="n_ctx" value="0">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="n_gpu_layers_label">n_gpu_layers</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="n_gpu_layers" value="0">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="max_tokens_label">Max tokens</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="max_tokens" value="4096">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="temperature_label">Temperature</label>
+          <div class="spin">
+            <input class="input" type="number" step="0.1" data-setting="temperature" value="0.1">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="token_hf_label">HF token</label>
+          <input class="input" type="text" data-setting="your_token_for_hf"></div>
+        <div class="row"><label data-i18n="subdomain_label">Subdomain</label>
+          <input class="input" type="text" data-setting="subdomain"></div>
+        <div class="row"><label data-i18n="repo_id_label">Repo ID</label>
+          <input class="input" type="text" data-setting="repo_id"></div>
+        <div class="row"><label data-i18n="filename_label">Filename</label>
+          <input class="input" type="text" data-setting="filename"></div>
+        <div class="row check-row"><label data-i18n="prefer_mirror_label">Prefer mirror</label>
+          <input class="check" type="checkbox" data-setting="prefer_mirror"></div>
+        <div class="row"><label data-i18n="type_computer_label">Type computer</label>
+          <select class="select" data-setting="type_computer" id="typeComputerSelect"></select></div>
+        <div class="row check-row"><label data-i18n="automatic_disk_space_check_label">Auto disk check</label>
+          <input class="check" type="checkbox" data-setting="automatic_disk_space_check"></div>
+        <div class="row"><label data-i18n="weight_attempts_label">Weight attempts</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="weight_attempts" value="3">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="cloud_ai_frame">Cloud AI</legend>
+        <div class="row check-row"><label data-i18n="model_cloud_version_label">Cloud AI</label>
+          <input class="check" type="checkbox" data-setting="model_cloud_version"></div>
+        <div class="row"><label data-i18n="key_for_api_label">API key</label>
+          <input class="input" type="text" data-setting="key_for_api"></div>
+        <div class="row"><label data-i18n="cloud_model_label">Cloud model</label>
+          <input class="input" type="text" data-setting="cloud_model"
+                 placeholder="gpt-4o-mini, claude-3-5-sonnet..."></div>
+        <div class="row"><label data-i18n="preview_request_label">Preview request</label>
+          <button class="btn small" id="btnPreviewRequest">
+            <svg class="icon"><use href="#i-eye"/></svg>
+            <span data-i18n="preview_btn">Show preview</span>
+          </button></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="prompt_frame">Prompt</legend>
+        <div class="row"><label data-i18n="main_prompt_mode_label">Main prompt mode</label>
+          <select class="select" data-setting="main_prompt_mode" id="promptModeSelect"></select></div>
+        <div class="row top"><label data-i18n="main_prompt_label">Main prompt</label>
+          <textarea class="textarea" rows="3" data-setting="main_prompt"></textarea></div>
+        <div class="row check-row"><label data-i18n="improving_user_experience_label">Improve user experience</label>
+          <input class="check" type="checkbox" data-setting="improving_user_experience"></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="translator_frame">Translator</legend>
+        <div class="row"><label data-i18n="determinant_mode_label">Determinant mode</label>
+          <select class="select" data-setting="determinant_mode" id="detModeSelect"></select></div>
+        <div class="row check-row"><label data-i18n="accurate_translation_label">Accurate translation</label>
+          <input class="check" type="checkbox" data-setting="accurate_translation"></div>
+        <div class="row"><label data-i18n="deepl_key_label">DeepL key</label>
+          <input class="input" type="text" data-setting="your_key_for_deepl"></div>
+        <div class="row"><label data-i18n="request_language_label">Request language</label>
+          <input class="input" type="text" data-setting="request_language" value="en"></div>
+        <div class="row check-row"><label data-i18n="local_trans_label">Local translation (Argos)</label>
+          <input class="check" type="checkbox" data-setting="local_trans"></div>
+        <div class="row"><label data-i18n="from_code_lang_label">Source language code</label>
+          <input class="input" type="text" data-setting="from_code_lang" maxlength="2" placeholder="en"></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="ocr_frame">OCR</legend>
+        <div class="row top"><label data-i18n="languages_list_label">Languages list</label>
+          <textarea class="textarea" rows="3" data-setting="lang_lst"></textarea></div>
+        <div class="row check-row"><label data-i18n="use_gpu_label">Use GPU for OCR</label>
+          <input class="check" type="checkbox" data-setting="use_gpu_for_ocr"></div>
+        <div class="row check-row"><label data-i18n="with_ocr_label">With OCR</label>
+          <input class="check" type="checkbox" data-setting="with_ocr"></div>
+        <div class="row check-row"><label data-i18n="cloud_version_label">Cloud version</label>
+          <input class="check" type="checkbox" data-setting="cloud_version"></div>
+        <div class="row"><label data-i18n="definition_option_label">OCR engine</label>
+          <select class="select" data-setting="definition_option" id="ocrOptionSelect"></select></div>
+        <div class="row"><label data-i18n="model_size_label">Model size</label>
+          <select class="select" data-setting="model_size" id="modelSizeSelect"></select></div>
+        <div class="row check-row"><label data-i18n="crop_mode_label">Crop mode</label>
+          <input class="check" type="checkbox" data-setting="crop_mode"></div>
+        <div class="row"><label data-i18n="base_url_label">Base URL</label>
+          <input class="input" type="text" data-setting="base_url"
+                 value="https://api.siliconflow.cn/v1/chat/completions"></div>
+        <div class="row"><label data-i18n="api_key_deepseek_label">DeepSeek API key</label>
+          <input class="input" type="text" data-setting="api_key_for_deepseek_ocr"></div>
+        <div class="row"><label data-i18n="timeout_deepseek_label">DeepSeek timeout</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="timeout_for_deepseek_ocr" value="30">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+        <div class="row"><label data-i18n="max_rate_limit_retries_label">Rate limit retries</label>
+          <div class="spin">
+            <input class="input" type="number" step="1" data-setting="max_rate_limit_retries" value="3">
+            <button class="spin-btn up"   data-spin="up"   tabindex="-1">▲</button>
+            <button class="spin-btn down" data-spin="down" tabindex="-1">▼</button>
+          </div></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="files_frame">Files &amp; Safety</legend>
+        <div class="row check-row"><label data-i18n="writing_response_label">Writing response to file</label>
+          <input class="check" type="checkbox" data-setting="writing_response_to_file"></div>
+        <div class="row check-row"><label data-i18n="editing_files_label">Editing files</label>
+          <input class="check" type="checkbox" data-setting="editing_files"></div>
+        <div class="row check-row"><label data-i18n="deleting_files_label">Deleting files</label>
+          <input class="check" type="checkbox" data-setting="deleting_files"></div>
+        <div class="row check-row"><label data-i18n="compress_text_label">Compress text</label>
+          <input class="check" type="checkbox" data-setting="compress_text"></div>
+        <div class="row check-row"><label data-i18n="anonymize_text_label">Anonymize text</label>
+          <input class="check" type="checkbox" data-setting="anonymize_text"></div>
+        <div class="row check-row"><label data-i18n="use_websites_label">Use websites</label>
+          <input class="check" type="checkbox" data-setting="use_websites"></div>
+        <div class="row top"><label data-i18n="websites_sources_label">Website sources</label>
+          <textarea class="textarea" rows="3" data-setting="websites_sources_information"
+                    placeholder="https://... (one per line)"></textarea></div>
+        <div class="row top"><label data-i18n="ignored_files_label">Ignored files</label>
+          <textarea class="textarea" rows="3" data-setting="ignored_files"
+                    placeholder="path/to/file (one per line)"></textarea></div>
+        <div class="row"><label data-i18n="main_disk_label">Main disk</label>
+          <input class="input" type="text" data-setting="main_disk"
+                 placeholder="C:\\ or /home/user"></div>
+        <div class="row check-row"><label data-i18n="prompt_injection_label">Prompt injection check</label>
+          <input class="check" type="checkbox" data-setting="prompt_injection"></div>
+        <div class="row"><label data-i18n="injection_detect_model_label">Injection detect model</label>
+          <select class="select" data-setting="injection_detect_model" id="injectionModelSelect"></select></div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="other_frame">Other</legend>
+        <div class="row"><label data-i18n="theme_label">Theme</label>
+          <select class="select" data-setting="theme" id="themeSelect">
+            <option value="github-noir">GitHub Noir</option>
+            <option value="midnight">Midnight Deep</option>
+            <option value="monokai">Monokai Classic</option>
+            <option value="dracula">Dracula's Castle</option>
+            <option value="nord">Nordic Frost</option>
+            <option value="solar-flare">Solar Flare</option>
+            <option value="one-dark">One Dark Pro</option>
+            <option value="catppuccin">Catppuccin Mocha</option>
+            <option value="tokyo-night">Tokyo Night Drift</option>
+            <option value="gruvbox">Gruvbox Retro</option>
+            <option value="ayu-mirage">Ayu Mirage</option>
+            <option value="material-ocean">Material Ocean</option>
+            <option value="cobalt">Cobalt Abyss</option>
+            <option value="synthwave">Synthwave '84</option>
+            <option value="everforest">Everforest</option>
+            <option value="rose-pine">Rose Pine</option>
+            <option value="kanagawa">Kanagawa Wave</option>
+            <option value="cyberpunk">Cyberpunk 2077</option>
+            <option value="matrix">Matrix Terminal</option>
+            <option value="vaporwave">Vaporwave Sunset</option>
+            <option value="obsidian">Obsidian Night</option>
+            <option value="oceanic">Oceanic Abyss</option>
+            <option value="forest">Deep Forest</option>
+            <option value="amoled">AMOLED Black</option>
+          </select></div>
+        <div class="row check-row"><label data-i18n="filter_swearing_label">Filter swearing</label>
+          <input class="check" type="checkbox" data-setting="filter_for_swearing"></div>
+        <div class="row check-row"><label data-i18n="verbose_label">Verbose</label>
+          <input class="check" type="checkbox" data-setting="verbose"></div>
+        <div class="row check-row"><label data-i18n="echo_label">Echo</label>
+          <input class="check" type="checkbox" data-setting="echo"></div>
+
+        <div class="master-box">
+          <div class="master-title">
+            <svg class="icon sm"><use href="#i-key"/></svg>
+            <span data-i18n="master_title">Master password</span>
+          </div>
+          <div class="master-state" id="masterState">Checking...</div>
+          <div class="master-actions">
+            <button class="btn small" id="btnMasterEnable">
+              <svg class="icon"><use href="#i-lock"/></svg>
+              <span data-i18n="master_enable">Enable</span>
+            </button>
+            <button class="btn small" id="btnMasterDisable">
+              <svg class="icon"><use href="#i-unlock"/></svg>
+              <span data-i18n="master_disable">Disable</span>
+            </button>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend data-i18n="language_frame">Language</legend>
+        <div class="row">
+          <label data-i18n="ui_language_label">Interface language</label>
+          <select class="select" id="langSelectSidebar">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+            <option value="zh">中文</option>
+          </select>
+        </div>
+      </fieldset>
+    </div>
+  </aside>
+
+  <main class="panel chat-panel">
+    <div class="chat-title">
+      <svg class="icon lg"><use href="#i-chat"/></svg>
+      <span data-i18n="chat_title">Chat</span>
+    </div>
+    <div class="status-bar" id="statusBar"></div>
+
+    <button class="btn resume-btn" id="resumeBtn">
+      <svg class="icon"><use href="#i-play"/></svg>
+      <span data-i18n="resume_button_text">Resume request</span>
+    </button>
+
+    <section class="logs-panel collapsed" id="logsPanel">
+      <div class="logs-header" id="logsToggle" role="button" tabindex="0">
+        <span class="logs-chevron">
+          <svg class="icon" style="width:14px;height:14px"><use href="#i-chevron"/></svg>
+        </span>
+        <span class="logs-title">
+          <svg class="icon sm"><use href="#i-terminal"/></svg>
+          <span data-i18n="logs_title">Logs</span>
+        </span>
+        <span class="logs-count" id="logsCount">0</span>
+        <span class="logs-spinner" id="logsSpinner" hidden></span>
+        <button class="logs-copy" id="logsCopy" type="button" data-i18n-title="copy_logs">
+          <svg class="icon" style="width:13px;height:13px"><use href="#i-copy"/></svg>
+        </button>
+      </div>
+      <div class="logs-body" id="logsBody"></div>
+    </section>
+
+    <div class="messages-wrap" id="messagesWrap">
+      <div class="welcome" data-i18n="welcome_text">
+        Welcome to BiNeuron!<br>Type your request below to begin.
+      </div>
+    </div>
+
+    <fieldset class="fieldset attached-box">
+      <legend data-i18n="attached_files_label">Attached files</legend>
+      <div class="drop-zone" id="dropZone" tabindex="0">
+        <div class="drop-hint">
+          <svg class="icon sm"><use href="#i-upload"/></svg>
+          <span data-i18n="drop_hint">Drag &amp; drop files here or click to browse</span>
+        </div>
+        <div class="file-chips" id="fileChips"></div>
+      </div>
+    </fieldset>
+
+    <div class="input-row">
+      <input class="input" type="text" id="requestInput"
+             placeholder="Type your request..." data-i18n-ph="request_placeholder">
+      <button class="btn" id="uploadBtn" title="Upload">
+        <svg class="icon"><use href="#i-paperclip"/></svg>
+      </button>
+      <button class="btn" id="sendBtn" title="Send">
+        <svg class="icon"><use href="#i-send"/></svg>
+        <span data-i18n="send_btn">Send</span>
+      </button>
+      <button class="btn" id="copyBtn" title="Copy chat">
+        <svg class="icon"><use href="#i-copy"/></svg>
+      </button>
+    </div>
+  </main>
+
+  <aside class="panel history-panel">
+    <div class="history-header">
+      <div class="panel-title">
+        <svg class="icon lg"><use href="#i-history"/></svg>
+        <span id="historyTitle" data-i18n="history_title">History</span>
+      </div>
+      <label class="vs-label">
+        <svg class="icon sm"><use href="#i-folder"/></svg>
+        <span class="vs-text" data-i18n="virtual_storage_switch">Virtual storage</span>
+        <input class="check vs-check" type="checkbox" data-setting="virtual_storage" id="virtualStorage">
+      </label>
+    </div>
+
+    <div class="history-controls" id="historyControls">
+      <input class="input search" type="text" id="searchChats"
+             placeholder="Search..." data-i18n-ph="search_placeholder">
+      <button class="btn small" id="btnAddChat" title="Add">
+        <svg class="icon"><use href="#i-plus"/></svg>
+      </button>
+      <button class="btn small" id="btnDelChat" title="Delete">
+        <svg class="icon"><use href="#i-trash"/></svg>
+      </button>
+      <button class="btn small" id="btnDlChat" title="Save">
+        <svg class="icon"><use href="#i-save"/></svg>
+      </button>
+    </div>
+
+    <div class="storage-controls" id="storageControls">
+      <input class="input" type="text" id="storagePath"
+             data-setting="virtual_storage_path" data-i18n-ph="storage_path_placeholder"
+             placeholder="Storage path...">
+      <button class="btn small" id="btnBrowse">
+        <svg class="icon"><use href="#i-folder"/></svg>
+        <span data-i18n="browse_btn">Browse</span>
+      </button>
+      <button class="btn small" id="btnRefresh">
+        <svg class="icon"><use href="#i-refresh"/></svg>
+        <span data-i18n="refresh_btn">Refresh</span>
+      </button>
+    </div>
+
+    <div class="history-list" id="historyList"></div>
+    <div class="tree-view" id="treeView"></div>
+
+    <fieldset class="fieldset models-box">
+      <legend data-i18n="gguf_models_frame">GGUF models</legend>
+      <button class="btn small" id="refreshModels" style="margin-bottom:5px;">
+        <svg class="icon"><use href="#i-refresh"/></svg>
+        <span data-i18n="refresh_models_btn">Refresh models</span>
+      </button>
+      <div class="models-list" id="modelsList">
+        <div style="color:var(--fg-dark);">No models found</div>
+      </div>
+    </fieldset>
+  </aside>
+</div>
+
+<script>
+(function(){
+  const tabs = document.querySelectorAll(".mobile-tabs .mob-tab");
+  const app = document.getElementById("appRoot");
+  if (!tabs.length || !app) return;
+  tabs.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      tabs.forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      app.dataset.mobileTab = btn.dataset.tab;
+    });
+  });
+})();
+
+window.addEventListener("error", function (e) {
+  console.error("[BiNeuron]", e.error || e.message);
+});
+
+const TRANSLATIONS = {
+  en: {
+    lang_ok:"OK",
+    lang_dont_show:"Don't show this again",
+    language_frame:"Language",
+    ui_language_label:"Interface language",
+    settings_title:"Settings", reset_btn:"Reset", export_all_btn:"Export",
+    delete_all_btn:"Delete", apply_settings_btn:"Apply",
+    network_frame:"Network", country_label:"Country", protocol_label:"Protocol",
+    max_timeout_label:"Max timeout", is_working_label:"Is working",
+    auto_proxies_label:"Auto proxies", your_proxies_label:"Your proxies",
+    min_timeout_check_label:"Min timeout check", max_timeout_check_label:"Max timeout check",
+    retries_label:"Retries", github_proxies_label:"Github proxies",
+    url_list_label:"URL list", proxy_retries_label:"Proxy retries",
+    main_retries_label:"Main retries",
+    with_proxy_label:"With proxy",
+    model_frame:"Model", preferences_in_ai_label:"Preferences in AI",
+    models_dir_label:"Models dir", with_ai_orchestrator_label:"AI orchestrator",
+    proprietary_algorithms_label:"Proprietary algorithms",
+    n_ctx_label:"n_ctx", n_gpu_layers_label:"n_gpu_layers", max_tokens_label:"Max tokens",
+    token_hf_label:"HF token", subdomain_label:"Subdomain", repo_id_label:"Repo ID",
+    filename_label:"Filename", prefer_mirror_label:"Prefer mirror",
+    type_computer_label:"Type computer",
+    automatic_disk_space_check_label:"Auto disk check",
+    weight_attempts_label:"Weight attempts",
+    cloud_ai_frame:"Cloud AI",
+    model_cloud_version_label:"Cloud AI",
+    key_for_api_label:"API key",
+    cloud_model_label:"Cloud model",
+    prompt_frame:"Prompt",
+    main_prompt_mode_label:"Main prompt mode", main_prompt_label:"Main prompt",
+    improving_user_experience_label:"Improve user experience",
+    temperature_label:"Temperature",
+    translator_frame:"Translator", determinant_mode_label:"Determinant mode",
+    accurate_translation_label:"Accurate translation", deepl_key_label:"DeepL key",
+    request_language_label:"Request language",
+    local_trans_label:"Local translation (Argos)",
+    from_code_lang_label:"Source language code",
+    ocr_frame:"OCR", languages_list_label:"Languages list", use_gpu_label:"Use GPU for OCR",
+    with_ocr_label:"With OCR", cloud_version_label:"Cloud version",
+    definition_option_label:"OCR engine",
+    model_size_label:"Model size",
+    crop_mode_label:"Crop mode", base_url_label:"Base URL",
+    api_key_deepseek_label:"DeepSeek API key", timeout_deepseek_label:"DeepSeek timeout",
+    max_rate_limit_retries_label:"Rate limit retries",
+    files_frame:"Files & Safety",
+    writing_response_label:"Writing response to file", editing_files_label:"Editing files",
+    deleting_files_label:"Deleting files",
+    compress_text_label:"Compress text",
+    use_websites_label:"Use websites",
+    websites_sources_label:"Website sources",
+    ignored_files_label:"Ignored files",
+    main_disk_label:"Main disk",
+    prompt_injection_label:"Prompt injection check",
+    injection_detect_model_label:"Injection detect model",
+    anonymize_text_label:"Anonymize text",
+    other_frame:"Other", theme_label:"Theme", filter_swearing_label:"Filter swearing",
+    verbose_label:"Verbose", echo_label:"Echo",
+    master_title:"Master password", master_enable:"Enable", master_disable:"Disable",
+    master_checking:"Checking...", master_enabled_unlocked:"Enabled - unlocked",
+    master_enabled_locked:"Enabled - locked",
+    master_disabled:"Disabled - chats are stored as plaintext",
+    master_crypto_missing:"cryptography not installed (pip install cryptography)",
+    chat_title:"Chat", resume_button_text:"Resume request",
+    welcome_text:"Welcome to BiNeuron!<br>Type your request below to begin.",
+    attached_files_label:"Attached files", request_placeholder:"Type your request...",
+    drop_hint:"Drag & drop files here or click to browse",
+    remove_file:"Remove", logs_title:"Logs", copy_logs:"Copy logs",
+    upload_btn:"Upload", send_btn:"Send", copy_chat_btn:"Copy chat", copy_message:"Copy",
+    history_title:"History", history_title_virtual:"Virtual Storage",
+    virtual_storage_switch:"Virtual storage", search_placeholder:"Search...",
+    storage_path_placeholder:"Storage path...",
+    add_btn:"Add", delete_btn:"Del", download_btn:"Save",
+    browse_btn:"Browse", refresh_btn:"Refresh",
+    gguf_models_frame:"GGUF models", refresh_models_btn:"Refresh models",
+    polling_retry:"Connection lost, retrying...",
+    polling_fail:"Connection to server lost",
+    status_phrases:["Processing request...","Thinking...","Analyzing data...",
+      "Generating response...","Working on it...","Almost there...",
+      "Consulting the AI...","Crunching numbers...","Reading files...","Optimizing answer..."],
+    no_chats_yet:"No chats yet", empty_chat:"Empty chat",
+    no_models_found:"No models found", loading:"Loading...",
+    scanning:"Scanning...", enter_storage_path:"Enter a storage path and click Refresh",
+    enter_storage_prompt:"Enter full path to storage directory:",
+    delete_chat_confirm:"Delete this chat?",
+    delete_all_chats_confirm:"Delete ALL chats? This cannot be undone.",
+    reset_settings_confirm:"Reset settings to defaults?",
+    settings_applied:"Settings applied", settings_reset:"Settings reset",
+    chat_copied:"Chat copied", no_chat_selected:"No chat selected",
+    no_chats_to_export:"No chats to export", logs_empty:"Logs are empty",
+    files_attached:"{n} file(s) attached",
+    unlock_title:"BiNeuron is locked", unlock_hint:"Enter your master password",
+    unlock_btn:"Unlock", unlock_forgot:"Forgot password? (data will be wiped)",
+    last_attempt_warning:"Last attempt! Data will be wiped.",
+    attempts_remaining:"{n} attempts remaining",
+    all_data_wiped:"All data has been wiped.",
+    unlock_failed:"Unlock failed", network_error:"Network error",
+    set_master_password:"Set a master password (min 4 chars):",
+    repeat_password:"Repeat master password:",
+    password_too_short:"Password too short",
+    passwords_do_not_match:"Passwords do not match",
+    encryption_enabled:"Encryption enabled", encryption_disabled:"Encryption disabled",
+    failed_prefix:"Failed: ", unknown:"unknown",
+    disable_encryption_confirm:"Disable encryption? Chats will be stored as plaintext.",
+    wipe_confirm_1:"This will PERMANENTLY delete all chats and the master key. Continue?",
+    wipe_confirm_2:"Are you absolutely sure? This cannot be undone.",
+    preview_request_label:"Preview request",
+    preview_btn:"Show preview",
+    preview_title:"Request preview",
+    preview_copy:"Copy",
+    preview_close:"Close",
+    preview_empty_request:"Type a request first",
+    preview_failed:"Failed to build preview"
+  },
+  ru: {
+    lang_ok:"OK",
+    lang_dont_show:"Больше не показывать",
+    language_frame:"Язык",
+    ui_language_label:"Язык интерфейса",
+    settings_title:"Настройки", reset_btn:"Сброс", export_all_btn:"Экспорт",
+    delete_all_btn:"Удалить", apply_settings_btn:"Применить",
+    network_frame:"Сеть", country_label:"Страна", protocol_label:"Протокол",
+    max_timeout_label:"Макс. таймаут", is_working_label:"Работает",
+    auto_proxies_label:"Авто прокси", your_proxies_label:"Свои прокси",
+    min_timeout_check_label:"Мин. таймаут проверки",
+    max_timeout_check_label:"Макс. таймаут проверки",
+    retries_label:"Повторы", github_proxies_label:"GitHub прокси",
+    url_list_label:"Список URL", proxy_retries_label:"Повторы прокси",
+    main_retries_label:"Основные повторы",
+    with_proxy_label:"С прокси",
+    model_frame:"Модель", preferences_in_ai_label:"Предпочтения ИИ",
+    models_dir_label:"Папка моделей", with_ai_orchestrator_label:"ИИ-оркестратор",
+    proprietary_algorithms_label:"Проприетарные алгоритмы",
+    n_ctx_label:"n_ctx", n_gpu_layers_label:"n_gpu_layers",
+    max_tokens_label:"Макс. токенов",
+    token_hf_label:"Токен HF", subdomain_label:"Субдомен", repo_id_label:"ID репозитория",
+    filename_label:"Имя файла", prefer_mirror_label:"Предпочитать зеркало",
+    type_computer_label:"Тип компьютера",
+    automatic_disk_space_check_label:"Автопроверка диска",
+    weight_attempts_label:"Попытки веса",
+    cloud_ai_frame:"Облачный ИИ",
+    model_cloud_version_label:"Облачный ИИ",
+    key_for_api_label:"API-ключ",
+    cloud_model_label:"Облачная модель",
+    prompt_frame:"Промпт",
+    main_prompt_mode_label:"Режим промпта", main_prompt_label:"Основной промпт",
+    improving_user_experience_label:"Улучшать запрос",
+    temperature_label:"Температура",
+    translator_frame:"Переводчик", determinant_mode_label:"Режим определения",
+    accurate_translation_label:"Точный перевод", deepl_key_label:"Ключ DeepL",
+    request_language_label:"Язык запроса",
+    local_trans_label:"Локальный перевод (Argos)",
+    from_code_lang_label:"Код исходного языка",
+    ocr_frame:"OCR", languages_list_label:"Список языков", use_gpu_label:"GPU для OCR",
+    with_ocr_label:"Использовать OCR", cloud_version_label:"Облачная версия",
+    definition_option_label:"OCR-движок",
+    model_size_label:"Размер модели",
+    crop_mode_label:"Режим обрезки", base_url_label:"Базовый URL",
+    api_key_deepseek_label:"API-ключ DeepSeek", timeout_deepseek_label:"Таймаут DeepSeek",
+    max_rate_limit_retries_label:"Повторы при лимите",
+    files_frame:"Файлы и безопасность",
+    writing_response_label:"Запись ответа в файл", editing_files_label:"Редактирование файлов",
+    deleting_files_label:"Удаление файлов",
+    compress_text_label:"Сжимать текст",
+    use_websites_label:"Использовать сайты",
+    websites_sources_label:"Источники (сайты)",
+    ignored_files_label:"Игнорируемые файлы",
+    main_disk_label:"Основной диск",
+    prompt_injection_label:"Проверка промпт-инъекций",
+    injection_detect_model_label:"Модель обнаружения инъекций",
+    anonymize_text_label:"Анонимизировать текст",
+    other_frame:"Прочее", theme_label:"Тема", filter_swearing_label:"Фильтр мата",
+    verbose_label:"Подробный вывод", echo_label:"Эхо",
+    master_title:"Мастер-пароль", master_enable:"Включить", master_disable:"Отключить",
+    master_checking:"Проверка...", master_enabled_unlocked:"Включено - разблокировано",
+    master_enabled_locked:"Включено - заблокировано",
+    master_disabled:"Отключено - чаты хранятся в открытом виде",
+    master_crypto_missing:"cryptography не установлена (pip install cryptography)",
+    chat_title:"Чат", resume_button_text:"Возобновить запрос",
+    welcome_text:"Добро пожаловать в BiNeuron!<br>Введите запрос ниже, чтобы начать.",
+    attached_files_label:"Прикреплённые файлы", request_placeholder:"Введите запрос...",
+    drop_hint:"Перетащите файлы сюда или нажмите для выбора",
+    remove_file:"Удалить", logs_title:"Логи", copy_logs:"Скопировать логи",
+    upload_btn:"Загрузить", send_btn:"Отправить", copy_chat_btn:"Копировать чат",
+    copy_message:"Копировать",
+    history_title:"История", history_title_virtual:"Виртуальное хранилище",
+    virtual_storage_switch:"Виртуальное хранилище", search_placeholder:"Поиск...",
+    storage_path_placeholder:"Путь к хранилищу...",
+    add_btn:"Добавить", delete_btn:"Удалить", download_btn:"Сохранить",
+    browse_btn:"Обзор", refresh_btn:"Обновить",
+    gguf_models_frame:"Модели GGUF", refresh_models_btn:"Обновить модели",
+    polling_retry:"Связь потеряна, переподключение...",
+    polling_fail:"Соединение с сервером потеряно",
+    status_phrases:["Обработка запроса...","Думаю...","Анализ данных...",
+      "Генерация ответа...","Работаю над этим...","Почти готово...",
+      "Консультируюсь с ИИ...","Считаю числа...","Читаю файлы...","Оптимизирую ответ..."],
+    no_chats_yet:"Пока нет чатов", empty_chat:"Пустой чат",
+    no_models_found:"Модели не найдены", loading:"Загрузка...",
+    scanning:"Сканирование...", enter_storage_path:"Введите путь и нажмите Обновить",
+    enter_storage_prompt:"Введите полный путь к папке хранилища:",
+    delete_chat_confirm:"Удалить этот чат?",
+    delete_all_chats_confirm:"Удалить ВСЕ чаты? Это нельзя отменить.",
+    reset_settings_confirm:"Сбросить настройки до значений по умолчанию?",
+    settings_applied:"Настройки применены", settings_reset:"Настройки сброшены",
+    chat_copied:"Чат скопирован", no_chat_selected:"Чат не выбран",
+    no_chats_to_export:"Нечего экспортировать", logs_empty:"Логи пусты",
+    files_attached:"Прикреплено файлов: {n}",
+    unlock_title:"BiNeuron заблокирован", unlock_hint:"Введите мастер-пароль",
+    unlock_btn:"Разблокировать",
+    unlock_forgot:"Забыли пароль? (данные будут удалены)",
+    last_attempt_warning:"Последняя попытка! Данные будут удалены.",
+    attempts_remaining:"Осталось попыток: {n}",
+    all_data_wiped:"Все данные были удалены.",
+    unlock_failed:"Разблокировка не удалась", network_error:"Ошибка сети",
+    set_master_password:"Задайте мастер-пароль (мин. 4 символа):",
+    repeat_password:"Повторите мастер-пароль:",
+    password_too_short:"Пароль слишком короткий",
+    passwords_do_not_match:"Пароли не совпадают",
+    encryption_enabled:"Шифрование включено", encryption_disabled:"Шифрование отключено",
+    failed_prefix:"Ошибка: ", unknown:"неизвестно",
+    disable_encryption_confirm:"Отключить шифрование? Чаты будут храниться в открытом виде.",
+    wipe_confirm_1:"Это НАВСЕГДА удалит все чаты и мастер-ключ. Продолжить?",
+    wipe_confirm_2:"Вы абсолютно уверены? Это нельзя отменить.",
+    preview_request_label:"Предпросмотр запроса",
+    preview_btn:"Показать",
+    preview_title:"Предпросмотр запроса",
+    preview_copy:"Копировать",
+    preview_close:"Закрыть",
+    preview_empty_request:"Сначала введите запрос",
+    preview_failed:"Не удалось построить предпросмотр"
+  },
+  zh: {
+    lang_ok:"确定",
+    lang_dont_show:"不再显示",
+    language_frame:"语言",
+    ui_language_label:"界面语言",
+    settings_title:"设置", reset_btn:"重置", export_all_btn:"导出",
+    delete_all_btn:"删除", apply_settings_btn:"应用",
+    network_frame:"网络", country_label:"国家", protocol_label:"协议",
+    max_timeout_label:"最大超时", is_working_label:"启用中",
+    auto_proxies_label:"自动代理", your_proxies_label:"自定义代理",
+    min_timeout_check_label:"最小检查超时",
+    max_timeout_check_label:"最大检查超时",
+    retries_label:"重试次数", github_proxies_label:"GitHub 代理",
+    url_list_label:"URL 列表", proxy_retries_label:"代理重试",
+    main_retries_label:"主重试次数",
+    with_proxy_label:"使用代理",
+    model_frame:"模型", preferences_in_ai_label:"AI 偏好",
+    models_dir_label:"模型目录", with_ai_orchestrator_label:"AI 编排器",
+    proprietary_algorithms_label:"专有算法",
+    n_ctx_label:"n_ctx", n_gpu_layers_label:"n_gpu_layers",
+    max_tokens_label:"最大令牌数",
+    token_hf_label:"HF 令牌", subdomain_label:"子域", repo_id_label:"仓库 ID",
+    filename_label:"文件名", prefer_mirror_label:"优先使用镜像",
+    type_computer_label:"计算机类型",
+    automatic_disk_space_check_label:"自动磁盘检查",
+    weight_attempts_label:"权重尝试次数",
+    cloud_ai_frame:"云 AI",
+    model_cloud_version_label:"云 AI",
+    key_for_api_label:"API 密钥",
+    cloud_model_label:"云模型",
+    prompt_frame:"提示",
+    main_prompt_mode_label:"主提示模式", main_prompt_label:"主提示",
+    improving_user_experience_label:"改进用户请求",
+    temperature_label:"温度",
+    translator_frame:"翻译器", determinant_mode_label:"检测模式",
+    accurate_translation_label:"精确翻译", deepl_key_label:"DeepL 密钥",
+    request_language_label:"请求语言",
+    local_trans_label:"本地翻译 (Argos)",
+    from_code_lang_label:"源语言代码",
+    ocr_frame:"OCR", languages_list_label:"语言列表", use_gpu_label:"使用 GPU 进行 OCR",
+    with_ocr_label:"启用 OCR", cloud_version_label:"云版本",
+    definition_option_label:"OCR 引擎",
+    model_size_label:"模型大小",
+    crop_mode_label:"裁剪模式", base_url_label:"基础 URL",
+    api_key_deepseek_label:"DeepSeek API 密钥",
+    timeout_deepseek_label:"DeepSeek 超时",
+    max_rate_limit_retries_label:"限速重试次数",
+    files_frame:"文件与安全",
+    writing_response_label:"将回复写入文件", editing_files_label:"编辑文件",
+    deleting_files_label:"删除文件",
+    compress_text_label:"压缩文本",
+    use_websites_label:"使用网站",
+    websites_sources_label:"网站来源",
+    ignored_files_label:"忽略文件",
+    main_disk_label:"主磁盘",
+    prompt_injection_label:"提示注入检查",
+    injection_detect_model_label:"注入检测模型",
+    anonymize_text_label:"匿名化文本",
+    other_frame:"其他", theme_label:"主题", filter_swearing_label:"过滤脏话",
+    verbose_label:"详细输出", echo_label:"回显",
+    master_title:"主密码", master_enable:"启用", master_disable:"禁用",
+    master_checking:"检查中...", master_enabled_unlocked:"已启用 - 已解锁",
+    master_enabled_locked:"已启用 - 已锁定",
+    master_disabled:"已禁用 - 聊天以明文存储",
+    master_crypto_missing:"未安装 cryptography (pip install cryptography)",
+    chat_title:"对话", resume_button_text:"恢复请求",
+    welcome_text:"欢迎使用 BiNeuron!<br>在下方输入请求以开始。",
+    attached_files_label:"已附加文件", request_placeholder:"输入您的请求...",
+    drop_hint:"将文件拖放到此处，或点击浏览",
+    remove_file:"移除", logs_title:"日志", copy_logs:"复制日志",
+    upload_btn:"上传", send_btn:"发送", copy_chat_btn:"复制对话", copy_message:"复制",
+    history_title:"历史记录", history_title_virtual:"虚拟存储",
+    virtual_storage_switch:"虚拟存储", search_placeholder:"搜索...",
+    storage_path_placeholder:"存储路径...",
+    add_btn:"新增", delete_btn:"删除", download_btn:"保存",
+    browse_btn:"浏览", refresh_btn:"刷新",
+    gguf_models_frame:"GGUF 模型", refresh_models_btn:"刷新模型",
+    polling_retry:"连接中断，正在重试...",
+    polling_fail:"与服务器的连接已断开",
+    status_phrases:["正在处理请求...","思考中...","分析数据...",
+      "生成回复...","正在处理...","快完成了...",
+      "正在咨询 AI...","计算数字...","读取文件...","优化回答..."],
+    no_chats_yet:"暂无对话", empty_chat:"空对话",
+    no_models_found:"未找到模型", loading:"加载中...",
+    scanning:"扫描中...", enter_storage_path:"输入路径并点击刷新",
+    enter_storage_prompt:"输入存储目录的完整路径:",
+    delete_chat_confirm:"删除此对话?",
+    delete_all_chats_confirm:"删除所有对话?此操作无法撤销。",
+    reset_settings_confirm:"将设置重置为默认值?",
+    settings_applied:"设置已应用", settings_reset:"设置已重置",
+    chat_copied:"对话已复制", no_chat_selected:"未选择对话",
+    no_chats_to_export:"没有可导出的对话", logs_empty:"日志为空",
+    files_attached:"已附加 {n} 个文件",
+    unlock_title:"BiNeuron 已锁定", unlock_hint:"请输入主密码",
+    unlock_btn:"解锁", unlock_forgot:"忘记密码?(数据将被删除)",
+    last_attempt_warning:"最后一次尝试!数据将被删除。",
+    attempts_remaining:"剩余尝试次数: {n}",
+    all_data_wiped:"所有数据已被删除。",
+    unlock_failed:"解锁失败", network_error:"网络错误",
+    set_master_password:"设置主密码(至少 4 个字符):",
+    repeat_password:"再次输入主密码:",
+    password_too_short:"密码太短",
+    passwords_do_not_match:"密码不匹配",
+    encryption_enabled:"加密已启用", encryption_disabled:"加密已禁用",
+    failed_prefix:"失败: ", unknown:"未知",
+    disable_encryption_confirm:"禁用加密?聊天将以明文存储。",
+    wipe_confirm_1:"这将永久删除所有对话和主密钥。继续?",
+    wipe_confirm_2:"您确定吗?此操作无法撤销。",
+    preview_request_label:"预览请求",
+    preview_btn:"显示预览",
+    preview_title:"请求预览",
+    preview_copy:"复制",
+    preview_close:"关闭",
+    preview_empty_request:"请先输入请求",
+    preview_failed:"无法生成预览"
+  }
+};
+
+const POLL_INTERVAL_MS = 700;
+const POLL_TIMEOUT_MS = 20000;
+const POLL_MAX_ERRORS = 15;
+const LAST_TASK_KEY = "bineuron_last_task_id";
+const LANG_KEY = "bineuron_lang";
+const LANG_CHOSEN_KEY = "bineuron_lang_chosen";
+const THEME_KEY = "bineuron_theme";
+const STICK_TOLERANCE = 40;
+const AVAILABLE_THEMES = [
+  "github-noir", "midnight", "monokai", "dracula", "nord",
+  "solar-flare", "one-dark",
+  "catppuccin", "tokyo-night", "gruvbox", "ayu-mirage",
+  "material-ocean", "cobalt", "synthwave", "everforest",
+  "rose-pine", "kanagawa", "cyberpunk", "matrix", "vaporwave",
+  "obsidian", "oceanic", "forest", "amoled",
+];
+
+const state = {
+  lang: "en",
+  theme: "github-noir",
+  meta: {},
+  isBusy: false,
+  taskId: null,
+  pollTimer: null,
+  lastLogCount: 0,
+  attachedFiles: [],
+  currentChatId: null,
+  chats: {},
+  timerStart: null,
+  timerInterval: null,
+  master: { enabled: false, unlocked: false, attempts_left: 3, available: false },
+};
+
+let lastLogEl = null;
+let lastLogWasProgress = false;
+let consecutivePollErrors = 0;
+let pollingPaused = false;
+let logLineCount = 0;
+let fullLogBuffer = [];
+let copyResetTimer = null;
+let previewText = "";
+
+const $  = function (sel, root) { return (root || document).querySelector(sel); };
+const $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+const t  = function (key, vars) {
+  const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
+  let s = (dict[key] !== undefined) ? dict[key] : (TRANSLATIONS.en[key] !== undefined ? TRANSLATIONS.en[key] : key);
+  if (vars && typeof s === "string") {
+    s = s.replace(/\{(\w+)\}/g, function (m, k) {
+      return (vars[k] !== undefined) ? vars[k] : m;
+    });
+  }
+  return s;
+};
+
+function saveLang(lang) {
+  try { if (lang) localStorage.setItem(LANG_KEY, lang); } catch (e) {}
+}
+function loadLang() {
+  try { return localStorage.getItem(LANG_KEY); } catch (e) { return null; }
+}
+function saveLangChosen(v) {
+  try {
+    if (v) localStorage.setItem(LANG_CHOSEN_KEY, "1");
+    else localStorage.removeItem(LANG_CHOSEN_KEY);
+  } catch (e) {}
+}
+function isLangChosen() {
+  try { return localStorage.getItem(LANG_CHOSEN_KEY) === "1"; } catch (e) { return false; }
+}
+function syncLangSelectors() {
+  const a = document.getElementById("langSelect");
+  const b = document.getElementById("langSelectSidebar");
+  if (a) a.value = state.lang;
+  if (b) b.value = state.lang;
+}
+
+function saveThemeLocal(name) {
+  try { if (name) localStorage.setItem(THEME_KEY, name); } catch (e) {}
+}
+function loadThemeLocal() {
+  try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; }
+}
+
+function setLanguage(lang) {
+  if (!TRANSLATIONS[lang]) lang = "en";
+  state.lang = lang;
+  saveLang(lang);
+  applyLanguage();
+  applyTheme(state.theme);
+  syncLangSelectors();
+}
+
+function isAtBottom(el) {
+  return (el.scrollHeight - el.scrollTop - el.clientHeight) < STICK_TOLERANCE;
+}
+
+function createStickyScroll(el) {
+  const self = {
+    stick: true,
+    onChange: null,
+    scrollBottom: function () { el.scrollTop = el.scrollHeight; },
+    scrollIfSticky: function () {
+      if (self.stick) el.scrollTop = el.scrollHeight;
+    },
+    forceScroll: function () {
+      self.stick = true;
+      el.scrollTop = el.scrollHeight;
+    }
+  };
+  el.addEventListener("scroll", function () {
+    const atBottom = isAtBottom(el);
+    if (self.stick !== atBottom) {
+      self.stick = atBottom;
+      if (typeof self.onChange === "function") self.onChange(atBottom);
+    }
+  });
+  return self;
+}
+
+const messagesWrap = $("#messagesWrap");
+const logsPanel    = $("#logsPanel");
+const logsBody     = $("#logsBody");
+const logsToggle   = $("#logsToggle");
+const logsCount    = $("#logsCount");
+const logsSpinner  = $("#logsSpinner");
+const logsCopy     = $("#logsCopy");
+const statusBar    = $("#statusBar");
+const requestInput = $("#requestInput");
+const sendBtn      = $("#sendBtn");
+const resumeBtn    = $("#resumeBtn");
+
+const messagesScroll = createStickyScroll(messagesWrap);
+const logsScroll     = createStickyScroll(logsBody);
+
+function applyTheme(name) {
+  const theme = AVAILABLE_THEMES.indexOf(name) >= 0 ? name : "github-noir";
+  document.documentElement.setAttribute("data-theme", theme);
+  const sel = document.getElementById("themeSelect");
+  if (sel) sel.value = theme;
+  state.theme = theme;
+  saveThemeLocal(theme);
+}
+
+function saveLastTask(tid) {
+  try {
+    if (tid) localStorage.setItem(LAST_TASK_KEY, tid);
+    else localStorage.removeItem(LAST_TASK_KEY);
+  } catch (e) {}
+}
+function loadLastTask() {
+  try { return localStorage.getItem(LAST_TASK_KEY); }
+  catch (e) { return null; }
+}
+
+function applyLanguage() {
+  document.documentElement.lang = state.lang;
+  document.title = "BiNeuron";
+  $$("[data-i18n]").forEach(function (el) { el.innerHTML = t(el.dataset.i18n); });
+  $$("[data-i18n-ph]").forEach(function (el) { el.placeholder = t(el.dataset.i18nPh); });
+  $$("[data-i18n-title]").forEach(function (el) { el.title = t(el.dataset.i18nTitle); });
+  const vs = $("#virtualStorage").checked;
+  $("#historyTitle").textContent = vs ? t("history_title_virtual") : t("history_title");
+  const lc = $("#logsCopy");
+  if (lc) lc.title = t("copy_logs");
+  renderFileChips();
+  updateMasterUI();
+  const ml = $("#modelsList");
+  if (ml && ml.children.length === 1) {
+    ml.firstChild.textContent = t("no_models_found");
+  }
+}
+
+(function(){
+  const sel = document.getElementById("langSelect");
+  if (!sel) return;
+  sel.addEventListener("change", function () {
+    const preview = this.value || "en";
+    const dict = TRANSLATIONS[preview] || TRANSLATIONS.en;
+    $$("#langModal [data-i18n]").forEach(function (el) {
+      const k = el.dataset.i18n;
+      el.innerHTML = (dict[k] !== undefined)
+        ? dict[k]
+        : (TRANSLATIONS.en[k] !== undefined ? TRANSLATIONS.en[k] : k);
+    });
+    document.documentElement.lang = preview;
+  });
+})();
+
+$("#langOk").addEventListener("click", function () {
+  const chosen = $("#langSelect").value || "en";
+  const cb = document.getElementById("langDontShow");
+  if (cb && cb.checked) saveLangChosen(true);
+  $("#langModal").classList.add("hidden");
+  setLanguage(chosen);
+});
+
+(function(){
+  const sel = document.getElementById("langSelectSidebar");
+  if (!sel) return;
+  sel.addEventListener("change", function () {
+    setLanguage(this.value || "en");
+  });
+})();
+
+$$(".spin").forEach(function (spin) {
+  const input = spin.querySelector("input");
+  const up    = spin.querySelector('[data-spin="up"]');
+  const down  = spin.querySelector('[data-spin="down"]');
+  if (!input) return;
+  function step(dir) {
+    const s = parseFloat(input.step) || 1;
+    let v = parseFloat(input.value) || 0;
+    v += dir * s;
+    const dec = (String(s).split(".")[1] || "").length;
+    input.value = dec > 0 ? v.toFixed(dec) : Math.round(v);
+    input.dispatchEvent(new Event("input", {bubbles: true}));
+  }
+  if (up)   up.addEventListener("click",   function () { step(1); });
+  if (down) down.addEventListener("click", function () { step(-1); });
+});
+
+function fillSelect(sel, values) {
+  const el = $(sel);
+  if (!el) return;
+  el.innerHTML = "";
+  (values || []).forEach(function (v) {
+    const o = document.createElement("option");
+    o.value = v; o.textContent = v;
+    el.appendChild(o);
+  });
+}
+
+async function loadMeta() {
+  const r = await fetch("/api/meta");
+  state.meta = await r.json();
+  fillSelect("#protocolSelect", state.meta.protocols);
+  fillSelect("#prefsSelect",    state.meta.preferences_in_ai);
+  fillSelect("#detModeSelect",  state.meta.determinant_modes);
+  fillSelect("#promptModeSelect", state.meta.main_prompt_modes);
+  fillSelect("#modelSizeSelect", state.meta.model_sizes);
+  fillSelect("#typeComputerSelect", ["auto"].concat(state.meta.types_power || []));
+  fillSelect("#ocrOptionSelect",
+             state.meta.definition_options || ["easy_ocr", "deepseek_ocr"]);
+  fillSelect("#injectionModelSelect",
+             state.meta.injection_detect_models || ["deberta", "distilbert", "onnx"]);
+  if (state.meta.import_error) {
+    const w = $("#importWarning");
+    w.style.display = "flex";
+    w.innerHTML = '<svg class="icon"><use href="#i-alert"/></svg><span>BiNeuron import failed: ' + state.meta.import_error + '</span>';
+  }
+}
+
+function fillForm(settings) {
+  $$("[data-setting]").forEach(function (el) {
+    const key = el.dataset.setting;
+    const v = settings[key];
+    if (el.type === "checkbox") el.checked = !!v;
+    else if (v === undefined || v === null) el.value = "";
+    else el.value = v;
+  });
+  const localTheme = loadThemeLocal();
+  if (localTheme && AVAILABLE_THEMES.indexOf(localTheme) >= 0) {
+    applyTheme(localTheme);
+  } else if (settings.theme) {
+    applyTheme(settings.theme);
+  }
+  onVirtualStorageChanged();
+}
+
+function collectSettings() {
+  const out = {};
+  $$("[data-setting]").forEach(function (el) {
+    const key = el.dataset.setting;
+    if (el.type === "checkbox") out[key] = el.checked;
+    else if (el.type === "number") {
+      const n = parseFloat(el.value);
+      out[key] = isNaN(n) ? 0 : n;
+    } else out[key] = el.value;
+  });
+  out.theme = state.theme;
+  return out;
+}
+
+async function loadSettings() {
+  const r = await fetch("/api/settings");
+  const s = await r.json();
+  fillForm(s);
+}
+
+async function saveSettings() {
+  await fetch("/api/settings", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(collectSettings())
+  });
+}
+
+$("#btnApply").addEventListener("click", async function () {
+  await saveSettings();
+  toast(t("settings_applied"));
+});
+$("#btnReset").addEventListener("click", async function () {
+  if (!confirm(t("reset_settings_confirm"))) return;
+  const r = await fetch("/api/settings/reset", {method: "POST"});
+  const data = await r.json();
+  try { localStorage.removeItem(THEME_KEY); } catch(e){}
+  fillForm(data.settings);
+  toast(t("settings_reset"));
+});
+$("#btnExport").addEventListener("click", exportAllChats);
+$("#btnDelete").addEventListener("click", deleteAllChats);
+
+document.addEventListener("change", function (e) {
+  if (e.target && e.target.id === "themeSelect") {
+    applyTheme(e.target.value);
+    saveSettings();
+  }
+});
+
+logsToggle.addEventListener("click", function (e) {
+  if (e.target.closest(".logs-copy")) return;
+  const nowCollapsed = logsPanel.classList.toggle("collapsed");
+  if (!nowCollapsed) {
+    setTimeout(function () { logsScroll.forceScroll(); }, 60);
+  }
+});
+logsToggle.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    logsToggle.click();
+  }
+});
+
+function setLogsActive(active) {
+  logsSpinner.hidden = !active;
+}
+
+function flashCopied() {
+  if (!logsCopy) return;
+  logsCopy.classList.add("copied");
+  if (copyResetTimer) clearTimeout(copyResetTimer);
+  copyResetTimer = setTimeout(function () {
+    logsCopy.classList.remove("copied");
+  }, 1200);
+}
+
+if (logsCopy) {
+  logsCopy.addEventListener("click", function (e) {
+    e.stopPropagation();
+    if (!fullLogBuffer.length) { toast(t("logs_empty")); return; }
+    copyToClipboard(fullLogBuffer.join("\n"));
+    flashCopied();
+  });
+}
+
+function hideWelcome() {
+  const el = messagesWrap.querySelector(".welcome");
+  if (el && el.parentNode) el.parentNode.removeChild(el);
+}
+
+function addMessage(role, text, timestamp) {
+  hideWelcome();
+  const wrap = document.createElement("div");
+  wrap.className = "msg " + role;
+  const body = document.createElement("div");
+  body.className = "text";
+  body.textContent = text;
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  const time = document.createElement("span");
+  time.className = "time";
+  time.textContent = timestamp || nowTime();
+  const copy = document.createElement("button");
+  copy.className = "btn small";
+  copy.innerHTML = '<svg class="icon"><use href="#i-copy"/></svg><span>' + t("copy_message") + '</span>';
+  copy.addEventListener("click", function () { copyToClipboard(text); });
+  meta.appendChild(time);
+  meta.appendChild(copy);
+  wrap.appendChild(body);
+  wrap.appendChild(meta);
+  messagesWrap.appendChild(wrap);
+  messagesScroll.scrollIfSticky();
+}
+
+function looksLikeProgress(text) {
+  if (!text) return false;
+  if (/[\u2588\u2589\u258A\u258B\u258C\u258D\u258E\u258F\u2591\u2592\u2593]/.test(text)) return true;
+  if (text.indexOf("█") >= 0 || text.indexOf("▊") >= 0 || text.indexOf("▉") >= 0) return true;
+  if (/downloading bytes|Fetching|it\/s\]|B\/s\]/.test(text)) return true;
+  if (/%\|/.test(text) && /[|<]/.test(text)) return true;
+  return false;
+}
+
+function resetLogTracker() {
+  lastLogEl = null;
+  lastLogWasProgress = false;
+}
+
+function addLog(text) {
+  const isProgress = looksLikeProgress(text);
+  if (isProgress && lastLogEl && lastLogWasProgress && lastLogEl.parentNode === logsBody) {
+    lastLogEl.textContent = text;
+    if (fullLogBuffer.length > 0) fullLogBuffer[fullLogBuffer.length - 1] = text;
+  } else {
+    const div = document.createElement("div");
+    div.className = "log-line" + (isProgress ? " progress" : "");
+    div.textContent = text;
+    logsBody.appendChild(div);
+    lastLogEl = div;
+    logLineCount++;
+    logsCount.textContent = String(logLineCount);
+    fullLogBuffer.push(text);
+  }
+  lastLogWasProgress = isProgress;
+  if (!logsPanel.classList.contains("collapsed")) {
+    logsScroll.scrollIfSticky();
+  }
+}
+
+function clearLogs() {
+  logsBody.innerHTML = "";
+  logLineCount = 0;
+  logsCount.textContent = "0";
+  fullLogBuffer = [];
+  resetLogTracker();
+}
+
+function clearMessages() {
+  messagesWrap.innerHTML = "";
+  const w = document.createElement("div");
+  w.className = "welcome";
+  w.innerHTML = t("welcome_text");
+  messagesWrap.appendChild(w);
+  resetLogTracker();
+}
+
+function nowTime() {
+  const d = new Date();
+  const pad = function (n) { return String(n).padStart(2, "0"); };
+  return pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear() +
+         " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+}
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).catch(function () {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+  });
+}
+
+function startRequestTimer() {
+  state.timerStart = Date.now();
+  tickStatus();
+}
+function tickStatus() {
+  if (state.timerStart === null) return;
+  const elapsed = (Date.now() - state.timerStart) / 1000;
+  const m = String(Math.floor(elapsed / 60)).padStart(2, "0");
+  const s = String(Math.floor(elapsed % 60)).padStart(2, "0");
+  const phrases = t("status_phrases");
+  const p = phrases[Math.floor(elapsed / 5) % phrases.length];
+  statusBar.textContent = p + " " + m + ":" + s;
+  state.timerInterval = setTimeout(tickStatus, 1000);
+}
+function stopRequestTimer() {
+  if (state.timerInterval) clearTimeout(state.timerInterval);
+  state.timerInterval = null;
+  state.timerStart = null;
+  statusBar.textContent = "";
+}
+
+async function ensureCurrentChat() {
+  if (state.currentChatId && state.chats[state.currentChatId]) return state.currentChatId;
+  const r = await fetch("/api/chats", {method: "POST"});
+  if (r.status === 401) { handleLocked(); return null; }
+  const data = await r.json();
+  state.currentChatId = data.id;
+  state.chats[data.id] = data.chat;
+  renderHistoryList();
+  return data.id;
+}
+
+async function persistMessage(chatId, role, content) {
+  if (!chatId) return;
+  const r = await fetch("/api/chats/" + chatId + "/messages", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({role: role, content: content})
+  });
+  if (r.status === 401) { handleLocked(); return; }
+  if (state.chats[chatId]) {
+    state.chats[chatId].messages.push({
+      role: role, content: content, timestamp: nowTime()
+    });
+  }
+}
+
+async function sendMessage() {
+  if (state.isBusy) return;
+  const text = requestInput.value.trim();
+  if (!text) return;
+  const chatId = await ensureCurrentChat();
+  addMessage("user", text);
+  await persistMessage(chatId, "user", text);
+  messagesScroll.forceScroll();
+  requestInput.value = "";
+  resumeBtn.classList.remove("visible");
+  clearLogs();
+  logsPanel.classList.remove("collapsed");
+  state.isBusy = true;
+  state.lastLogCount = 0;
+  consecutivePollErrors = 0;
+  resetLogTracker();
+  setLogsActive(true);
+  startRequestTimer();
+  try {
+    const r = await fetch("/api/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        request: text,
+        settings: collectSettings(),
+        attached_files: state.attachedFiles.map(function (f) { return f.path; })
+      })
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const data = await r.json();
+    state.taskId = data.task_id;
+    saveLastTask(data.task_id);
+    pollTask(data.task_id);
+  } catch (e) {
+    addLog("ERROR: " + e.message);
+    finishTask();
+  }
+}
+
+async function fetchTaskOnce(tid) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(function () { controller.abort(); }, POLL_TIMEOUT_MS);
+  try {
+    const r = await fetch("/api/chat/task/" + tid + "?since=" + state.lastLogCount, {
+      signal: controller.signal,
+      cache: "no-store"
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function pollTask(tid) {
+  state.pollTimer = setTimeout(async function () {
+    if (pollingPaused) { pollTask(tid); return; }
+    let data;
+    try {
+      data = await fetchTaskOnce(tid);
+      if (consecutivePollErrors > 0) {
+        addLog("[web] Reconnected to server.");
+        consecutivePollErrors = 0;
+      }
+    } catch (e) {
+      consecutivePollErrors++;
+      if (consecutivePollErrors === 1) {
+        statusBar.textContent = t("polling_retry");
+      }
+      if (consecutivePollErrors >= POLL_MAX_ERRORS) {
+        addLog("[web] " + t("polling_fail") + ": " + e.message);
+        finishTask();
+        return;
+      }
+      pollTask(tid);
+      return;
+    }
+    (data.logs || []).forEach(function (l) { addLog(l); });
+    state.lastLogCount = data.log_count;
+    if (data.status === "done") {
+      addMessage("assistant", data.answer || "(empty response)");
+      const chatId = state.currentChatId;
+      if (chatId) persistMessage(chatId, "assistant", data.answer || "");
+      finishTask();
+    } else if (data.status === "error") {
+      addLog("TASK FAILED: " + (data.error || "unknown error"));
+      finishTask();
+    } else {
+      pollTask(tid);
+    }
+  }, POLL_INTERVAL_MS);
+}
+
+function finishTask() {
+  state.isBusy = false;
+  state.taskId = null;
+  consecutivePollErrors = 0;
+  saveLastTask(null);
+  if (state.pollTimer) clearTimeout(state.pollTimer);
+  state.pollTimer = null;
+  stopRequestTimer();
+  setLogsActive(false);
+}
+
+async function tryResumeAfterReload() {
+  const tid = loadLastTask();
+  if (!tid) return false;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(function () { controller.abort(); }, POLL_TIMEOUT_MS);
+    const r = await fetch("/api/chat/task/" + tid + "?since=0", {
+      signal: controller.signal,
+      cache: "no-store"
+    });
+    clearTimeout(timeoutId);
+    if (!r.ok) { saveLastTask(null); return false; }
+    const data = await r.json();
+    if (data.status === "running") {
+      state.taskId = tid;
+      state.isBusy = true;
+      state.lastLogCount = 0;
+      consecutivePollErrors = 0;
+      logsPanel.classList.remove("collapsed");
+      startRequestTimer();
+      setLogsActive(true);
+      addLog("[web] Resuming previous request...");
+      pollTask(tid);
+      return true;
+    }
+    saveLastTask(null);
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+sendBtn.addEventListener("click", sendMessage);
+requestInput.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") sendMessage();
+});
+resumeBtn.addEventListener("click", function () {
+  if (state.isBusy) return;
+  resumeBtn.classList.remove("visible");
+  sendMessage();
+});
+
+$("#copyBtn").addEventListener("click", function () {
+  const lines = [];
+  $$(".msg", messagesWrap).forEach(function (m) {
+    const role = m.classList.contains("user") ? "User"
+               : m.classList.contains("assistant") ? "Assistant"
+               : "Log";
+    const el = m.querySelector(".text") || m;
+    lines.push(role + ": " + el.textContent.trim());
+  });
+  copyToClipboard(lines.join("\n"));
+  toast(t("chat_copied"));
+});
+
+function renderFileChips() {
+  const container = $("#fileChips");
+  if (!container) return;
+  container.innerHTML = "";
+  state.attachedFiles.forEach(function (file, index) {
+    const chip = document.createElement("span");
+    chip.className = "file-chip";
+    const name = document.createElement("span");
+    name.className = "name";
+    name.textContent = file.name;
+    name.title = file.name;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "remove";
+    btn.innerHTML = '<svg class="icon" style="width:11px;height:11px"><use href="#i-x"/></svg>';
+    btn.title = t("remove_file");
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      removeAttachedFile(index);
+    });
+    chip.appendChild(name);
+    chip.appendChild(btn);
+    container.appendChild(chip);
+  });
+}
+
+function removeAttachedFile(index) {
+  if (index < 0 || index >= state.attachedFiles.length) return;
+  state.attachedFiles.splice(index, 1);
+  renderFileChips();
+}
+
+async function uploadFiles(fileList) {
+  if (!fileList || !fileList.length) return;
+  const fd = new FormData();
+  for (let i = 0; i < fileList.length; i++) fd.append("files", fileList[i]);
+  const r = await fetch("/api/upload", {method: "POST", body: fd});
+  const data = await r.json();
+  const paths = (data.paths || []).slice();
+  const names = Array.prototype.slice.call(fileList).map(function (f) { return f.name; });
+  for (let i = 0; i < paths.length; i++) {
+    state.attachedFiles.push({name: names[i] || paths[i], path: paths[i]});
+  }
+  renderFileChips();
+  if (paths.length) toast(t("files_attached", {n: paths.length}));
+}
+
+$("#uploadBtn").addEventListener("click", function () {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.multiple = true;
+  input.addEventListener("change", function () { uploadFiles(input.files); });
+  input.click();
+});
+
+const dropZone = $("#dropZone");
+if (dropZone) {
+  function openPicker() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.multiple = true;
+    input.addEventListener("change", function () { uploadFiles(input.files); });
+    input.click();
+  }
+  dropZone.addEventListener("click", function (e) {
+    if (e.target.closest(".file-chip")) return;
+    openPicker();
+  });
+  dropZone.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPicker(); }
+  });
+  ["dragenter", "dragover"].forEach(function (evt) {
+    dropZone.addEventListener(evt, function (e) {
+      e.preventDefault(); e.stopPropagation();
+      dropZone.classList.add("drag-over");
+    });
+  });
+  ["dragleave", "dragend"].forEach(function (evt) {
+    dropZone.addEventListener(evt, function (e) {
+      e.preventDefault(); e.stopPropagation();
+      if (e.target === dropZone || !dropZone.contains(e.relatedTarget)) {
+        dropZone.classList.remove("drag-over");
+      }
+    });
+  });
+  dropZone.addEventListener("drop", function (e) {
+    e.preventDefault(); e.stopPropagation();
+    dropZone.classList.remove("drag-over");
+    const dt = e.dataTransfer;
+    if (dt && dt.files && dt.files.length) uploadFiles(dt.files);
+  });
+  ["dragover", "drop"].forEach(function (evt) {
+    window.addEventListener(evt, function (e) { e.preventDefault(); });
+  });
+}
+
+const historyList = $("#historyList");
+const treeView    = $("#treeView");
+
+function renderHistoryList() {
+  historyList.innerHTML = "";
+  const entries = Object.entries(state.chats)
+    .sort(function (a, b) { return (b[1].created_at || "").localeCompare(a[1].created_at || ""); });
+  if (!entries.length) {
+    historyList.innerHTML = '<div style="color:var(--fg-dark);padding:8px;">' + t("no_chats_yet") + '</div>';
+    return;
+  }
+  entries.forEach(function (entry) {
+    const id = entry[0], chat = entry[1];
+    const btn = document.createElement("button");
+    btn.className = "chat-item" + (id === state.currentChatId ? " active" : "");
+    const first = (chat.messages || []).find(function (m) { return m.role === "user"; });
+    const title = first ? first.content.slice(0, 30) : t("empty_chat");
+    btn.textContent = (chat.created_at || "-") + " - " + title;
+    btn.addEventListener("click", function () { loadChat(id); });
+    historyList.appendChild(btn);
+  });
+}
+
+async function loadChat(id) {
+  const r = await fetch("/api/chats/" + id);
+  if (r.status === 401) { handleLocked(); return; }
+  if (!r.ok) return;
+  const chat = await r.json();
+  state.currentChatId = id;
+  clearMessages();
+  clearLogs();
+  (chat.messages || []).forEach(function (m) {
+    if (m.role === "user" || m.role === "assistant") addMessage(m.role, m.content, m.timestamp);
+    else addLog(m.content);
+  });
+  messagesScroll.forceScroll();
+  logsScroll.forceScroll();
+  renderHistoryList();
+}
+
+async function loadChats() {
+  const r = await fetch("/api/chats");
+  if (r.status === 401) { handleLocked(); return; }
+  state.chats = await r.json();
+  const ids = Object.keys(state.chats)
+    .sort(function (a, b) {
+      return (state.chats[b].created_at || "").localeCompare(state.chats[a].created_at || "");
+    });
+  if (ids.length) {
+    state.currentChatId = ids[0];
+    await loadChat(ids[0]);
+  } else {
+    state.currentChatId = null;
+    clearMessages();
+    clearLogs();
+  }
+  renderHistoryList();
+}
+
+$("#btnAddChat").addEventListener("click", async function () {
+  const r = await fetch("/api/chats", {method: "POST"});
+  if (r.status === 401) { handleLocked(); return; }
+  const data = await r.json();
+  state.currentChatId = data.id;
+  state.chats[data.id] = data.chat;
+  clearMessages();
+  clearLogs();
+  renderHistoryList();
+});
+
+$("#btnDelChat").addEventListener("click", async function () {
+  if (!state.currentChatId) return;
+  if (!confirm(t("delete_chat_confirm"))) return;
+  const r = await fetch("/api/chats/" + state.currentChatId, {method: "DELETE"});
+  if (r.status === 401) { handleLocked(); return; }
+  delete state.chats[state.currentChatId];
+  state.currentChatId = null;
+  const ids = Object.keys(state.chats);
+  if (ids.length) await loadChat(ids[0]);
+  else { clearMessages(); clearLogs(); renderHistoryList(); }
+});
+
+$("#btnDlChat").addEventListener("click", function () {
+  if (!state.currentChatId || !state.chats[state.currentChatId]) {
+    toast(t("no_chat_selected")); return;
+  }
+  const chat = state.chats[state.currentChatId];
+  const text = (chat.messages || []).map(function (m) {
+    return m.role.charAt(0).toUpperCase() + m.role.slice(1) + ": " + m.content;
+  }).join("\n");
+  const blob = new Blob([text], {type: "text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "chat_" + state.currentChatId + ".txt";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+async function exportAllChats() {
+  const ids = Object.keys(state.chats);
+  if (!ids.length) { toast(t("no_chats_to_export")); return; }
+  const lines = [];
+  ids.forEach(function (id) {
+    const c = state.chats[id];
+    lines.push("===== " + c.created_at + " (" + id + ") =====");
+    (c.messages || []).forEach(function (m) { lines.push(m.role + ": " + m.content); });
+    lines.push("");
+  });
+  const blob = new Blob([lines.join("\n")], {type: "text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "bineuron_all_chats.txt";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function deleteAllChats() {
+  if (!Object.keys(state.chats).length) return;
+  if (!confirm(t("delete_all_chats_confirm"))) return;
+  for (const id of Object.keys(state.chats)) {
+    const r = await fetch("/api/chats/" + id, {method: "DELETE"});
+    if (r.status === 401) { handleLocked(); return; }
+  }
+  state.chats = {};
+  state.currentChatId = null;
+  clearMessages();
+  clearLogs();
+  renderHistoryList();
+}
+
+$("#searchChats").addEventListener("input", function (e) {
+  const q = e.target.value.toLowerCase();
+  $$(".chat-item", historyList).forEach(function (el) {
+    el.style.display = el.textContent.toLowerCase().indexOf(q) >= 0 ? "" : "none";
+  });
+});
+
+const virtualStorage  = $("#virtualStorage");
+const historyControls = $("#historyControls");
+const storageControls = $("#storageControls");
+
+function onVirtualStorageChanged() {
+  const on = virtualStorage.checked;
+  historyControls.classList.toggle("hidden", on);
+  storageControls.classList.toggle("visible", on);
+  historyList.style.display = on ? "none" : "block";
+  treeView.style.display    = on ? "block" : "none";
+  $("#historyTitle").textContent = on ? t("history_title_virtual") : t("history_title");
+  if (on) loadStorageTree();
+}
+virtualStorage.addEventListener("change", onVirtualStorageChanged);
+
+async function loadStorageTree() {
+  const path = $("#storagePath").value.trim();
+  if (!path) {
+    treeView.innerHTML = '<div style="padding:8px;color:var(--fg-dark);">' + t("enter_storage_path") + '</div>';
+    return;
+  }
+  treeView.innerHTML = '<div style="padding:8px;color:var(--fg-dark);">' + t("scanning") + '</div>';
+  const r = await fetch("/api/storage/tree", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({path: path})
+  });
+  const data = await r.json();
+  if (!data.ok) {
+    treeView.innerHTML = '<div style="padding:8px;color:#ffb0b0;">' + data.error + '</div>';
+    return;
+  }
+  treeView.innerHTML = "";
+  treeView.appendChild(renderTreeNode(data.tree));
+}
+
+function renderTreeNode(node) {
+  const ul = document.createElement("ul");
+  const li = document.createElement("li");
+  if (node.type === "file") li.classList.add("file");
+  li.textContent = node.name;
+  li.dataset.path = node.path;
+  if (node.type === "file") {
+    li.addEventListener("dblclick", function () {
+      fetch("/api/storage/open", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({path: node.path})
+      });
+    });
+  } else if (node.children) {
+    const sub = document.createElement("ul");
+    node.children.forEach(function (ch) { sub.appendChild(renderTreeNode(ch)); });
+    li.appendChild(sub);
+  }
+  ul.appendChild(li);
+  return ul;
+}
+
+$("#btnBrowse").addEventListener("click", function () {
+  const p = prompt(t("enter_storage_prompt"));
+  if (p) { $("#storagePath").value = p; loadStorageTree(); }
+});
+$("#btnRefresh").addEventListener("click", loadStorageTree);
+
+$("#refreshModels").addEventListener("click", async function () {
+  const dir = $('[data-setting="models_dir"]').value.trim() || "./models";
+  const list = $("#modelsList");
+  list.innerHTML = '<div style="color:var(--fg-dark);">' + t("loading") + '</div>';
+  const r = await fetch("/api/models?dir=" + encodeURIComponent(dir));
+  const data = await r.json();
+  list.innerHTML = "";
+  if (!data.ok || !data.models.length) {
+    list.innerHTML = '<div style="color:var(--fg-dark);">' + t("no_models_found") + '</div>';
+    return;
+  }
+  data.models.forEach(function (name) {
+    const el = document.createElement("div");
+    el.textContent = name;
+    el.title = name;
+    list.appendChild(el);
+  });
+});
+
+function toast(msg) {
+  const el = document.createElement("div");
+  el.textContent = msg;
+  el.style.position = "fixed";
+  el.style.left = "50%";
+  el.style.bottom = "30px";
+  el.style.transform = "translateX(-50%)";
+  el.style.background = "var(--bg-frame)";
+  el.style.border = "1px solid var(--border)";
+  el.style.padding = "10px 16px";
+  el.style.borderRadius = "6px";
+  el.style.zIndex = "2000";
+  el.style.boxShadow = "0 6px 20px rgba(0,0,0,.5)";
+  el.style.fontSize = "13px";
+  el.style.maxWidth = "calc(100vw - 32px)";
+  el.style.textAlign = "center";
+  document.body.appendChild(el);
+  setTimeout(function () { el.remove(); }, 2200);
+}
+
+const unlockModal    = document.getElementById("unlockModal");
+const unlockPwd      = document.getElementById("unlockPassword");
+const unlockOk       = document.getElementById("unlockOk");
+const unlockHint     = document.getElementById("unlockHint");
+const unlockAttempts = document.getElementById("unlockAttempts");
+const unlockWipe     = document.getElementById("unlockWipeHint");
+
+function updateMasterUI() {
+  const box = document.getElementById("masterState");
+  if (!box) return;
+  const m = state.master;
+  if (!m.available) {
+    box.textContent = t("master_crypto_missing");
+    box.className = "master-state off";
+    const b1 = document.getElementById("btnMasterEnable");
+    const b2 = document.getElementById("btnMasterDisable");
+    if (b1) b1.disabled = true;
+    if (b2) b2.disabled = true;
+    return;
+  }
+  if (m.enabled) {
+    box.textContent = m.unlocked ? t("master_enabled_unlocked") : t("master_enabled_locked");
+    box.className = "master-state on";
+    document.getElementById("btnMasterEnable").disabled = true;
+    document.getElementById("btnMasterDisable").disabled = !m.unlocked;
+  } else {
+    box.textContent = t("master_disabled");
+    box.className = "master-state off";
+    document.getElementById("btnMasterEnable").disabled = false;
+    document.getElementById("btnMasterDisable").disabled = true;
+  }
+}
+
+async function refreshMasterStatus() {
+  try {
+    const r = await fetch("/api/master/status");
+    state.master = await r.json();
+    updateMasterUI();
+  } catch (e) {}
+}
+
+function showUnlockModal(attemptsLeft) {
+  unlockModal.classList.remove("hidden");
+  unlockPwd.value = "";
+  unlockPwd.focus();
+  unlockHint.textContent = t("unlock_hint");
+  if (attemptsLeft !== undefined && attemptsLeft !== null) {
+    if (attemptsLeft <= 1) {
+      unlockAttempts.classList.add("danger");
+      unlockAttempts.textContent = t("last_attempt_warning");
+    } else {
+      unlockAttempts.classList.remove("danger");
+      unlockAttempts.textContent = t("attempts_remaining", {n: attemptsLeft});
+    }
+  } else {
+    unlockAttempts.textContent = "";
+  }
+}
+
+function hideUnlockModal() {
+  unlockModal.classList.add("hidden");
+}
+
+function handleLocked() {
+  state.master.unlocked = false;
+  showUnlockModal(state.master.attempts_left);
+}
+
+async function tryUnlock() {
+  const pwd = unlockPwd.value;
+  if (!pwd) return;
+  unlockOk.disabled = true;
+  try {
+    const r = await fetch("/api/master/unlock", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({password: pwd}),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      hideUnlockModal();
+      state.master.unlocked = true;
+      await loadChats();
+      await refreshMasterStatus();
+      return;
+    }
+    if (data.wiped) {
+      unlockHint.textContent = t("all_data_wiped");
+      unlockAttempts.classList.remove("danger");
+      unlockAttempts.textContent = "";
+      unlockOk.disabled = true;
+      setTimeout(function () {
+        hideUnlockModal();
+        state.chats = {};
+        state.currentChatId = null;
+        clearMessages();
+        clearLogs();
+        renderHistoryList();
+        refreshMasterStatus();
+      }, 2500);
+      return;
+    }
+    if (data.wrong) {
+      state.master.attempts_left = data.attempts_left;
+      showUnlockModal(data.attempts_left);
+      unlockPwd.value = "";
+    } else {
+      unlockHint.textContent = data.error || t("unlock_failed");
+    }
+  } catch (e) {
+    unlockHint.textContent = t("network_error");
+  } finally {
+    unlockOk.disabled = false;
+  }
+}
+
+if (unlockOk) {
+  unlockOk.addEventListener("click", tryUnlock);
+  unlockPwd.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") tryUnlock();
+  });
+}
+
+if (unlockWipe) {
+  unlockWipe.addEventListener("click", async function () {
+    if (!confirm(t("wipe_confirm_1"))) return;
+    if (!confirm(t("wipe_confirm_2"))) return;
+    for (let i = 0; i < 3; i++) {
+      await fetch("/api/master/unlock", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({password: "__wipe__" + i}),
+      });
+    }
+    location.reload();
+  });
+}
+
+const btnMasterEnable  = document.getElementById("btnMasterEnable");
+const btnMasterDisable = document.getElementById("btnMasterDisable");
+
+if (btnMasterEnable) {
+  btnMasterEnable.addEventListener("click", async function () {
+    const pwd = prompt(t("set_master_password"));
+    if (!pwd) return;
+    if (pwd.length < 4) { toast(t("password_too_short")); return; }
+    const pwd2 = prompt(t("repeat_password"));
+    if (pwd !== pwd2) { toast(t("passwords_do_not_match")); return; }
+    const r = await fetch("/api/master/setup", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({password: pwd}),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast(t("encryption_enabled"));
+      await refreshMasterStatus();
+    } else {
+      toast(t("failed_prefix") + (data.error || t("unknown")));
+    }
+  });
+}
+
+if (btnMasterDisable) {
+  btnMasterDisable.addEventListener("click", async function () {
+    if (!confirm(t("disable_encryption_confirm"))) return;
+    const r = await fetch("/api/master/disable", {method: "POST"});
+    const data = await r.json();
+    if (data.ok) {
+      toast(t("encryption_disabled"));
+      await refreshMasterStatus();
+    } else {
+      toast(t("failed_prefix") + (data.error || t("unknown")));
+    }
+  });
+}
+
+const previewBtn      = document.getElementById("btnPreviewRequest");
+const previewModalEl  = document.getElementById("previewModal");
+const previewBody     = document.getElementById("previewBody");
+const previewCopyBtn  = document.getElementById("previewCopy");
+const previewCloseBtn = document.getElementById("previewClose");
+
+function openPreviewModal(text) {
+  previewText = text || "";
+  previewBody.textContent = previewText;
+  previewModalEl.classList.remove("hidden");
+}
+
+function closePreviewModal() {
+  previewModalEl.classList.add("hidden");
+}
+
+if (previewBtn) {
+  previewBtn.addEventListener("click", async function () {
+    const text = requestInput.value.trim();
+    if (!text) { toast(t("preview_empty_request")); return; }
+    previewBtn.disabled = true;
+    try {
+      const r = await fetch("/api/preview_request", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          request: text,
+          settings: collectSettings(),
+          attached_files: state.attachedFiles.map(function (f) { return f.path; })
+        })
+      });
+      const data = await r.json();
+      if (!data.ok) {
+        toast(t("preview_failed") + ": " + (data.error || t("unknown")));
+        return;
+      }
+      openPreviewModal(data.preview || "");
+    } catch (e) {
+      toast(t("network_error"));
+    } finally {
+      previewBtn.disabled = false;
+    }
+  });
+}
+
+if (previewCloseBtn) {
+  previewCloseBtn.addEventListener("click", closePreviewModal);
+}
+
+if (previewCopyBtn) {
+  previewCopyBtn.addEventListener("click", function () {
+    if (!previewText) return;
+    copyToClipboard(previewText);
+    toast(t("chat_copied"));
+  });
+}
+
+if (previewModalEl) {
+  previewModalEl.addEventListener("click", function (e) {
+    if (e.target === previewModalEl) closePreviewModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !previewModalEl.classList.contains("hidden")) {
+      closePreviewModal();
+    }
+  });
+}
+
+document.addEventListener("visibilitychange", function () {
+  pollingPaused = document.hidden;
+});
+
+(async function init() {
+  try {
+    const savedLang = loadLang();
+    if (savedLang && TRANSLATIONS[savedLang]) state.lang = savedLang;
+    syncLangSelectors();
+
+    const savedTheme = loadThemeLocal();
+    if (savedTheme && AVAILABLE_THEMES.indexOf(savedTheme) >= 0) {
+      state.theme = savedTheme;
+    }
+
+    if (isLangChosen()) {
+      $("#langModal").classList.add("hidden");
+    }
+
+    applyLanguage();
+    applyTheme(state.theme);
+
+    const m = await fetch("/api/master/status").then(r => r.json());
+    state.master = m;
+    updateMasterUI();
+    if (m.enabled && !m.unlocked) {
+      showUnlockModal(m.attempts_left);
+      return;
+    }
+    await loadMeta();
+    await loadSettings();
+    syncLangSelectors();
+    await loadChats();
+    await tryResumeAfterReload();
+  } catch (e) {
+    console.error("Init failed:", e);
+  }
+})();
+</script>
+</body>
+</html>

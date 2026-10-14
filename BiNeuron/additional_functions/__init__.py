@@ -21,3 +21,4 @@ from .template_for_changing_text_query_via_ai import template_for_changing_text_
 from .improving_user_text_through_ai import improving_user_text_through_ai
 from .request_for_cloud_ai import request_for_cloud_ai
 from .free_space_for_ai_model import free_space_for_ai_model
+from .prompt_injection_detect import prompt_injection_detect

@@ -100,7 +100,7 @@ The architecture emphasises reusability, fault tolerance, and performance, allow
 ## Graphical Interface  
 
 <p align="center">
-  <img src="img_files/gui_screenshot_3.png" width="80%" alt="BiNeuron GUI Screenshot" />
+  <img src="img_files/gui_screenshot_4.png" width="80%" alt="BiNeuron GUI Screenshot" />
 </p>
 
 A modern web application built with Flask, offering:  
@@ -317,7 +317,7 @@ BiNeuron спроектирован по модульному принципу �
 ## Графический интерфейс  
 
 <p align="center">
-  <img src="img_files/gui_screenshot_3.png" width="80%" alt="Скриншот GUI BiNeuron" />
+  <img src="img_files/gui_screenshot_4.png" width="80%" alt="Скриншот GUI BiNeuron" />
 </p>
 
 Современное веб приложение на Flask, предлагающее:  
@@ -534,7 +534,7 @@ BiNeuron 采用模块化、关注点分离的设计：
 ## 图形界面  
 
 <p align="center">
-  <img src="img_files/gui_screenshot_3.png" width="80%" alt="BiNeuron GUI 截图" />
+  <img src="img_files/gui_screenshot_4.png" width="80%" alt="BiNeuron GUI 截图" />
 </p>
 
 使用 Flask 构建的现代 Web 应用程序，提供：  

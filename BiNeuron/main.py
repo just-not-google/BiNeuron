@@ -37,6 +37,8 @@ from BiNeuron.additional_functions.request_anonymization import request_anonymiz
 from BiNeuron.additional_functions.improving_user_text_through_ai import improving_user_text_through_ai
 from BiNeuron.additional_functions.request_for_cloud_ai import request_for_cloud_ai
 from BiNeuron.additional_functions.free_space_for_ai_model import free_space_for_ai_model
+from BiNeuron.additional_functions.prompt_injection_detect import prompt_injection_detect
+from BiNeuron.data.response_pattern_for_injection_detection import ANSWER_INJECTION_DETECTION
 from BiNeuron import main_logger
 
 
@@ -650,7 +652,18 @@ class BiNeuron:
             else:
                 logger.warning("For all attempts, the files could not be overwritten, the usual response was given.")
 
-        return ai_answer
+        true_context = ai_answer
+
+        if self.safety_conf.prompt_injection:
+            inj_answer = prompt_injection_detect(
+                text=true_context,
+                ai_model=self.safety_conf.injection_detect_model
+            )
+
+            if inj_answer:
+                return ANSWER_INJECTION_DETECTION
+
+        return true_context
 
     def final_ai_request(self) -> str:
         """

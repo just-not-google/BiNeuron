@@ -31,6 +31,7 @@ EASY_OCR = "easy_ocr"
 DEFINITION_OPTION_LIST = ["easy_ocr", "deepseek_ocr"]
 MODELS_DIR_CONST = "./models"
 API_BASE_URL = "https://api.siliconflow.cn/v1/chat/completions"
+DEBERTA_CONST = "deberta"
 MAX_NEW_TOKENS = 256
 MAX_TIMEOUT = 1000
 POINTS_PER_CORE = 1000000

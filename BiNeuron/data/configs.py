@@ -1,12 +1,12 @@
 from typing import Optional, Literal, List
 from BiNeuron.data.preferences_in_ai import PREFERENCES_IN_AI_LIST
 from BiNeuron.data.links_to_raw_github_proxies import PROXY_LINK_LST
-from BiNeuron.data.constants_for_functions import (NUMBER_ATTEMPTS, MAX_TOKENS, TYPE_DEFAULT,
-                                                   LITE_TYPE, MAIN_LANGUAGE, HTTP_PROTOCOL,
-                                                   MAX_TIMEOUT, MIN_TIMEOUT_FOR_CHECK,
-                                                   MAX_TIMEOUT_FOR_CHECK, MAIN_PROXY_ATTEMPTS,
-                                                   TINY_TYPE, EASY_OCR, MODELS_DIR_CONST,
-                                                   API_BASE_URL)
+from BiNeuron.data.constants_for_functions import (
+    NUMBER_ATTEMPTS, MAX_TOKENS, TYPE_DEFAULT, LITE_TYPE, MAIN_LANGUAGE,
+    HTTP_PROTOCOL, MAX_TIMEOUT, MIN_TIMEOUT_FOR_CHECK, MAX_TIMEOUT_FOR_CHECK,
+    MAIN_PROXY_ATTEMPTS, TINY_TYPE, EASY_OCR, MODELS_DIR_CONST, API_BASE_URL,
+    DEBERTA_CONST
+)
 from pydantic import BaseModel, Field, HttpUrl
 import logging
 
@@ -211,6 +211,14 @@ class SafetyConfig(BaseModel, extra="forbid"):
     Configuration for content safety and filtering.
     :param filter_for_swearing: If True, blocks responses containing profanity.
     :param anonymize_text: If True, it anonymizes personal data in a general request to the AI.
+    :param prompt_injection: If True, the entire text of the request is checked for the presence
+    of prompt injections.
+    :param injection_detect_model: An AI model from a ready-made list that acts as an injection
+    analyzer in the user's mind.
     """
     filter_for_swearing: bool = False
     anonymize_text: bool = False
+    prompt_injection: bool = False
+    injection_detect_model: Literal[
+        "deberta", "distilbert", "onnx"
+    ] = DEBERTA_CONST
