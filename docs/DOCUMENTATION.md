@@ -11,6 +11,7 @@
 * **Prompt engineering**: builds a system prompt according to the desired scenario (default, testing, explanation, refactoring, and so on).
 * **AI inference**: sends the request to the loaded LLM and returns the response. Both local GGUF models and cloud providers (via LiteLLM) are supported.
 * **File editing (optional)**: if enabled, the AI response is parsed and used to directly edit files on disk.
+* **Safety layer (optional)**: profanity filter, request anonymization, and prompt injection detection applied before or after the model call.
 * **Interactive chat**: supports multi turn conversations with history.
 
 > **Note (breaking change):** starting from the current version, `BiNeuron` no longer accepts dozens of flattened keyword arguments.  
@@ -49,7 +50,7 @@ Parameters:
 * `proxy_conf` (`Optional[ProxyConfig]`, default `None`): proxy usage, timeouts, retries, GitHub proxy list, cloud request proxy toggle. Falls back to defaults.
 * `ocr_conf` (`Optional[OCRConfig]`, default `None`): OCR settings, DeepSeek cloud, GPU, crop mode. Falls back to defaults.
 * `file_conf` (`Optional[FileConfig]`, default `None`): virtual storage, response to file, automatic file editing and deletion, main disk path. Falls back to defaults.
-* `safety_conf` (`Optional[SafetyConfig]`, default `None`): content safety (profanity filter, anonymization). Falls back to defaults.
+* `safety_conf` (`Optional[SafetyConfig]`, default `None`): content safety (profanity filter, request anonymization, prompt injection detection and detector model selection). Falls back to defaults.
 
 ---
 
@@ -126,7 +127,7 @@ Parameters:
 * `definition_option` (`Literal["easy_ocr","deepseek_ocr"]`, default `"easy_ocr"`): choose the OCR engine.
 * `model_size` (`Literal["tiny","small","base","large","gundam"]`, default `"tiny"`): size of the local DeepSeek OCR model.
 * `crop_mode` (`bool`, default `False`): split large images into four parts for detailed recognition.
-* `base_url` (`str`, default `"https://api.siliconflow.cn/v1/chat/completions"`): API endpoint for DeepSeek cloud OCR.
+* `base_url` (`HttpUrl`, default `"https://api.siliconflow.cn/v1/chat/completions"`): API endpoint for DeepSeek cloud OCR (validated as a URL by Pydantic).
 * `api_key_for_deepseek_ocr` (`Optional[str]`, default `None`): API key for DeepSeek cloud OCR.
 * `timeout_for_deepseek_ocr` (`Optional[int]`, default `None`): timeout in seconds for DeepSeek cloud OCR requests.
 * `max_rate_limit_retries` (`Optional[int]`, default `5`, constant `NUMBER_ATTEMPTS`): retries on rate limit errors for cloud OCR.
@@ -146,8 +147,10 @@ Parameters:
 
 ### `SafetyConfig`
 
-* `filter_for_swearing` (`bool`, default `False`): enable profanity filter, returning a predefined safe response if triggered.
+* `filter_for_swearing` (`bool`, default `False`): enable profanity filter. When triggered, a predefined safe response (`ANSWER_AGAINST_PROFANITY`) is returned instead of the model output.
 * `anonymize_text` (`bool`, default `False`): anonymize the user request with Microsoft Presidio before sending it to translation services or AI models.
+* `prompt_injection` (`bool`, default `False`): when `True`, every AI response is checked for prompt injections. If a malicious injection is detected, the content is discarded and the safe notice `ANSWER_INJECTION_DETECTION` is returned to the user.
+* `injection_detect_model` (`Literal["deberta","distilbert","onnx"]`, default `"deberta"`, constant `DEBERTA_CONST`): classifier used by the injection detector. Backed by `pytector`.
 
 ---
 
@@ -170,6 +173,18 @@ The Flask web UI exposes extra endpoints that reflect the configuration groups a
 
 ---
 
+## Safety submodules
+
+The safety layer is composed of three independent modules that can be toggled separately via `SafetyConfig`:
+
+| Module | Module file | Config flag | Effect |
+|--------|-------------|-------------|--------|
+| Profanity filter | `BiNeuron.additional_functions.definition_swearing` | `filter_for_swearing` | Blocks requests containing profanity or aggression before the AI call. |
+| Request anonymization | `BiNeuron.additional_functions.request_anonymization` | `anonymize_text` | Replaces PII (names, emails, phone numbers, addresses, credit cards) with placeholders via Microsoft Presidio before the text leaves the process. |
+| Prompt injection detection | `BiNeuron.additional_functions.prompt_injection_detect` | `prompt_injection` + `injection_detect_model` | Classifies each AI response with a `pytector` model. Malicious payloads are discarded and replaced with `ANSWER_INJECTION_DETECTION`. |
+
+---
+
 ## Example usage
 
 ```python
@@ -186,7 +201,12 @@ agent = BiNeuron(
     llm_conf=LLMConfig(max_tokens=2048, temperature=0.2),
     prompt_conf=PromptConfig(main_prompt_mode="default"),
     translation_conf=TranslationConfig(request_language="en"),
-    safety_conf=SafetyConfig(filter_for_swearing=True),
+    safety_conf=SafetyConfig(
+        filter_for_swearing=True,
+        anonymize_text=True,
+        prompt_injection=True,
+        injection_detect_model="deberta",
+    ),
 )
 
 print(agent.final_ai_request())
@@ -196,9 +216,10 @@ print(agent.final_ai_request())
 
 ## Notes
 
-* All constants such as `MAX_TOKENS`, `NUMBER_ATTEMPTS`, `MAIN_LANGUAGE` are defined in `BiNeuron.data.constants_for_functions`.
+* All constants such as `MAX_TOKENS`, `NUMBER_ATTEMPTS`, `MAIN_LANGUAGE`, `DEBERTA_CONST` are defined in `BiNeuron.data.constants_for_functions`.
 * Config dataclasses are defined in `BiNeuron.data.configs`.
 * Language specific and multilingual model mappings live in `BiNeuron.data.models_for_programming_languages` and `BiNeuron.data.models_and_file_names`.
+* Safety response templates are defined in `BiNeuron.data.answer_against_profanity` and `BiNeuron.data.response_pattern_for_injection_detection`.
 * Logging is configured by `main_logger.py`. Errors are written to `errors.log`.
 
 </details>
@@ -216,6 +237,7 @@ print(agent.final_ai_request())
 * **Формирование промпта**: создаёт системную инструкцию в соответствии с выбранным сценарием (стандартный, тестирование, объяснение, рефакторинг и так далее).
 * **Инференс ИИ**: отправляет запрос в загруженную LLM и возвращает ответ. Поддерживаются как локальные GGUF модели, так и облачные провайдеры через LiteLLM.
 * **Редактирование файлов (опционально)**: если включено, ответ ИИ парсится и используется для прямого изменения файлов на диске.
+* **Слой безопасности (опционально)**: фильтр ненормативной лексики, анонимизация запроса и обнаружение промпт-инъекций до или после вызова модели.
 * **Интерактивный чат**: поддерживает многошаговые диалоги с историей.
 
 > **Обратите внимание (breaking change):** начиная с текущей версии `BiNeuron` больше не принимает десятки плоских именованных аргументов.  
@@ -254,7 +276,7 @@ BiNeuron(
 * `proxy_conf` (`Optional[ProxyConfig]`, по умолчанию `None`): прокси, таймауты, повторы, GitHub списки прокси, переключатель прокси для облачных запросов. При `None` используются значения по умолчанию.
 * `ocr_conf` (`Optional[OCRConfig]`, по умолчанию `None`): OCR, облачный DeepSeek, GPU, crop режим. При `None` используются значения по умолчанию.
 * `file_conf` (`Optional[FileConfig]`, по умолчанию `None`): виртуальное хранилище, запись ответа в файл, авто редактирование и удаление файлов, основной диск. При `None` используются значения по умолчанию.
-* `safety_conf` (`Optional[SafetyConfig]`, по умолчанию `None`): безопасность контента (фильтр мата, анонимизация). При `None` используются значения по умолчанию.
+* `safety_conf` (`Optional[SafetyConfig]`, по умолчанию `None`): безопасность контента (фильтр мата, анонимизация запроса, обнаружение промпт-инъекций и выбор модели-детектора). При `None` используются значения по умолчанию.
 
 ---
 
@@ -331,7 +353,7 @@ BiNeuron(
 * `definition_option` (`Literal["easy_ocr","deepseek_ocr"]`, по умолчанию `"easy_ocr"`): выбор OCR движка.
 * `model_size` (`Literal["tiny","small","base","large","gundam"]`, по умолчанию `"tiny"`): размер локальной модели DeepSeek OCR.
 * `crop_mode` (`bool`, по умолчанию `False`): разбивать большие изображения на четыре части.
-* `base_url` (`str`, по умолчанию `"https://api.siliconflow.cn/v1/chat/completions"`): API эндпоинт облачного DeepSeek OCR.
+* `base_url` (`HttpUrl`, по умолчанию `"https://api.siliconflow.cn/v1/chat/completions"`): API эндпоинт облачного DeepSeek OCR (валидируется Pydantic как URL).
 * `api_key_for_deepseek_ocr` (`Optional[str]`, по умолчанию `None`): API ключ облачного DeepSeek OCR.
 * `timeout_for_deepseek_ocr` (`Optional[int]`, по умолчанию `None`): таймаут запросов к облачному DeepSeek OCR в секундах.
 * `max_rate_limit_retries` (`Optional[int]`, по умолчанию `5`, константа `NUMBER_ATTEMPTS`): повторы при rate limit для облачного OCR.
@@ -351,8 +373,10 @@ BiNeuron(
 
 ### `SafetyConfig`
 
-* `filter_for_swearing` (`bool`, по умолчанию `False`): фильтр ненормативной лексики, возвращает безопасный ответ при срабатывании.
+* `filter_for_swearing` (`bool`, по умолчанию `False`): фильтр ненормативной лексики. При срабатывании возвращается заранее заданный безопасный ответ (`ANSWER_AGAINST_PROFANITY`) вместо вывода модели.
 * `anonymize_text` (`bool`, по умолчанию `False`): анонимизировать запрос пользователя через Microsoft Presidio перед отправкой в сервисы перевода или ИИ модели.
+* `prompt_injection` (`bool`, по умолчанию `False`): если `True`, каждый ответ ИИ проверяется на промпт-инъекции. При обнаружении вредоносной инъекции содержимое отбрасывается, и пользователю возвращается безопасное уведомление `ANSWER_INJECTION_DETECTION`.
+* `injection_detect_model` (`Literal["deberta","distilbert","onnx"]`, по умолчанию `"deberta"`, константа `DEBERTA_CONST`): классификатор, используемый детектором инъекций. Работает на базе `pytector`.
 
 ---
 
@@ -375,6 +399,18 @@ Flask веб интерфейс предоставляет дополнител�
 
 ---
 
+## Подмодули безопасности
+
+Слой безопасности состоит из трёх независимых модулей, которые можно включать по отдельности через `SafetyConfig`:
+
+| Модуль | Файл модуля | Флаг конфигурации | Эффект |
+|--------|-------------|-------------------|--------|
+| Фильтр ненормативной лексики | `BiNeuron.additional_functions.definition_swearing` | `filter_for_swearing` | Блокирует запросы с матом или агрессией до вызова ИИ. |
+| Анонимизация запроса | `BiNeuron.additional_functions.request_anonymization` | `anonymize_text` | Заменяет PII (имена, email, телефоны, адреса, банковские карты) на заглушки через Microsoft Presidio до того, как текст покинет процесс. |
+| Обнаружение промпт-инъекций | `BiNeuron.additional_functions.prompt_injection_detect` | `prompt_injection` + `injection_detect_model` | Классифицирует каждый ответ ИИ моделью `pytector`. Вредоносные полезные нагрузки отбрасываются и заменяются на `ANSWER_INJECTION_DETECTION`. |
+
+---
+
 ## Пример использования
 
 ```python
@@ -391,7 +427,12 @@ agent = BiNeuron(
     llm_conf=LLMConfig(max_tokens=2048, temperature=0.2),
     prompt_conf=PromptConfig(main_prompt_mode="default"),
     translation_conf=TranslationConfig(request_language="en"),
-    safety_conf=SafetyConfig(filter_for_swearing=True),
+    safety_conf=SafetyConfig(
+        filter_for_swearing=True,
+        anonymize_text=True,
+        prompt_injection=True,
+        injection_detect_model="deberta",
+    ),
 )
 
 print(agent.final_ai_request())
@@ -401,9 +442,10 @@ print(agent.final_ai_request())
 
 ## Примечания
 
-* Все константы, такие как `MAX_TOKENS`, `NUMBER_ATTEMPTS`, `MAIN_LANGUAGE`, находятся в `BiNeuron.data.constants_for_functions`.
+* Все константы, такие как `MAX_TOKENS`, `NUMBER_ATTEMPTS`, `MAIN_LANGUAGE`, `DEBERTA_CONST`, находятся в `BiNeuron.data.constants_for_functions`.
 * Dataclass конфиги находятся в `BiNeuron.data.configs`.
 * Модели для языков и уровней производительности находятся в `BiNeuron.data.models_for_programming_languages` и `BiNeuron.data.models_and_file_names`.
+* Шаблоны ответов безопасности находятся в `BiNeuron.data.answer_against_profanity` и `BiNeuron.data.response_pattern_for_injection_detection`.
 * Логирование настраивается в `main_logger.py`. Ошибки пишутся в `errors.log`.
 
 </details>
@@ -421,6 +463,7 @@ print(agent.final_ai_request())
 * **提示词工程**：根据所需场景（默认、测试、解释、重构等）构建系统提示。
 * **AI 推理**：将请求发送给已加载的大语言模型并返回响应。支持本地 GGUF 模型和通过 LiteLLM 的云端提供商。
 * **文件编辑（可选）**：如果启用，将解析 AI 响应并直接用于修改磁盘上的文件。
+* **安全层（可选）**：脏话过滤、请求匿名化和提示注入检测，可在模型调用之前或之后应用。
 * **交互式聊天**：支持带历史记录的多轮对话。
 
 > **注意（破坏性变更）：** 从当前版本起，`BiNeuron` 不再接受大量扁平化的关键字参数。  
@@ -459,7 +502,7 @@ BiNeuron(
 * `proxy_conf` (`Optional[ProxyConfig]`，默认 `None`)：代理、超时、重试、GitHub 代理列表、云请求代理开关。若为 `None` 则使用默认值。
 * `ocr_conf` (`Optional[OCRConfig]`，默认 `None`)：OCR、DeepSeek 云、GPU、裁剪模式。若为 `None` 则使用默认值。
 * `file_conf` (`Optional[FileConfig]`，默认 `None`)：虚拟存储、回复写入文件、自动编辑和删除文件、主磁盘。若为 `None` 则使用默认值。
-* `safety_conf` (`Optional[SafetyConfig]`，默认 `None`)：内容安全（脏话过滤、匿名化）。若为 `None` 则使用默认值。
+* `safety_conf` (`Optional[SafetyConfig]`，默认 `None`)：内容安全（脏话过滤、请求匿名化、提示注入检测与检测器模型选择）。若为 `None` 则使用默认值。
 
 ---
 
@@ -536,7 +579,7 @@ BiNeuron(
 * `definition_option` (`Literal["easy_ocr","deepseek_ocr"]`，默认 `"easy_ocr"`)：选择 OCR 引擎。
 * `model_size` (`Literal["tiny","small","base","large","gundam"]`，默认 `"tiny"`)：本地 DeepSeek OCR 模型的大小。
 * `crop_mode` (`bool`，默认 `False`)：将大图像分割成四部分以进行更详细的识别。
-* `base_url` (`str`，默认 `"https://api.siliconflow.cn/v1/chat/completions"`)：DeepSeek 云 OCR 的 API 端点。
+* `base_url` (`HttpUrl`，默认 `"https://api.siliconflow.cn/v1/chat/completions"`)：DeepSeek 云 OCR 的 API 端点（由 Pydantic 作为 URL 验证）。
 * `api_key_for_deepseek_ocr` (`Optional[str]`，默认 `None`)：DeepSeek 云 OCR 的 API 密钥。
 * `timeout_for_deepseek_ocr` (`Optional[int]`，默认 `None`)：DeepSeek 云 OCR 请求的超时时间（秒）。
 * `max_rate_limit_retries` (`Optional[int]`，默认 `5`，常量 `NUMBER_ATTEMPTS`)：云 OCR 遇到速率限制错误时的重试次数。
@@ -556,8 +599,10 @@ BiNeuron(
 
 ### `SafetyConfig`
 
-* `filter_for_swearing` (`bool`，默认 `False`)：启用脏话过滤，触发时返回预定义的安全响应。
+* `filter_for_swearing` (`bool`，默认 `False`)：启用脏话过滤。触发时返回预定义的安全响应（`ANSWER_AGAINST_PROFANITY`），而不是模型输出。
 * `anonymize_text` (`bool`，默认 `False`)：在发送到翻译服务或 AI 模型之前，使用 Microsoft Presidio 匿名化用户请求。
+* `prompt_injection` (`bool`，默认 `False`)：若为 `True`，检查每个 AI 响应是否存在提示注入。如果检测到恶意注入，内容将被丢弃，并向用户返回安全提示 `ANSWER_INJECTION_DETECTION`。
+* `injection_detect_model` (`Literal["deberta","distilbert","onnx"]`，默认 `"deberta"`，常量 `DEBERTA_CONST`)：注入检测器使用的分类器，基于 `pytector`。
 
 ---
 
@@ -580,6 +625,18 @@ Flask Web 界面提供了与上述配置组对应的额外端点：
 
 ---
 
+## 安全子模块
+
+安全层由三个独立模块组成，可通过 `SafetyConfig` 单独启用：
+
+| 模块 | 模块文件 | 配置标志 | 效果 |
+|------|----------|----------|------|
+| 脏话过滤 | `BiNeuron.additional_functions.definition_swearing` | `filter_for_swearing` | 在 AI 调用前阻止包含脏话或攻击性的请求。 |
+| 请求匿名化 | `BiNeuron.additional_functions.request_anonymization` | `anonymize_text` | 在文本离开进程之前，通过 Microsoft Presidio 将 PII（姓名、电子邮件、电话号码、地址、信用卡）替换为占位符。 |
+| 提示注入检测 | `BiNeuron.additional_functions.prompt_injection_detect` | `prompt_injection` + `injection_detect_model` | 使用 `pytector` 模型对每个 AI 响应进行分类。恶意负载被丢弃并替换为 `ANSWER_INJECTION_DETECTION`。 |
+
+---
+
 ## 使用示例
 
 ```python
@@ -596,7 +653,12 @@ agent = BiNeuron(
     llm_conf=LLMConfig(max_tokens=2048, temperature=0.2),
     prompt_conf=PromptConfig(main_prompt_mode="default"),
     translation_conf=TranslationConfig(request_language="en"),
-    safety_conf=SafetyConfig(filter_for_swearing=True),
+    safety_conf=SafetyConfig(
+        filter_for_swearing=True,
+        anonymize_text=True,
+        prompt_injection=True,
+        injection_detect_model="deberta",
+    ),
 )
 
 print(agent.final_ai_request())
@@ -606,9 +668,10 @@ print(agent.final_ai_request())
 
 ## 备注
 
-* 所有常量（例如 `MAX_TOKENS`、`NUMBER_ATTEMPTS`、`MAIN_LANGUAGE`）均在 `BiNeuron.data.constants_for_functions` 中定义。
+* 所有常量（例如 `MAX_TOKENS`、`NUMBER_ATTEMPTS`、`MAIN_LANGUAGE`、`DEBERTA_CONST`）均在 `BiNeuron.data.constants_for_functions` 中定义。
 * 配置 dataclass 定义于 `BiNeuron.data.configs`。
 * 特定语言和多语言模型的映射存储在 `BiNeuron.data.models_for_programming_languages` 和 `BiNeuron.data.models_and_file_names` 中。
+* 安全响应模板定义于 `BiNeuron.data.answer_against_profanity` 和 `BiNeuron.data.response_pattern_for_injection_detection`。
 * 日志记录由 `main_logger.py` 配置。错误写入 `errors.log`。
 
 </details>
